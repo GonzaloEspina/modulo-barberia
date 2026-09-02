@@ -138,12 +138,14 @@
     @apply transition-colors;
   }
 
+  /* Utilities like bg-card beat @layer components; force hover bg so text stays readable. */
   .hover-surface:hover {
-    @apply bg-surface-hover text-white;
+    background-color: var(--surface-hover) !important;
+    color: var(--surface-hover-foreground) !important;
   }
 
   .hover-surface:hover .text-muted-foreground {
-    color: #ffffff;
+    color: var(--surface-hover-foreground) !important;
   }
 
   .interactive-row__cell {
@@ -151,7 +153,8 @@
   }
 
   .group\/interactive-row:hover .interactive-row__cell {
-    @apply bg-surface-hover text-white;
+    background-color: var(--surface-hover) !important;
+    color: var(--surface-hover-foreground) !important;
   }
 
   .interactive-row__cell--muted {
@@ -159,7 +162,7 @@
   }
 
   .group\/interactive-row:hover .interactive-row__cell--muted {
-    color: #ffffff;
+    color: var(--surface-hover-foreground) !important;
   }
 
   .group\/interactive-row:hover [data-slot='badge'][data-variant='outline'],
