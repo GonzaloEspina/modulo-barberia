@@ -57,15 +57,6 @@ export function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="bg-muted mb-4 rounded-xl p-4 text-sm">
-            <p className="mb-1 font-medium">Desarrollo local</p>
-            <p className="text-muted-foreground">
-              Admin: <code className="bg-background rounded px-1 py-0.5 text-xs">admin@barbatero.local</code> / <code className="bg-background rounded px-1 py-0.5 text-xs">admin123456</code>
-            </p>
-            <p className="text-muted-foreground">
-              Barbero: <code className="bg-background rounded px-1 py-0.5 text-xs">gian@barbatero.local</code> / <code className="bg-background rounded px-1 py-0.5 text-xs">barber123456</code>
-            </p>
-          </div>
           {!isConfigured && (
             <p className="text-muted-foreground mb-4 rounded-xl border border-dashed bg-card p-4 text-sm">
               Supabase no está configurado. Creá <code className="bg-muted rounded px-1 py-0.5 text-xs">.env.local</code> y ejecutá{' '}

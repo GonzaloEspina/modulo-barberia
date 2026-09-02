@@ -5,11 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/features/auth/auth-context'
 import { useProfile } from '@/hooks/use-profile'
 
-const SEED_USERS = [
-  { email: 'admin@barbatero.local', password: 'admin123456', role: 'Administrador' },
-  { email: 'gian@barbatero.local', password: 'barber123456', role: 'Barbero' },
-]
-
 export function ProfileGate() {
   const { user, signOut } = useAuth()
   const { data: profile, isLoading, isError, error } = useProfile()
@@ -58,16 +53,6 @@ export function ProfileGate() {
               Esto suele pasar si creaste un usuario en Supabase Studio sin perfil, o si tenés
               una sesión anterior guardada en el navegador.
             </p>
-            <div className="bg-muted rounded-md p-3">
-              <p className="mb-2 font-medium">Usuarios de prueba (después de `db reset`):</p>
-              <ul className="space-y-1">
-                {SEED_USERS.map((seed) => (
-                  <li key={seed.email}>
-                    <code>{seed.email}</code> / <code>{seed.password}</code> — {seed.role}
-                  </li>
-                ))}
-              </ul>
-            </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button variant="accent" onClick={() => void signOut()}>
                 Cerrar sesión e ingresar con otro usuario
