@@ -11,6 +11,7 @@ import {
   usePortalSlots,
 } from '@/features/portal/api'
 import { APP_TIMEZONE } from '@/lib/constants'
+import { appToday, isAppPastDate } from '@/lib/app-datetime'
 import { formatServicePrice } from '@/types/service'
 
 interface PortalBookingProps {
@@ -19,7 +20,7 @@ interface PortalBookingProps {
 }
 
 export function PortalBooking({ sessionToken, onBooked }: PortalBookingProps) {
-  const [date, setDate] = useState(formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd'))
+  const [date, setDate] = useState(() => appToday())
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [barberId, setBarberId] = useState('')
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
@@ -44,6 +45,10 @@ export function PortalBooking({ sessionToken, onBooked }: PortalBookingProps) {
     setMessage('')
     if (!barberId || !selectedSlot || selectedServices.length === 0) {
       setMessage('Completá servicio, barbero y horario')
+      return
+    }
+    if (isAppPastDate(date)) {
+      setMessage('No se pueden reservar turnos en días anteriores')
       return
     }
     try {
@@ -92,7 +97,23 @@ export function PortalBooking({ sessionToken, onBooked }: PortalBookingProps) {
           <>
             <div className="space-y-2">
               <Label>Fecha</Label>
-              <Input type="date" value={date} onChange={(e) => { setDate(e.target.value); setSelectedSlot(null) }} />
+              <Input
+                type="date"
+                min={appToday()}
+                value={date}
+                onChange={(e) => {
+                  const next = e.target.value
+                  if (isAppPastDate(next)) {
+                    setMessage('No se pueden reservar turnos en días anteriores')
+                    setDate(appToday())
+                    setSelectedSlot(null)
+                    return
+                  }
+                  setDate(next)
+                  setSelectedSlot(null)
+                  setMessage('')
+                }}
+              />
             </div>
 
             <div className="space-y-2">

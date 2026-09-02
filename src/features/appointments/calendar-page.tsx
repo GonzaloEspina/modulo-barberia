@@ -20,25 +20,61 @@ import './calendar.css'
 const selectClass =
   'border-input bg-background h-8 rounded-md border px-2 text-xs'
 
-function toEvent(appt: Appointment): EventInput {
-  const clientName = appt.client
-    ? `${appt.client.first_name} ${appt.client.last_name}`
-    : 'Cliente'
-
-  return {
-    id: appt.id,
-    title: clientName,
-    start: appt.starts_at,
-    end: appt.ends_at,
-    backgroundColor: appt.barber?.calendar_color ?? '#64748b',
-    borderColor: appt.barber?.calendar_color ?? '#64748b',
-    extendedProps: {
-      status: appt.status,
-      barberId: appt.barber_id,
-      barberName: appt.barber?.name,
-      isOverbooking: appt.is_overbooking,
-    },
+/** Mezcla un hex con otro (amount 0–1 hacia `mixWith`). */
+function mixHex(hex: string, mixWith: string, amount: number): string {
+  const parse = (value: string) => {
+    const h = value.replace('#', '')
+    return [
+      Number.parseInt(h.slice(0, 2), 16),
+      Number.parseInt(h.slice(2, 4), 16),
+      Number.parseInt(h.slice(4, 6), 16),
+    ] as const
   }
+  const [r1, g1, b1] = parse(hex)
+  const [r2, g2, b2] = parse(mixWith)
+  const mix = (a: number, b: number) => Math.round(a + (b - a) * amount)
+  const toHex = (n: number) => n.toString(16).padStart(2, '0')
+  return `#${toHex(mix(r1, r2))}${toHex(mix(g1, g2))}${toHex(mix(b1, b2))}`
+}
+
+/** Tono alterno: más oscuro y frío para contrastar turnos consecutivos. */
+function alternateAppointmentColor(base: string): string {
+  return mixHex(mixHex(base, '#1c1917', 0.42), '#334155', 0.28)
+}
+
+function toEvents(appointments: Appointment[]): EventInput[] {
+  const sorted = [...appointments].sort((a, b) =>
+    a.starts_at.localeCompare(b.starts_at),
+  )
+  const stripeIndexByDayBarber = new Map<string, number>()
+
+  return sorted.map((appt) => {
+    const clientName = appt.client
+      ? `${appt.client.first_name} ${appt.client.last_name}`
+      : 'Cliente'
+    const day = formatInTimeZone(new Date(appt.starts_at), APP_TIMEZONE, 'yyyy-MM-dd')
+    const stripeKey = `${day}:${appt.barber_id}`
+    const stripe = stripeIndexByDayBarber.get(stripeKey) ?? 0
+    stripeIndexByDayBarber.set(stripeKey, stripe + 1)
+
+    const base = appt.barber?.calendar_color ?? '#64748b'
+    const color = stripe % 2 === 0 ? base : alternateAppointmentColor(base)
+
+    return {
+      id: appt.id,
+      title: clientName,
+      start: appt.starts_at,
+      end: appt.ends_at,
+      backgroundColor: color,
+      borderColor: color,
+      extendedProps: {
+        status: appt.status,
+        barberId: appt.barber_id,
+        barberName: appt.barber?.name,
+        isOverbooking: appt.is_overbooking,
+      },
+    }
+  })
 }
 
 export function CalendarPage() {
@@ -68,7 +104,7 @@ export function CalendarPage() {
     })
   }, [appointments, barberFilter, statusFilter, profile])
 
-  const events = useMemo(() => filtered.map(toEvent), [filtered])
+  const events = useMemo(() => toEvents(filtered), [filtered])
 
   const handleDatesSet = useCallback((arg: { startStr: string; endStr: string }) => {
     const from = formatInTimeZone(new Date(arg.startStr), APP_TIMEZONE, 'yyyy-MM-dd')
@@ -77,6 +113,10 @@ export function CalendarPage() {
   }, [])
 
   const navigateToNewAppointment = useCallback((start: Date) => {
+    if (start.getTime() < Date.now()) {
+      setMessage('No se pueden crear turnos en el pasado')
+      return
+    }
     const params = new URLSearchParams({
       date: formatInTimeZone(start, APP_TIMEZONE, 'yyyy-MM-dd'),
       time: formatInTimeZone(start, APP_TIMEZONE, 'HH:mm'),
@@ -94,6 +134,11 @@ export function CalendarPage() {
     const newStart = info.event.start?.toISOString()
     if (!apptId || !newStart) {
       info.revert()
+      return
+    }
+    if (new Date(newStart).getTime() < Date.now()) {
+      info.revert()
+      setMessage('No se pueden reprogramar turnos al pasado')
       return
     }
 

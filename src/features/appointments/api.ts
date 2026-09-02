@@ -63,6 +63,8 @@ export function useAppointmentMutations() {
       is_overbooking?: boolean
       overbooking_reason?: string | null
       notes?: string | null
+      /** Fin del bloque cuando ocupa más de un cupo (turno múltiple). */
+      ends_at?: string | null
     }) => {
       const { data, error } = await getSupabaseClient().rpc('create_appointment', {
         p_client_id: input.client_id,
@@ -73,6 +75,7 @@ export function useAppointmentMutations() {
         p_is_overbooking: input.is_overbooking ?? false,
         p_overbooking_reason: input.overbooking_reason ?? null,
         p_notes: input.notes ?? null,
+        p_ends_at: input.ends_at ?? null,
       })
       if (error) throw error
       return data as string
