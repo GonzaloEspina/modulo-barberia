@@ -55,6 +55,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/servicios', label: 'Servicios', icon: Scissors, adminOnly: true },
       { to: '/barberos', label: 'Barberos', icon: UserRound, adminOnly: true },
+      { to: '/usuarios', label: 'Usuarios', icon: Shield, adminOnly: true },
       { to: '/gastos', label: 'Gastos', icon: Receipt, adminOnly: true },
     ],
   },

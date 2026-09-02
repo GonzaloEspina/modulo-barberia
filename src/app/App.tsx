@@ -61,6 +61,9 @@ import { ServiceEditPage } from '@/features/services/service-edit-page'
 import { ServicesPage } from '@/features/services/services-page'
 
 import { SettingsPage } from '@/features/settings/settings-page'
+import { UserCreatePage } from '@/features/users/user-create-page'
+import { UserEditPage } from '@/features/users/user-edit-page'
+import { UsersPage } from '@/features/users/users-page'
 
 
 
@@ -131,6 +134,12 @@ export function App() {
                   <Route path="/barberos/nuevo" element={<BarberCreatePage />} />
 
                   <Route path="/barberos/:id" element={<BarberEditPage />} />
+
+                  <Route path="/usuarios" element={<UsersPage />} />
+
+                  <Route path="/usuarios/nuevo" element={<UserCreatePage />} />
+
+                  <Route path="/usuarios/:id" element={<UserEditPage />} />
 
                   <Route path="/servicios" element={<ServicesPage />} />
 
