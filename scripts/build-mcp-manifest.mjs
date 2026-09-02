@@ -10,6 +10,29 @@ const outDir = join(__dirname, '.import-output')
 const MAX_CHARS = 30000
 const ROW_BATCH = 80
 const manifest = []
+const seenClientPhones = new Set()
+
+/** Drop duplicate (organization_id, phone_normalized) rows; keep first occurrence. */
+function dedupeClientInsert(sql) {
+  if (!sql.includes('INSERT INTO clients')) return sql
+  const suffixMatch = sql.match(/\s*(ON CONFLICT[\s\S]*);?\s*$/)
+  const suffix = suffixMatch ? '\n' + suffixMatch[1].replace(/;?\s*$/, ';') : ';'
+  const valuesIdx = sql.search(/\bVALUES\b/i)
+  if (valuesIdx === -1) return sql
+  const prefix = sql.slice(0, valuesIdx + 'VALUES'.length)
+  const valuesBody = sql.slice(valuesIdx + 'VALUES'.length, suffixMatch ? sql.length - suffixMatch[0].length : sql.length).trim()
+  const rows = valuesBody.split(/\),\s*\n/).map((r, i, arr) => (i < arr.length - 1 ? r + ')' : r))
+  const kept = []
+  for (const row of rows) {
+    const phone = row.match(/, '([^']+)', '[^']*', (?:NULL|'[^']*'), 'inherit'/)?.[1]
+      ?? row.match(/, '([^']+)', NULL, NULL, 'inherit'/)?.[1]
+    if (phone && seenClientPhones.has(phone)) continue
+    if (phone) seenClientPhones.add(phone)
+    kept.push(row)
+  }
+  if (kept.length === 0) return ''
+  return prefix + '\n' + kept.join(',\n') + suffix
+}
 
 function splitInsert(sql, label) {
   if (sql.length <= MAX_CHARS) {
@@ -51,7 +74,8 @@ function addFile(label, sql) {
 // Chunk 01 clients batches
 const clientsBatchesDir = join(outDir, 'parts-chunk-01/clients-batches')
 for (const f of readdirSync(clientsBatchesDir).filter((x) => x.endsWith('.sql')).sort()) {
-  const q = readFileSync(join(clientsBatchesDir, f), 'utf8')
+  const q = dedupeClientInsert(readFileSync(join(clientsBatchesDir, f), 'utf8'))
+  if (!q) continue
   manifest.push({ label: `chunk-01/clients/${f}`, query: q, chars: q.length })
 }
 for (const f of ['part-2.sql', 'part-3.sql', 'part-4.sql']) {
