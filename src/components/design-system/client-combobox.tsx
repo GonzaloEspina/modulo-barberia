@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, ChevronsUpDown, Plus } from 'lucide-react'
+import { AlertTriangle, Check, ChevronsUpDown, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -73,10 +73,11 @@ export function ClientCombobox({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="h-10 w-full justify-between rounded-lg font-normal"
+            className="h-11 w-full justify-start gap-2 rounded-lg px-3 font-normal"
           >
+            <Search className="text-muted-foreground size-4 shrink-0" aria-hidden />
             {selected ? (
-              <span className="flex min-w-0 items-center gap-1.5 truncate">
+              <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate text-left">
                 <span className="truncate">
                   {getClientFullName(selected)}
                   {selected.nickname ? ` (${selected.nickname})` : ''}
@@ -88,9 +89,9 @@ export function ClientCombobox({
                 )}
               </span>
             ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
+              <span className="text-muted-foreground flex-1 truncate text-left">{placeholder}</span>
             )}
-            <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+            <ChevronsUpDown className="ml-auto size-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">

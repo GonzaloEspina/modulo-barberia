@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LogOut, Scissors } from 'lucide-react'
+import { LogOut, Scissors, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { NAV_GROUPS, PLATFORM_NAV } from '@/config/navigation'
+import { NAV_GROUPS, NAV_PATHS, PLATFORM_NAV } from '@/config/navigation'
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +17,7 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import {
   DropdownMenu,
@@ -32,13 +33,52 @@ import { isAdminRole, useProfile } from '@/hooks/use-profile'
 import { ROLE_LABELS } from '@/types/database'
 import { cn } from '@/lib/utils'
 
-function isActivePath(pathname: string, to: string) {
+function resolveActiveNavPath(pathname: string, navPaths: string[]) {
+  if (pathname === '/') return '/'
+
+  const matches = navPaths
+    .filter((path) => path !== '/')
+    .filter((path) => pathname === path || pathname.startsWith(`${path}/`))
+    .sort((a, b) => b.length - a.length)
+
+  return matches[0] ?? null
+}
+
+function isActivePath(pathname: string, to: string, navPaths: string[]) {
   if (to === '/') return pathname === '/'
-  return pathname === to || pathname.startsWith(`${to}/`)
+  return resolveActiveNavPath(pathname, navPaths) === to
 }
 
 interface AppShellProps {
   children: ReactNode
+}
+
+function SidebarNavLink({
+  to,
+  isActive,
+  label,
+  icon: Icon,
+}: {
+  to: string
+  isActive: boolean
+  label: string
+  icon: LucideIcon
+}) {
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  return (
+    <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
+      <Link
+        to={to}
+        onClick={() => {
+          if (isMobile) setOpenMobile(false)
+        }}
+      >
+        <Icon className="size-4" />
+        <span>{label}</span>
+      </Link>
+    </SidebarMenuButton>
+  )
 }
 
 export function AppShell({ children }: AppShellProps) {
@@ -77,16 +117,12 @@ export function AppShell({ children }: AppShellProps) {
                   <SidebarMenu>
                     {items.map((item) => (
                       <SidebarMenuItem key={`${group.title}-${item.to}-${item.label}`}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={isActivePath(location.pathname, item.to)}
-                          tooltip={item.label}
-                        >
-                          <Link to={item.to}>
-                            <item.icon className="size-4" />
-                            <span>{item.label}</span>
-                          </Link>
-                        </SidebarMenuButton>
+                        <SidebarNavLink
+                          to={item.to}
+                          isActive={isActivePath(location.pathname, item.to, NAV_PATHS)}
+                          label={item.label}
+                          icon={item.icon}
+                        />
                       </SidebarMenuItem>
                     ))}
                   </SidebarMenu>
@@ -100,16 +136,12 @@ export function AppShell({ children }: AppShellProps) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild
+                    <SidebarNavLink
+                      to={PLATFORM_NAV.to}
                       isActive={location.pathname.startsWith(PLATFORM_NAV.to)}
-                      tooltip={PLATFORM_NAV.label}
-                    >
-                      <Link to={PLATFORM_NAV.to}>
-                        <PLATFORM_NAV.icon className="size-4" />
-                        <span>{PLATFORM_NAV.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                      label={PLATFORM_NAV.label}
+                      icon={PLATFORM_NAV.icon}
+                    />
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>

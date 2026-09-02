@@ -1,7 +1,10 @@
 import { formatInTimeZone } from 'date-fns-tz'
 import { Link } from 'react-router-dom'
 import { MoreHorizontal } from 'lucide-react'
-import { AppointmentStatusBadge } from '@/components/design-system/status-badges'
+import {
+  AppointmentStatusBadge,
+  OverbookingIndicator,
+} from '@/components/design-system/status-badges'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -18,6 +21,7 @@ interface AppointmentCardProps {
   appointment: Appointment
   serviceLabel?: string
   paymentStatus?: string
+  variant?: 'default' | 'compact'
   className?: string
 }
 
@@ -25,6 +29,7 @@ export function AppointmentCard({
   appointment,
   serviceLabel,
   paymentStatus,
+  variant = 'default',
   className,
 }: AppointmentCardProps) {
   const clientName = appointment.client
@@ -34,6 +39,52 @@ export function AppointmentCard({
     serviceLabel ??
     appointment.appointment_services?.map((s) => s.service_name).join(' · ') ??
     'Servicio'
+
+  if (variant === 'compact') {
+    return (
+      <article
+        className={cn(
+          'rounded-lg border bg-card px-3 py-2 hover-surface',
+          className,
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-[3.25rem] shrink-0 tabular-nums">
+            <p className="text-sm font-medium leading-tight">
+              {formatInTimeZone(appointment.starts_at, APP_TIMEZONE, 'HH:mm')}
+            </p>
+            <p className="text-muted-foreground text-xs leading-tight">
+              {formatInTimeZone(appointment.ends_at, APP_TIMEZONE, 'HH:mm')}
+            </p>
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">{clientName}</p>
+            <p className="text-muted-foreground truncate text-xs">{services}</p>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <div className="hidden min-w-0 text-right sm:block">
+              <p className="text-muted-foreground truncate text-xs">
+                {appointment.barber?.name}
+              </p>
+              <p className="text-xs font-medium">
+                {formatServicePrice(Number(appointment.total_amount))}
+              </p>
+            </div>
+            <div className="flex items-center gap-1">
+              <AppointmentStatusBadge
+                status={appointment.status}
+                className="px-1.5 py-0 text-[10px]"
+              />
+              {appointment.is_overbooking && <OverbookingIndicator />}
+            </div>
+            <AppointmentCardMenu appointmentId={appointment.id} />
+          </div>
+        </div>
+      </article>
+    )
+  }
 
   return (
     <article
@@ -45,22 +96,13 @@ export function AppointmentCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span
-              className="size-2.5 shrink-0 rounded-full"
-              style={{ backgroundColor: appointment.barber?.calendar_color ?? '#71717A' }}
-              aria-hidden
-            />
             <p className="font-medium">
               {formatInTimeZone(appointment.starts_at, APP_TIMEZONE, 'HH:mm')}
               {' – '}
               {formatInTimeZone(appointment.ends_at, APP_TIMEZONE, 'HH:mm')}
             </p>
             <AppointmentStatusBadge status={appointment.status} />
-            {appointment.is_overbooking && (
-              <span className="bg-warning/10 text-warning rounded-full px-2 py-0.5 text-xs font-medium">
-                Sobreturno
-              </span>
-            )}
+            {appointment.is_overbooking && <OverbookingIndicator />}
           </div>
           <div>
             <p className="font-medium">{clientName}</p>
@@ -72,20 +114,26 @@ export function AppointmentCard({
             {paymentStatus && <span className="capitalize">{paymentStatus}</span>}
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="Acciones del turno">
-              <MoreHorizontal className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link to={`/turnos/${appointment.id}`}>Ver detalle</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <AppointmentCardMenu appointmentId={appointment.id} />
       </div>
     </article>
+  )
+}
+
+function AppointmentCardMenu({ appointmentId }: { appointmentId: string }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon-sm" aria-label="Acciones del turno">
+          <MoreHorizontal className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link to={`/turnos/${appointmentId}`}>Ver detalle</Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

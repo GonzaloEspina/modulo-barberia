@@ -6,34 +6,121 @@ import type { Client, ClientFormInput } from '@/types/client'
 const CLIENT_COLUMNS =
   'id, organization_id, first_name, last_name, phone_normalized, phone_display, nickname, email, birth_date, notes, manual_warning, manual_warning_reason, booking_override, registered_at, is_active, deleted_at, created_at, updated_at'
 
+export const CLIENT_PAGE_SIZES = [25, 50] as const
+export type ClientPageSize = (typeof CLIENT_PAGE_SIZES)[number]
+export type ClientSort = 'name' | 'next_appointment' | 'last_activity'
+
+export interface ClientsPageOptions {
+  search?: string
+  page: number
+  pageSize: ClientPageSize
+  sort: ClientSort
+  warningOnly?: boolean
+  hasUpcomingAppointment?: boolean
+}
+
+export interface ClientsPageResult {
+  clients: Client[]
+  total: number
+}
+
+function applyClientSearch<T extends { or: (filters: string) => T }>(
+  query: T,
+  search: string,
+): T {
+  const term = search.trim()
+  if (!term) return query
+
+  const digits = phoneSearchDigits(term)
+  if (digits.length >= 3) {
+    return query.or(
+      `phone_normalized.ilike.%${digits}%,first_name.ilike.%${term}%,last_name.ilike.%${term}%,nickname.ilike.%${term}%`,
+    )
+  }
+
+  return query.or(
+    `first_name.ilike.%${term}%,last_name.ilike.%${term}%,nickname.ilike.%${term}%`,
+  )
+}
+
+function needsClientsRpc(options: ClientsPageOptions): boolean {
+  return options.sort !== 'name' || options.hasUpcomingAppointment === true
+}
+
+async function fetchClientsPage(options: ClientsPageOptions): Promise<ClientsPageResult> {
+  const {
+    search = '',
+    page,
+    pageSize,
+    sort,
+    warningOnly = false,
+    hasUpcomingAppointment = false,
+  } = options
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  if (needsClientsRpc(options)) {
+    const { data, error } = await getSupabaseClient().rpc('list_clients_page', {
+      p_search: search.trim(),
+      p_offset: from,
+      p_limit: pageSize,
+      p_sort: sort,
+      p_warning_only: warningOnly,
+      p_has_upcoming: hasUpcomingAppointment,
+    })
+    if (error) throw error
+
+    const result = (data ?? { total: 0, clients: [] }) as ClientsPageResult
+    return {
+      clients: result.clients ?? [],
+      total: result.total ?? 0,
+    }
+  }
+
+  let query = getSupabaseClient()
+    .from('clients')
+    .select(CLIENT_COLUMNS, { count: 'exact' })
+    .order('last_name', { ascending: true })
+    .order('first_name', { ascending: true })
+    .range(from, to)
+
+  query = applyClientSearch(query, search)
+  if (warningOnly) query = query.eq('manual_warning', true)
+
+  const { data, error, count } = await query
+  if (error) throw error
+
+  return {
+    clients: (data ?? []) as Client[],
+    total: count ?? 0,
+  }
+}
+
+async function fetchAllClients(search: string): Promise<Client[]> {
+  let query = getSupabaseClient()
+    .from('clients')
+    .select(CLIENT_COLUMNS)
+    .order('last_name', { ascending: true })
+    .order('first_name', { ascending: true })
+
+  query = applyClientSearch(query, search)
+
+  const { data, error } = await query
+  if (error) throw error
+  return (data ?? []) as Client[]
+}
+
 export function useClients(search: string) {
   return useQuery({
     queryKey: ['clients', search],
-    queryFn: async () => {
-      let query = getSupabaseClient()
-        .from('clients')
-        .select(CLIENT_COLUMNS)
-        .order('last_name', { ascending: true })
-        .order('first_name', { ascending: true })
+    queryFn: () => fetchAllClients(search),
+  })
+}
 
-      const term = search.trim()
-      if (term) {
-        const digits = phoneSearchDigits(term)
-        if (digits.length >= 3) {
-          query = query.or(
-            `phone_normalized.ilike.%${digits}%,first_name.ilike.%${term}%,last_name.ilike.%${term}%,nickname.ilike.%${term}%`,
-          )
-        } else {
-          query = query.or(
-            `first_name.ilike.%${term}%,last_name.ilike.%${term}%,nickname.ilike.%${term}%`,
-          )
-        }
-      }
-
-      const { data, error } = await query
-      if (error) throw error
-      return (data ?? []) as Client[]
-    },
+export function useClientsPage(options: ClientsPageOptions) {
+  return useQuery({
+    queryKey: ['clients', 'page', options],
+    queryFn: () => fetchClientsPage(options),
   })
 }
 

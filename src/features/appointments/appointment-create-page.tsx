@@ -1,5 +1,6 @@
 import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
 import { parse } from 'date-fns'
+import { ChevronUp } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -19,7 +20,7 @@ import { Switch } from '@/components/ui/switch'
 import { useAvailableSlots, dedupeSlotsByStart, useScheduleGaps, areSelectedSlotsContiguous, resolveSelectedSlotBlock } from '@/features/availability/api'
 import { useGeneralSchedules } from '@/features/schedules/api'
 import { resolveServiceSelection } from '@/lib/service-selection'
-import { formatServiceDuration } from '@/types/service'
+import { formatServiceDuration, formatServicePrice } from '@/types/service'
 import { useAppointmentMutations } from '@/features/appointments/api'
 import { useBarbers } from '@/features/barbers/api'
 import { useClient, useClients } from '@/features/clients/api'
@@ -94,7 +95,11 @@ export function AppointmentCreatePage() {
     barberId || null,
     !overbooking && selectedServices.length > 0,
   )
-  const { data: scheduleGaps } = useScheduleGaps(date, barberId || null, !overbooking)
+  const { data: scheduleGaps } = useScheduleGaps(
+    date,
+    barberId || null,
+    !overbooking && selectedServices.length === 0,
+  )
 
   const slots = useMemo(() => {
     if (!slotsRaw) return slotsRaw
@@ -221,6 +226,22 @@ export function AppointmentCreatePage() {
     return `${formatInTimeZone(slotBlock.starts_at, APP_TIMEZONE, 'HH:mm')} → ${formatInTimeZone(slotBlock.ends_at, APP_TIMEZONE, 'HH:mm')}`
   }, [slotBlock])
 
+  const showBarberPicker = (filteredBarbers?.length ?? 0) > 1
+
+  const isOverbookingValid = useMemo(() => {
+    if (!overbooking || !overbookingTime || !overbookingReason.trim()) return false
+    const overbookingStart = fromZonedTime(`${date}T${overbookingTime}:00`, APP_TIMEZONE)
+    return !isAppPastInstant(overbookingStart.toISOString())
+  }, [overbooking, overbookingTime, overbookingReason, date])
+
+  const canConfirm =
+    Boolean(clientId) &&
+    Boolean(barberId) &&
+    selectedServices.length > 0 &&
+    (overbooking ? isOverbookingValid : Boolean(slotBlock))
+
+  const dateLabel = formatInTimeZone(`${date}T12:00:00`, APP_TIMEZONE, 'dd/MM/yyyy')
+
   const handleSubmit = async () => {
     if (!clientId || !barberId || selectedServices.length === 0) {
       toast.error('Completá cliente, barbero y servicios')
@@ -285,13 +306,13 @@ export function AppointmentCreatePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-36 md:pb-0">
       <PageHeader
         title="Nuevo turno"
         description="Seleccioná cliente, servicios, fecha y horario."
       />
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
+      <div className="grid gap-6 md:grid-cols-[1fr_min(320px,38%)]">
         <div className="space-y-6">
           {(selectedClient?.manual_warning || absenceWarning?.warning) && (
             <ClientWarning
@@ -314,7 +335,7 @@ export function AppointmentCreatePage() {
 
           <section className="rounded-xl border bg-card p-5">
             <h2 className="mb-4 font-semibold">2. Servicios</h2>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-3 sm:grid-cols-2">
               {services?.map((s) => (
                 <ServiceCard
                   key={s.id}
@@ -324,6 +345,7 @@ export function AppointmentCreatePage() {
                   price={Number(s.price)}
                   selected={selectedServices.includes(s.id)}
                   onToggle={toggleService}
+                  size="lg"
                 />
               ))}
             </div>
@@ -336,8 +358,30 @@ export function AppointmentCreatePage() {
             </div>
           </section>
 
+          {showBarberPicker && (
+            <section className="rounded-xl border bg-card p-5">
+              <h2 className="mb-4 font-semibold">3. Barbero</h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {filteredBarbers?.map((b) => (
+                  <BarberCard
+                    key={b.id}
+                    id={b.id}
+                    name={b.name}
+                    color={b.calendar_color}
+                    selected={barberId === b.id}
+                    subtitle="Disponible"
+                    onSelect={(id) => {
+                      setBarberId(id)
+                      setSelectedSlots([])
+                    }}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className="rounded-xl border bg-card p-5">
-            <h2 className="mb-4 font-semibold">3. Fecha y horario</h2>
+            <h2 className="mb-4 font-semibold">{showBarberPicker ? '4. Fecha' : '3. Fecha'}</h2>
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Fecha</Label>
@@ -437,9 +481,16 @@ export function AppointmentCreatePage() {
                   </div>
                 </div>
               )}
+            </div>
+          </section>
 
-              {!overbooking && (
-                <div className="space-y-3">
+          {!overbooking && (
+            <section className="rounded-xl border bg-card p-5">
+              <h2 className="mb-4 font-semibold">
+                {showBarberPicker ? '5. Horario' : '4. Horario'}
+              </h2>
+              <div className="space-y-4">
+                {selectedServices.length > 0 && (
                   <div className="space-y-2">
                     <Label>Tipo de turno</Label>
                     <div className="grid grid-cols-2 gap-2 sm:max-w-md">
@@ -469,102 +520,89 @@ export function AppointmentCreatePage() {
                         : 'Varios cupos seguidos para un mismo turno (ej. ocupar dos horarios).'}
                     </p>
                   </div>
+                )}
 
-                  <div className="space-y-2">
-                    <Label>Horarios disponibles</Label>
-                    {selectedServices.length === 0 ? (
-                      <>
-                        <p className="text-muted-foreground text-xs">
-                          Huecos libres en la agenda. Elegí servicios para ver horarios exactos según duración.
-                        </p>
-                        {scheduleGaps?.length === 0 ? (
-                          <p className="text-muted-foreground text-sm">Sin disponibilidad para esta fecha.</p>
-                        ) : (
-                          <div className="flex flex-wrap gap-2">
-                            {scheduleGaps?.map((gap) => (
-                              <span
-                                key={`${gap.gap_start}-${gap.barber_id}`}
-                                className="bg-muted/60 text-muted-foreground rounded-lg border px-3 py-2 text-xs"
-                              >
-                                {formatInTimeZone(gap.gap_start, APP_TIMEZONE, 'HH:mm')}
-                                {' – '}
-                                {formatInTimeZone(gap.gap_end, APP_TIMEZONE, 'HH:mm')}
-                                <span className="text-foreground/70 ml-1.5 font-medium">
-                                  ({formatServiceDuration(gap.duration_minutes)})
-                                </span>
+                <div className="space-y-2">
+                  <Label>Horarios disponibles</Label>
+                  {selectedServices.length === 0 ? (
+                    <>
+                      <p className="text-muted-foreground text-xs">
+                        Huecos libres — no seleccionables. Elegí servicios para ver horarios exactos según duración.
+                      </p>
+                      {scheduleGaps && scheduleGaps.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {scheduleGaps.map((gap) => (
+                            <span
+                              key={`${gap.gap_start}-${gap.barber_id}`}
+                              className="bg-muted/60 text-muted-foreground rounded-lg border px-3 py-2 text-xs"
+                            >
+                              {formatInTimeZone(gap.gap_start, APP_TIMEZONE, 'HH:mm')}
+                              {' – '}
+                              {formatInTimeZone(gap.gap_end, APP_TIMEZONE, 'HH:mm')}
+                              <span className="text-foreground/70 ml-1.5 font-medium">
+                                ({formatServiceDuration(gap.duration_minutes)})
                               </span>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-muted-foreground text-xs">
-                          Duración de servicios: {formatServiceDuration(totals.duration)}
-                          {slotBlock && slotBlock.durationMinutes > totals.duration
-                            ? ` · Bloque reservado: ${formatServiceDuration(slotBlock.durationMinutes)}`
-                            : null}
-                          {'. '}
-                          {slotMode === 'multiple'
-                            ? 'Tocá varios horarios consecutivos.'
-                            : 'Solo se muestran horarios donde entra el servicio completo.'}
-                        </p>
-                        {slots?.length === 0 ? (
-                          <p className="text-muted-foreground text-sm">Sin horarios para esta combinación.</p>
-                        ) : (
-                          <TimeSlotGrid>
-                            {slots?.map((slot) => (
-                              <TimeSlot
-                                key={slot.slot_start}
-                                label={formatInTimeZone(slot.slot_start, APP_TIMEZONE, 'HH:mm')}
-                                state={selectedSlots.includes(slot.slot_start) ? 'selected' : 'available'}
-                                onClick={() => selectSlot(slot.slot_start, slot.barber_id)}
-                              />
-                            ))}
-                          </TimeSlotGrid>
-                        )}
-                      </>
-                    )}
-                  </div>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-muted-foreground text-xs">
+                        Duración de servicios: {formatServiceDuration(totals.duration)}
+                        {slotBlock && slotBlock.durationMinutes > totals.duration
+                          ? ` · Bloque reservado: ${formatServiceDuration(slotBlock.durationMinutes)}`
+                          : null}
+                        {'. '}
+                        {slotMode === 'multiple'
+                          ? 'Tocá varios horarios consecutivos.'
+                          : 'Solo se muestran horarios donde entra el servicio completo.'}
+                      </p>
+                      {slots?.length === 0 ? (
+                        <p className="text-muted-foreground text-sm">Sin horarios para esta combinación.</p>
+                      ) : (
+                        <TimeSlotGrid>
+                          {slots?.map((slot) => (
+                            <TimeSlot
+                              key={slot.slot_start}
+                              label={formatInTimeZone(slot.slot_start, APP_TIMEZONE, 'HH:mm')}
+                              state={selectedSlots.includes(slot.slot_start) ? 'selected' : 'available'}
+                              onClick={() => selectSlot(slot.slot_start, slot.barber_id)}
+                            />
+                          ))}
+                        </TimeSlotGrid>
+                      )}
+                    </>
+                  )}
                 </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="notes">Notas</Label>
-                <Input id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
-              </div>
-            </div>
-          </section>
-
-          {filteredBarbers && filteredBarbers.length > 1 && (
-            <section className="rounded-xl border bg-card p-5">
-              <h2 className="mb-4 font-semibold">4. Barbero</h2>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {filteredBarbers?.map((b) => (
-                  <BarberCard
-                    key={b.id}
-                    id={b.id}
-                    name={b.name}
-                    color={b.calendar_color}
-                    selected={barberId === b.id}
-                    subtitle="Disponible"
-                    onSelect={(id) => {
-                      setBarberId(id)
-                      setSelectedSlots([])
-                    }}
-                  />
-                ))}
               </div>
             </section>
           )}
+
+          <section className="rounded-xl border bg-card p-5">
+            <h2 className="mb-4 font-semibold">
+              {showBarberPicker
+                ? overbooking
+                  ? '5. Notas'
+                  : '6. Notas'
+                : overbooking
+                  ? '4. Notas'
+                  : '5. Notas'}
+            </h2>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notas (opcional)</Label>
+              <Input id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+            </div>
+          </section>
         </div>
 
-        <div className="xl:sticky xl:top-20 xl:self-start">
+        <div className="hidden md:sticky md:top-20 md:block md:self-start">
           <AppointmentSummary
             clientName={selectedClient ? getClientFullName(selectedClient) : undefined}
             services={selectedServiceRows.map((s) => s.name)}
             durationMinutes={blockDurationMinutes}
-            dateLabel={formatInTimeZone(`${date}T12:00:00`, APP_TIMEZONE, 'dd/MM/yyyy')}
+            dateLabel={dateLabel}
             timeRange={timeRange}
             barberName={selectedBarber?.name}
             subtotal={totals.subtotal}
@@ -577,7 +615,7 @@ export function AppointmentCreatePage() {
                 <Button
                   variant="accent"
                   className="w-full"
-                  disabled={createAppointment.isPending}
+                  disabled={!canConfirm || createAppointment.isPending}
                   onClick={() => void handleSubmit()}
                 >
                   Confirmar turno
@@ -588,6 +626,61 @@ export function AppointmentCreatePage() {
               </>
             }
           />
+        </div>
+      </div>
+
+      <div className="bg-background/95 fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
+        <details className="group border-b">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
+            <span>Resumen del turno</span>
+            <ChevronUp className="text-muted-foreground size-4 transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="max-h-48 overflow-y-auto px-4 pb-3">
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Cliente</dt>
+                <dd className="text-right font-medium">
+                  {selectedClient ? getClientFullName(selectedClient) : '—'}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Servicios</dt>
+                <dd className="text-right">
+                  {selectedServiceRows.length
+                    ? selectedServiceRows.map((s) => s.name).join(', ')
+                    : '—'}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Fecha</dt>
+                <dd>{dateLabel}</dd>
+              </div>
+              {timeRange && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Horario</dt>
+                  <dd className="font-medium">{timeRange}</dd>
+                </div>
+              )}
+              <div className="flex justify-between gap-4 font-semibold">
+                <dt>Total</dt>
+                <dd>
+                  {membershipId && totals.total === 0
+                    ? 'Membresía'
+                    : formatServicePrice(totals.total)}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </details>
+        <div className="p-4">
+          <Button
+            variant="accent"
+            className="w-full"
+            disabled={!canConfirm || createAppointment.isPending}
+            onClick={() => void handleSubmit()}
+          >
+            Confirmar turno
+          </Button>
         </div>
       </div>
     </div>

@@ -10,6 +10,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+      },
       includeAssets: ['pwa-192.png', 'pwa-512.png', 'apple-touch-icon.png', 'favicon-32.png'],
       manifest: {
         name: 'Barbatero',

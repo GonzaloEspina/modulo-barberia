@@ -9,6 +9,7 @@ interface ServiceCardProps {
   price: number
   selected: boolean
   onToggle: (id: string) => void
+  size?: 'default' | 'lg'
 }
 
 export function ServiceCard({
@@ -18,28 +19,44 @@ export function ServiceCard({
   price,
   selected,
   onToggle,
+  size = 'default',
 }: ServiceCardProps) {
+  const isLarge = size === 'lg'
+
   return (
     <button
       type="button"
       onClick={() => onToggle(id)}
       className={cn(
-        'inline-flex max-w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors',
+        'max-w-full text-left transition-colors',
+        isLarge
+          ? 'flex min-h-[88px] w-full flex-col gap-2 rounded-xl border p-4'
+          : 'inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm',
         selected
           ? 'border-accent bg-accent/10 text-foreground ring-1 ring-accent/30'
           : 'bg-card hover-surface hover:border-foreground/15',
       )}
     >
+      <span className={cn('flex items-start gap-2', isLarge && 'w-full')}>
+        <span
+          className={cn(
+            'flex shrink-0 items-center justify-center rounded-full border',
+            isLarge ? 'size-5' : 'size-4',
+            selected ? 'border-accent bg-accent text-accent-foreground' : 'border-input bg-background',
+          )}
+        >
+          {selected && <Check className={cn(isLarge ? 'size-3' : 'size-2.5')} strokeWidth={3} />}
+        </span>
+        <span className={cn('min-w-0 font-medium', isLarge ? 'text-base leading-snug' : 'truncate')}>
+          {name}
+        </span>
+      </span>
       <span
         className={cn(
-          'flex size-4 shrink-0 items-center justify-center rounded-full border',
-          selected ? 'border-accent bg-accent text-accent-foreground' : 'border-input bg-background',
+          'text-muted-foreground',
+          isLarge ? 'pl-7 text-sm' : 'shrink-0 text-xs',
         )}
       >
-        {selected && <Check className="size-2.5" strokeWidth={3} />}
-      </span>
-      <span className="min-w-0 truncate font-medium">{name}</span>
-      <span className="text-muted-foreground shrink-0 text-xs">
         {durationMinutes} min · {formatServicePrice(price)}
       </span>
     </button>

@@ -1,9 +1,10 @@
-import { formatInTimeZone } from 'date-fns-tz'
+import { endOfMonth, startOfMonth } from 'date-fns'
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz'
 import { useQuery } from '@tanstack/react-query'
 import {
   CalendarCheck,
   CircleDollarSign,
-  Clock,
+  Receipt,
   UserX,
   Wallet,
 } from 'lucide-react'
@@ -17,13 +18,22 @@ import { useAppointments } from '@/features/appointments/api'
 import { APP_TIMEZONE } from '@/lib/constants'
 import { getSupabaseClient } from '@/lib/supabase'
 import { isAdminRole, useProfile } from '@/hooks/use-profile'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { formatServicePrice } from '@/types/service'
 
 function todayIso() {
   return formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd')
 }
 
+function monthBalanceHref() {
+  const zoned = toZonedTime(new Date(), APP_TIMEZONE)
+  const from = formatInTimeZone(startOfMonth(zoned), APP_TIMEZONE, 'yyyy-MM-dd')
+  const to = formatInTimeZone(endOfMonth(zoned), APP_TIMEZONE, 'yyyy-MM-dd')
+  return `/balance?from=${from}&to=${to}`
+}
+
 export function DashboardPage() {
+  const isMobile = useIsMobile()
   const { data: profile } = useProfile()
   const today = todayIso()
   const { data: appointments, isLoading: loadingAppointments } = useAppointments(today, today)
@@ -54,6 +64,9 @@ export function DashboardPage() {
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
   const absences = todayAppointments.filter((a) => a.status === 'no_show').length
   const estimated = todayAppointments.reduce((sum, a) => sum + Number(a.total_amount), 0)
+  const production = Number(balance?.production ?? 0)
+  const cash = Number(balance?.cash ?? 0)
+  const pendingBalance = production - cash
 
   const isLoading = loadingAppointments || loadingBalance
 
@@ -70,30 +83,31 @@ export function DashboardPage() {
       />
 
       <section>
-        <SectionHeader title="Hoy" />
+        <SectionHeader
+          title="Hoy"
+          action={
+            <Button variant="link" size="sm" className="h-auto px-0" asChild>
+              <Link to={monthBalanceHref()}>Facturación del mes en Balance</Link>
+            </Button>
+          }
+        />
         {isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            {Array.from({ length: 5 }).map((_, i) => (
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-28 rounded-xl" />
             ))}
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <MetricCard label="Turnos de hoy" value={String(todayAppointments.length)} icon={CalendarCheck} />
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+            <MetricCard label="Turnos" value={String(todayAppointments.length)} icon={CalendarCheck} />
             <MetricCard label="Estimado" value={formatServicePrice(estimated)} icon={CircleDollarSign} />
-            <MetricCard
-              label="Cobrado"
-              value={formatServicePrice(Number(balance?.cash ?? 0))}
-              icon={Wallet}
-            />
-            <MetricCard
-              label="Facturación del mes"
-              value={formatServicePrice(Number(balance?.production ?? 0))}
-              icon={Clock}
-            />
-            {absences > 0 && (
-              <MetricCard label="Ausencias" value={String(absences)} icon={UserX} hint="Registradas hoy" />
-            )}
+            <MetricCard label="Cobrado" value={formatServicePrice(cash)} icon={Wallet} />
+            <MetricCard label="Saldo pendiente" value={formatServicePrice(pendingBalance)} icon={Receipt} />
+          </div>
+        )}
+        {!isLoading && absences > 0 && (
+          <div className="mt-4 max-w-xs">
+            <MetricCard label="Ausencias" value={String(absences)} icon={UserX} hint="Registradas hoy" />
           </div>
         )}
       </section>
@@ -102,15 +116,17 @@ export function DashboardPage() {
         <SectionHeader
           title="Próximos turnos"
           action={
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/turnos">Ver calendario</Link>
-            </Button>
+            upcoming.length > 0 ? (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/turnos">Ver todos</Link>
+              </Button>
+            ) : undefined
           }
         />
         {loadingAppointments ? (
-          <div className="space-y-3">
-            <Skeleton className="h-28 rounded-xl" />
-            <Skeleton className="h-28 rounded-xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-14 rounded-lg" />
+            <Skeleton className="h-14 rounded-lg" />
           </div>
         ) : upcoming.length === 0 ? (
           <EmptyState
@@ -124,9 +140,9 @@ export function DashboardPage() {
             }
           />
         ) : (
-          <div className="space-y-3">
-            {upcoming.slice(0, 6).map((appt) => (
-              <AppointmentCard key={appt.id} appointment={appt} />
+          <div className="space-y-2">
+            {upcoming.slice(0, isMobile ? 5 : 6).map((appt) => (
+              <AppointmentCard key={appt.id} appointment={appt} variant="compact" />
             ))}
           </div>
         )}

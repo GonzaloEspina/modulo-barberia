@@ -16,6 +16,8 @@ import { AppointmentCreatePage } from '@/features/appointments/appointment-creat
 
 import { AppointmentDetailPage } from '@/features/appointments/appointment-detail-page'
 
+import { AppointmentsPage } from '@/features/appointments/appointments-page'
+
 import { CalendarPage } from '@/features/appointments/calendar-page'
 
 import { AuditPage } from '@/features/audit/audit-page'
@@ -118,6 +120,8 @@ export function App() {
                 <Route path="/turnos/:id" element={<AppointmentDetailPage />} />
 
                 <Route path="/calendario" element={<Navigate to="/turnos" replace />} />
+
+                <Route path="/exportaciones" element={<AppointmentsPage />} />
 
                 <Route path="/balance" element={<BalancePage />} />
 

@@ -1,4 +1,11 @@
+import { AlertTriangle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import {
   APPOINTMENT_STATUS_LABELS,
   type AppointmentStatus,
@@ -25,6 +32,27 @@ export function AppointmentStatusBadge({
     <Badge variant="outline" className={cn(STATUS_STYLES[status], className)}>
       {APPOINTMENT_STATUS_LABELS[status]}
     </Badge>
+  )
+}
+
+export function OverbookingIndicator({ className }: { className?: string }) {
+  return (
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span
+            className={cn(
+              'text-warning inline-flex shrink-0 items-center',
+              className,
+            )}
+            aria-label="Sobreturno"
+          >
+            <AlertTriangle className="size-3.5" strokeWidth={1.75} />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>Sobreturno</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }
 

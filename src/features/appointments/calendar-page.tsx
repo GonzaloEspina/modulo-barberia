@@ -1,24 +1,46 @@
-import type { DateSelectArg, EventClickArg, EventDropArg, EventInput } from '@fullcalendar/core'
+import type {
+  DateSelectArg,
+  EventClickArg,
+  EventContentArg,
+  EventDropArg,
+  EventInput,
+} from '@fullcalendar/core'
 import type { DateClickArg } from '@fullcalendar/interaction'
 import esLocale from '@fullcalendar/core/locales/es'
+import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
+import listPlugin from '@fullcalendar/list'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { formatInTimeZone } from 'date-fns-tz'
-import { Plus } from 'lucide-react'
+import { AlertTriangle, Plus } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAppointmentMutations, useAppointments } from '@/features/appointments/api'
 import { useBarbers } from '@/features/barbers/api'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { isAdminRole, useProfile } from '@/hooks/use-profile'
 import { APP_TIMEZONE } from '@/lib/constants'
-import { APPOINTMENT_STATUS_LABELS, type Appointment } from '@/types/appointment'
+import {
+  APPOINTMENT_STATUS_LABELS,
+  type Appointment,
+  type AppointmentStatus,
+} from '@/types/appointment'
 
 import './calendar.css'
 
 const selectClass =
-  'border-input bg-background h-8 rounded-md border px-2 text-xs'
+  'border-input bg-background h-8 min-w-0 shrink rounded-md border px-2 text-xs'
+
+const STATUS_DOT_CLASS: Record<AppointmentStatus, string> = {
+  pending: 'calendar-status-dot--pending',
+  confirmed: 'calendar-status-dot--confirmed',
+  in_progress: 'calendar-status-dot--in-progress',
+  completed: 'calendar-status-dot--completed',
+  cancelled: 'calendar-status-dot--cancelled',
+  no_show: 'calendar-status-dot--no-show',
+}
 
 /** Mezcla un hex con otro (amount 0–1 hacia `mixWith`). */
 function mixHex(hex: string, mixWith: string, amount: number): string {
@@ -77,11 +99,35 @@ function toEvents(appointments: Appointment[]): EventInput[] {
   })
 }
 
+function renderEventContent(arg: EventContentArg) {
+  const status = arg.event.extendedProps.status as AppointmentStatus
+  const isOverbooking = arg.event.extendedProps.isOverbooking as boolean
+  const dotClass = STATUS_DOT_CLASS[status] ?? 'calendar-status-dot--pending'
+  const timeHtml = arg.timeText
+    ? `<span class="fc-event-time">${arg.timeText}</span>`
+    : ''
+  const overbookingHtml = isOverbooking
+    ? '<span class="fc-event-overbooking" aria-hidden="true">⚠</span>'
+    : ''
+
+  return {
+    html: `<div class="fc-event-inner-custom">
+      <span class="calendar-status-dot ${dotClass}" aria-hidden="true"></span>
+      ${overbookingHtml}
+      ${timeHtml}
+      <span class="fc-event-title fc-sticky">${arg.event.title}</span>
+    </div>`,
+  }
+}
+
 export function CalendarPage() {
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const { data: profile } = useProfile()
   const { data: barbers } = useBarbers(false)
   const { rescheduleAppointment } = useAppointmentMutations()
+
+  const initialView = isMobile ? 'listDay' : 'timeGridWeek'
 
   const [range, setRange] = useState(() => {
     const today = formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd')
@@ -105,6 +151,14 @@ export function CalendarPage() {
   }, [appointments, barberFilter, statusFilter, profile])
 
   const events = useMemo(() => toEvents(filtered), [filtered])
+
+  const legendBarbers = useMemo(() => {
+    if (!isAdminRole(profile) && profile?.barber_id) {
+      const mine = barbers?.find((b) => b.id === profile.barber_id)
+      return mine ? [mine] : []
+    }
+    return barbers ?? []
+  }, [barbers, profile])
 
   const handleDatesSet = useCallback((arg: { startStr: string; endStr: string }) => {
     const from = formatInTimeZone(new Date(arg.startStr), APP_TIMEZONE, 'yyyy-MM-dd')
@@ -160,6 +214,17 @@ export function CalendarPage() {
     selectInfo.view.calendar.unselect()
   }
 
+  const selectAllow = useCallback(
+    (selectInfo: { start: Date }) => selectInfo.start.getTime() >= Date.now(),
+    [],
+  )
+
+  const eventAllow = useCallback(
+    (dropInfo: { start: Date | null }) =>
+      dropInfo.start ? dropInfo.start.getTime() >= Date.now() : false,
+    [],
+  )
+
   const newAppointmentHref = useMemo(() => {
     const params = new URLSearchParams({
       date: formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd'),
@@ -170,9 +235,9 @@ export function CalendarPage() {
 
   return (
     <div className="calendar-page -m-4 flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-4 md:-m-6 md:p-6 lg:-m-8 lg:p-8">
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
-        <h1 className="text-lg font-semibold tracking-tight">Calendario</h1>
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 flex-nowrap items-center gap-2 overflow-x-auto">
+        <h1 className="shrink-0 text-lg font-semibold tracking-tight">Calendario</h1>
+        <div className="ml-auto flex shrink-0 flex-nowrap items-center gap-2">
           {isAdminRole(profile) && (
             <select
               className={selectClass}
@@ -197,13 +262,50 @@ export function CalendarPage() {
               <option key={value} value={value}>{label}</option>
             ))}
           </select>
-          <Button variant="accent" size="sm" className="h-8 gap-1.5" asChild>
+          <Button variant="accent" size="sm" className="h-8 shrink-0 gap-1.5" asChild>
             <Link to={newAppointmentHref}>
               <Plus className="size-4" />
-              Nuevo turno
+              <span className="hidden sm:inline">Nuevo turno</span>
+              <span className="sm:hidden">Nuevo</span>
             </Link>
           </Button>
         </div>
+      </div>
+
+      <div className="calendar-legend hidden max-h-16 shrink-0 flex-wrap items-center gap-x-4 gap-y-1 overflow-hidden text-[0.6875rem] text-muted-foreground sm:flex sm:max-h-none">
+        {legendBarbers.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="font-medium text-foreground/70">Barberos</span>
+            {legendBarbers.map((b) => (
+              <span key={b.id} className="inline-flex items-center gap-1">
+                <span
+                  className="calendar-barber-swatch"
+                  style={{ backgroundColor: b.calendar_color }}
+                  aria-hidden="true"
+                />
+                {b.name}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="font-medium text-foreground/70">Estado</span>
+          {(Object.entries(APPOINTMENT_STATUS_LABELS) as [AppointmentStatus, string][]).map(
+            ([status, label]) => (
+              <span key={status} className="inline-flex items-center gap-1">
+                <span
+                  className={`calendar-status-dot ${STATUS_DOT_CLASS[status]}`}
+                  aria-hidden="true"
+                />
+                {label}
+              </span>
+            ),
+          )}
+        </div>
+        <span className="inline-flex items-center gap-1">
+          <AlertTriangle className="calendar-overbooking-icon size-3" aria-hidden="true" />
+          Sobreturno
+        </span>
       </div>
 
       {message && (
@@ -216,13 +318,22 @@ export function CalendarPage() {
         ) : (
           <div className="calendar-compact flex h-full min-h-0 flex-col p-1">
             <FullCalendar
-              plugins={[timeGridPlugin, interactionPlugin]}
-              initialView="timeGridWeek"
+              key={initialView}
+              plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+              initialView={initialView}
               locale={esLocale}
               headerToolbar={{
                 left: 'prev,next today',
                 center: 'title',
-                right: '',
+                right: isMobile
+                  ? 'listDay,timeGridDay'
+                  : 'timeGridDay,timeGridWeek,dayGridMonth,listDay',
+              }}
+              views={{
+                timeGridDay: { buttonText: 'Día' },
+                timeGridWeek: { buttonText: 'Semana' },
+                dayGridMonth: { buttonText: 'Mes' },
+                listDay: { buttonText: 'Lista' },
               }}
               slotMinTime="10:00:00"
               slotMaxTime="20:00:00"
@@ -235,15 +346,19 @@ export function CalendarPage() {
               editable
               selectable
               selectMirror
+              selectAllow={selectAllow}
+              eventAllow={eventAllow}
               eventDrop={handleEventDrop}
               eventClick={handleEventClick}
               dateClick={handleDateClick}
               select={handleDateSelect}
               datesSet={handleDatesSet}
+              eventContent={renderEventContent}
               eventTimeFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
               slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
               dayHeaderFormat={{ weekday: 'short', day: 'numeric' }}
               nowIndicator
+              noEventsContent="Sin turnos en este período"
             />
           </div>
         )}

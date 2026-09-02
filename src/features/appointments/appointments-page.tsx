@@ -31,7 +31,7 @@ export function AppointmentsPage() {
               Excel
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/calendario">Calendario</Link>
+              <Link to="/turnos">Agenda</Link>
             </Button>
             <Button variant="accent" asChild>
               <Link to="/turnos/nuevo">
