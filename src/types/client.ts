@@ -23,7 +23,7 @@ export interface Client {
 
 export interface ClientFormInput {
   first_name: string
-  last_name: string
+  last_name?: string
   phone: string
   nickname?: string
   email?: string
@@ -62,8 +62,21 @@ export function getBookingOverrideBadge(
   return null
 }
 
-export function getClientFullName(client: Pick<Client, 'first_name' | 'last_name'>): string {
-  return `${client.first_name} ${client.last_name}`.trim()
+export function getClientFullName(
+  client: Pick<Client, 'first_name'> & { last_name?: string | null },
+): string {
+  return [client.first_name, client.last_name]
+    .map((part) => part?.trim() ?? '')
+    .filter(Boolean)
+    .join(' ')
+}
+
+export function getClientInitials(
+  client: Pick<Client, 'first_name'> & { last_name?: string | null },
+): string {
+  const first = client.first_name.trim().charAt(0)
+  const last = client.last_name?.trim().charAt(0) ?? ''
+  return `${first}${last}`.toUpperCase() || '?'
 }
 
 export function groupClientsByInitial(clients: Client[]): { initial: string; clients: Client[] }[] {

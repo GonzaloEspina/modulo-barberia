@@ -1,12 +1,13 @@
 import { formatInTimeZone } from 'date-fns-tz'
 import { useAppointments } from '@/features/appointments/api'
 import { APP_TIMEZONE } from '@/lib/constants'
+import { getClientFullName } from '@/types/client'
 import { createProWorkbook, downloadWorkbook } from '@/features/export/excel-pro'
 
 export function exportAppointmentsCsv(from: string, to: string, appointments: Awaited<ReturnType<typeof useAppointments>>['data']) {
   const header = 'Fecha,Hora,Cliente,Barbero,Estado,Total\n'
   const rows = (appointments ?? []).map((a) => {
-    const client = a.client ? `${a.client.first_name} ${a.client.last_name}` : ''
+    const client = a.client ? getClientFullName(a.client) : ''
     return [
       formatInTimeZone(a.starts_at, APP_TIMEZONE, 'yyyy-MM-dd'),
       formatInTimeZone(a.starts_at, APP_TIMEZONE, 'HH:mm'),
@@ -29,7 +30,7 @@ export function exportAppointmentsExcel(from: string, to: string, appointments: 
   const rows = (appointments ?? []).map((a) => ({
     Fecha: formatInTimeZone(a.starts_at, APP_TIMEZONE, 'yyyy-MM-dd'),
     Hora: formatInTimeZone(a.starts_at, APP_TIMEZONE, 'HH:mm'),
-    Cliente: a.client ? `${a.client.first_name} ${a.client.last_name}` : '',
+    Cliente: a.client ? getClientFullName(a.client) : '',
     Barbero: a.barber?.name ?? '',
     Estado: a.status,
     Total: Number(a.total_amount),

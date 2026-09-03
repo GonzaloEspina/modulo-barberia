@@ -51,7 +51,11 @@ export function useAppointment(id: string | undefined) {
 
 export function useAppointmentMutations() {
   const queryClient = useQueryClient()
-  const invalidate = () => void queryClient.invalidateQueries({ queryKey: ['appointments'] })
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: ['appointments'] })
+    void queryClient.invalidateQueries({ queryKey: ['available-slots'] })
+    void queryClient.invalidateQueries({ queryKey: ['schedule-gaps'] })
+  }
 
   const createAppointment = useMutation({
     mutationFn: async (input: {

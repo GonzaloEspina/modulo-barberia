@@ -66,7 +66,13 @@ function parseUsDate(value) {
 function parseDateTime(fecha, hora) {
   const date = parseUsDate(fecha)
   if (!date) return null
-  const time = hora ? String(hora).slice(0, 8) : '09:00:00'
+  let time = hora ? String(hora).trim() : '09:00:00'
+  // AppSheet sometimes exports times as HH/MM/SS instead of HH:MM:SS
+  time = time.replace(/^(\d{1,2})\/(\d{1,2})\/(\d{1,2})$/, (_, h, m, s) =>
+    `${h.padStart(2, '0')}:${m.padStart(2, '0')}:${s.padStart(2, '0')}`,
+  )
+  time = time.slice(0, 8)
+  if (!/^\d{2}:\d{2}:\d{2}$/.test(time)) time = '09:00:00'
   return `${date}T${time}`
 }
 
@@ -91,6 +97,13 @@ function mapAttendance(value) {
   if (v === 'si' || v === 'sí') return 'attended'
   if (v === 'no') return 'no_show'
   return 'pending'
+}
+
+function mapTurnoStatus(attendance, startsLocal) {
+  if (attendance === 'no_show') return 'no_show'
+  if (attendance === 'attended') return 'completed'
+  const nowLocal = new Date().toLocaleString('sv-SE', { timeZone: TZ }).replace(' ', 'T')
+  return startsLocal > nowLocal.slice(0, 19) ? 'pending' : 'completed'
 }
 
 function mapMembershipStatus(value) {
@@ -257,12 +270,12 @@ export function transformData(data, paymentMethodIds) {
       subtotal: amount,
       discount_amount: 0,
       total_amount: amount,
-      status: 'completed',
+      status: mapTurnoStatus(attendance, startsLocal),
       attendance_status: attendance,
       client_membership_id: membershipAppsheetId ? appsheetUuid(membershipAppsheetId) : null,
       membership_turns_consumed: membershipAppsheetId ? 1 : 0,
       creation_channel: 'import',
-      is_overbooking: true,
+      is_overbooking: false,
       is_active: true,
     })
 
@@ -302,7 +315,16 @@ export function transformData(data, paymentMethodIds) {
       discount_applied: 0,
       payment_method_id: methodId,
       status: 'paid',
-      paid_at: pick(row, 'Orden del Pago') || new Date().toISOString(),
+      paid_at: (() => {
+        const raw = pick(row, 'Orden del Pago')
+        if (!raw) return new Date().toISOString()
+        const m = String(raw).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{2}:\d{2}:\d{2})/)
+        if (m) {
+          const [, mm, dd, yyyy, t] = m
+          return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}T${t}`
+        }
+        return String(raw)
+      })(),
       notes: pick(row, 'Notas') || null,
       is_active: true,
     })
@@ -324,7 +346,7 @@ export function transformData(data, paymentMethodIds) {
     description: pick(row, 'Ítem', 'Item') || 'Gasto',
     amount: parseMoney(pick(row, 'Monto')),
     expense_date: parseUsDate(pick(row, 'Fecha')) ?? '2025-01-01',
-    expense_type: 'variable',
+    expense_type: 'general',
     is_active: true,
   }))
 
@@ -371,8 +393,8 @@ function buildAppointmentInsert(rows) {
     (${sqlStr(row.starts_at)}::timestamp AT TIME ZONE '${TZ}'),
     (${sqlStr(row.starts_at)}::timestamp AT TIME ZONE '${TZ}') + (${row.duration_minutes} || ' minutes')::interval,
     ${row.duration_minutes},
-    'completed',
-    TRUE,
+    ${sqlStr(row.status)}::public.appointment_status,
+    FALSE,
     ${sqlNum(row.subtotal)},
     ${sqlNum(row.discount_amount)},
     ${sqlNum(row.total_amount)},
@@ -500,7 +522,7 @@ async function importWithSupabase(transformed) {
             ends_at: ends.toISOString(),
             total_duration_minutes: row.duration_minutes,
             status: row.status,
-            is_overbooking: true,
+            is_overbooking: false,
             subtotal: row.subtotal,
             discount_amount: row.discount_amount,
             total_amount: row.total_amount,

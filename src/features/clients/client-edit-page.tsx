@@ -21,7 +21,7 @@ import { useProfile } from '@/hooks/use-profile'
 import { APP_TIMEZONE } from '@/lib/constants'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { getSupabaseClient } from '@/lib/supabase'
-import { getClientFullName } from '@/types/client'
+import { getClientFullName, getClientInitials } from '@/types/client'
 import type { Appointment, AppointmentStatus } from '@/types/appointment'
 
 function useClientAppointments(clientId: string | undefined) {
@@ -121,7 +121,7 @@ export function ClientEditPage() {
       <div className="flex items-center gap-4 rounded-xl border bg-card p-4">
         <Avatar className="size-14 rounded-xl">
           <AvatarFallback className="rounded-xl text-lg">
-            {client.first_name.slice(0, 1)}{client.last_name.slice(0, 1)}
+            {getClientInitials(client)}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">

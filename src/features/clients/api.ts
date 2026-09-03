@@ -80,8 +80,8 @@ async function fetchClientsPage(options: ClientsPageOptions): Promise<ClientsPag
   let query = getSupabaseClient()
     .from('clients')
     .select(CLIENT_COLUMNS, { count: 'exact' })
-    .order('last_name', { ascending: true })
     .order('first_name', { ascending: true })
+    .order('last_name', { ascending: true })
     .range(from, to)
 
   query = applyClientSearch(query, search)
@@ -100,8 +100,8 @@ async function fetchAllClients(search: string): Promise<Client[]> {
   let query = getSupabaseClient()
     .from('clients')
     .select(CLIENT_COLUMNS)
-    .order('last_name', { ascending: true })
     .order('first_name', { ascending: true })
+    .order('last_name', { ascending: true })
 
   query = applyClientSearch(query, search)
 
@@ -149,7 +149,7 @@ function toDbPayload(input: ClientFormInput, organizationId: string) {
   return {
     organization_id: organizationId,
     first_name: input.first_name.trim(),
-    last_name: input.last_name.trim(),
+    last_name: input.last_name?.trim() ?? '',
     phone_normalized,
     phone_display: formatPhoneDisplay(input.phone),
     nickname: input.nickname?.trim() || null,

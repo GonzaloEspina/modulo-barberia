@@ -14,8 +14,8 @@ import { cn } from '@/lib/utils'
 
 const STATUS_STYLES: Record<AppointmentStatus, string> = {
   pending: 'bg-muted text-muted-foreground border-transparent',
-  confirmed: 'bg-secondary text-secondary-foreground border-transparent',
-  in_progress: 'bg-accent/15 text-accent-foreground border-accent/20',
+  confirmed: 'bg-muted text-muted-foreground border-transparent',
+  in_progress: 'bg-muted text-muted-foreground border-transparent',
   completed: 'bg-success/10 text-success border-success/20',
   cancelled: 'bg-muted text-muted-foreground border-transparent line-through',
   no_show: 'bg-destructive/10 text-destructive border-destructive/20',

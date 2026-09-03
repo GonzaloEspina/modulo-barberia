@@ -375,7 +375,7 @@ export function MembershipsPage() {
                     <option value="">Seleccionar cliente…</option>
                     {clients?.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.first_name} {c.last_name}
+                        {getClientFullName(c)}
                       </option>
                     ))}
                   </select>

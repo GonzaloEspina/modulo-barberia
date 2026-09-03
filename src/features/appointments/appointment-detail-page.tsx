@@ -19,11 +19,13 @@ import { notifyError } from '@/lib/notify'
 import { confirmAction } from '@/lib/notify'
 import { validatePaymentAmount } from '@/lib/payment'
 import {
-  ATTENDANCE_STATUS_LABELS,
+  APPOINTMENT_STATUS_LABELS,
+  APPOINTMENT_STATUS_OPTIONS,
+  visibleAppointmentStatus,
   type AppointmentStatus,
-  type AttendanceStatus,
 } from '@/types/appointment'
 import { formatServicePrice } from '@/types/service'
+import { getClientFullName } from '@/types/client'
 
 export function AppointmentDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -55,9 +57,7 @@ export function AppointmentDetailPage() {
     )
   }
 
-  const clientName = appt.client
-    ? `${appt.client.first_name} ${appt.client.last_name}`
-    : 'Cliente'
+  const clientName = appt.client ? getClientFullName(appt.client) : 'Cliente'
 
   const handlePay = async () => {
     const amount = Number(payAmount)
@@ -86,7 +86,6 @@ export function AppointmentDetailPage() {
         <CardHeader>
           <CardTitle className="flex flex-wrap gap-2">
             <AppointmentStatusBadge status={appt.status} />
-            <Badge variant="outline">{ATTENDANCE_STATUS_LABELS[appt.attendance_status]}</Badge>
             {appt.is_overbooking && <Badge variant="warning">Sobreturno</Badge>}
           </CardTitle>
         </CardHeader>
@@ -101,27 +100,26 @@ export function AppointmentDetailPage() {
           </ul>
           <p className="font-semibold">Total: {formatServicePrice(Number(appt.total_amount))}</p>
 
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="appointment-status">Estado</Label>
             <select
-              className="border-input bg-background h-10 rounded-lg border px-3 text-sm"
-              value={appt.status}
-              onChange={(e) =>
-                void updateStatus.mutateAsync({ id: appt.id, status: e.target.value })
-              }
+              id="appointment-status"
+              className="border-input bg-background mt-1.5 h-10 w-full rounded-lg border px-3 text-sm"
+              value={visibleAppointmentStatus(appt.status)}
+              onChange={(e) => {
+                const next = e.target.value as AppointmentStatus
+                if (next === 'cancelled') {
+                  void confirmAction('¿Cancelar turno? Se libera el horario.').then((ok) => {
+                    if (!ok) return
+                    void cancelAppointment.mutateAsync({ id: appt.id, reason: 'Cancelado desde panel' })
+                  })
+                  return
+                }
+                void updateStatus.mutateAsync({ id: appt.id, status: next })
+              }}
             >
-              {(['pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show'] as AppointmentStatus[]).map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-            <select
-              className="border-input bg-background h-10 rounded-lg border px-3 text-sm"
-              value={appt.attendance_status}
-              onChange={(e) =>
-                void updateStatus.mutateAsync({ id: appt.id, attendance: e.target.value })
-              }
-            >
-              {(Object.keys(ATTENDANCE_STATUS_LABELS) as AttendanceStatus[]).map((s) => (
-                <option key={s} value={s}>{ATTENDANCE_STATUS_LABELS[s]}</option>
+              {APPOINTMENT_STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>{APPOINTMENT_STATUS_LABELS[s]}</option>
               ))}
             </select>
           </div>
@@ -130,7 +128,7 @@ export function AppointmentDetailPage() {
             <Button
               variant="outline"
               onClick={() => {
-                void confirmAction('¿Cancelar turno?').then((ok) => {
+                void confirmAction('¿Cancelar turno? Se libera el horario.').then((ok) => {
                   if (!ok) return
                   void cancelAppointment.mutateAsync({ id: appt.id, reason: 'Cancelado desde panel' })
                     .then(() => navigate('/turnos'))

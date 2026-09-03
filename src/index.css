@@ -128,8 +128,20 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   body {
     @apply bg-background font-sans text-foreground antialiased;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+  #root {
+    min-height: 100svh;
+    max-width: 100%;
+    overflow-x: clip;
   }
 }
 

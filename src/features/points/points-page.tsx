@@ -16,6 +16,7 @@ import {
 } from '@/features/points/api'
 import { RewardsAdminPanel } from '@/features/points/rewards-admin-panel'
 import { confirmAction, notifyError, notifySuccess } from '@/lib/notify'
+import { getClientFullName } from '@/types/client'
 
 const REDEMPTION_STATUS_LABELS: Record<string, string> = {
   requested: 'Solicitado',
@@ -131,9 +132,8 @@ export function PointsPage() {
           )}
           {redemptions?.map((r) => {
             const client = r.clients
-            const clientName = client
-              ? `${(Array.isArray(client) ? client[0] : client)?.first_name} ${(Array.isArray(client) ? client[0] : client)?.last_name}`
-              : '—'
+            const row = Array.isArray(client) ? client[0] : client
+            const clientName = row ? getClientFullName(row) : '—'
             return (
               <div
                 key={r.id}

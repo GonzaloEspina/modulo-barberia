@@ -86,8 +86,11 @@ export function DashboardPage() {
         <SectionHeader
           title="Hoy"
           action={
-            <Button variant="link" size="sm" className="h-auto px-0" asChild>
-              <Link to={monthBalanceHref()}>Facturación del mes en Balance</Link>
+            <Button variant="link" size="sm" className="h-auto max-w-[55%] shrink-0 px-0 text-right text-xs sm:max-w-none sm:text-sm" asChild>
+              <Link to={monthBalanceHref()}>
+                <span className="sm:hidden">Ver balance</span>
+                <span className="hidden sm:inline">Facturación del mes en Balance</span>
+              </Link>
             </Button>
           }
         />

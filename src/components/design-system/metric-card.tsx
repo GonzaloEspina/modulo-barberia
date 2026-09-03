@@ -14,7 +14,7 @@ export function MetricCard({ label, value, icon: Icon, hint, className }: Metric
     <div className={cn('rounded-xl border bg-card p-3 sm:p-4', className)}>
       <div className="flex items-start justify-between gap-2 sm:gap-3">
         <div className="min-w-0 space-y-1 sm:space-y-2">
-          <p className="text-lg font-semibold tracking-tight sm:text-2xl">{value}</p>
+          <p className="truncate text-lg font-semibold tracking-tight sm:text-2xl">{value}</p>
           <p className="text-muted-foreground text-xs sm:text-sm">{label}</p>
           {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
         </div>

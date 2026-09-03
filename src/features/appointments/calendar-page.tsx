@@ -13,10 +13,11 @@ import listPlugin from '@fullcalendar/list'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { formatInTimeZone } from 'date-fns-tz'
-import { AlertTriangle, Plus } from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
+import { AlertTriangle, Minus, Plus } from 'lucide-react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { useAppointmentMutations, useAppointments } from '@/features/appointments/api'
 import { useBarbers } from '@/features/barbers/api'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -24,19 +25,42 @@ import { isAdminRole, useProfile } from '@/hooks/use-profile'
 import { APP_TIMEZONE } from '@/lib/constants'
 import {
   APPOINTMENT_STATUS_LABELS,
+  APPOINTMENT_STATUS_OPTIONS,
   type Appointment,
   type AppointmentStatus,
 } from '@/types/appointment'
+import { getClientFullName } from '@/types/client'
 
 import './calendar.css'
 
 const selectClass =
-  'border-input bg-background h-8 min-w-0 shrink rounded-md border px-2 text-xs'
+  'border-input bg-background h-8 min-w-0 flex-1 rounded-md border px-2 text-xs sm:flex-none sm:shrink'
+
+const MIN_ZOOM = 1
+const MAX_ZOOM = 2.5
+const ZOOM_STEP = 0.25
+const DEFAULT_SLOT_MIN_HEIGHT = 28
+const ZOOM_STORAGE_KEY = 'calendar-zoom'
+
+function clampZoom(value: number) {
+  const stepped = Math.round(value / ZOOM_STEP) * ZOOM_STEP
+  return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Number(stepped.toFixed(2))))
+}
+
+function readStoredZoom() {
+  try {
+    const raw = localStorage.getItem(ZOOM_STORAGE_KEY)
+    const parsed = raw ? Number(raw) : MIN_ZOOM
+    return Number.isFinite(parsed) ? clampZoom(parsed) : MIN_ZOOM
+  } catch {
+    return MIN_ZOOM
+  }
+}
 
 const STATUS_DOT_CLASS: Record<AppointmentStatus, string> = {
   pending: 'calendar-status-dot--pending',
-  confirmed: 'calendar-status-dot--confirmed',
-  in_progress: 'calendar-status-dot--in-progress',
+  confirmed: 'calendar-status-dot--pending',
+  in_progress: 'calendar-status-dot--pending',
   completed: 'calendar-status-dot--completed',
   cancelled: 'calendar-status-dot--cancelled',
   no_show: 'calendar-status-dot--no-show',
@@ -71,9 +95,7 @@ function toEvents(appointments: Appointment[]): EventInput[] {
   const stripeIndexByDayBarber = new Map<string, number>()
 
   return sorted.map((appt) => {
-    const clientName = appt.client
-      ? `${appt.client.first_name} ${appt.client.last_name}`
-      : 'Cliente'
+    const clientName = appt.client ? getClientFullName(appt.client) : 'Cliente'
     const day = formatInTimeZone(new Date(appt.starts_at), APP_TIMEZONE, 'yyyy-MM-dd')
     const stripeKey = `${day}:${appt.barber_id}`
     const stripe = stripeIndexByDayBarber.get(stripeKey) ?? 0
@@ -112,10 +134,12 @@ function renderEventContent(arg: EventContentArg) {
 
   return {
     html: `<div class="fc-event-inner-custom">
-      <span class="calendar-status-dot ${dotClass}" aria-hidden="true"></span>
-      ${overbookingHtml}
+      <div class="fc-event-heading">
+        <span class="calendar-status-dot ${dotClass}" aria-hidden="true"></span>
+        ${overbookingHtml}
+        <span class="fc-event-title fc-sticky">${arg.event.title}</span>
+      </div>
       ${timeHtml}
-      <span class="fc-event-title fc-sticky">${arg.event.title}</span>
     </div>`,
   }
 }
@@ -127,7 +151,50 @@ export function CalendarPage() {
   const { data: barbers } = useBarbers(false)
   const { rescheduleAppointment } = useAppointmentMutations()
 
+  const calendarRef = useRef<FullCalendar>(null)
+  const calendarShellRef = useRef<HTMLDivElement>(null)
+  const baseSlotHeightRef = useRef(DEFAULT_SLOT_MIN_HEIGHT)
   const initialView = isMobile ? 'listDay' : 'timeGridWeek'
+  const [zoom, setZoom] = useState(readStoredZoom)
+  const zoomed = zoom > MIN_ZOOM
+
+  const applyZoom = useCallback((next: number | ((current: number) => number)) => {
+    setZoom((current) => {
+      const target = typeof next === 'function' ? next(current) : next
+      const clamped = clampZoom(target)
+      if (current === MIN_ZOOM && clamped > MIN_ZOOM) {
+        const slot = document.querySelector('.calendar-compact .fc-timegrid-slot')
+        const height = slot?.getBoundingClientRect().height ?? 0
+        if (height > 8) baseSlotHeightRef.current = height
+      }
+      return clamped
+    })
+  }, [])
+
+  useLayoutEffect(() => {
+    try {
+      localStorage.setItem(ZOOM_STORAGE_KEY, String(zoom))
+    } catch {
+      /* ignore quota / private mode */
+    }
+    calendarRef.current?.getApi().updateSize()
+  }, [zoom])
+
+  useEffect(() => {
+    const el = calendarShellRef.current
+    if (!el) return
+    const onWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return
+      event.preventDefault()
+      applyZoom((current) => current + (event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP))
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [applyZoom])
+
+  const slotMinHeight = zoomed
+    ? Math.round(baseSlotHeightRef.current * zoom)
+    : DEFAULT_SLOT_MIN_HEIGHT
 
   const [range, setRange] = useState(() => {
     const today = formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd')
@@ -142,7 +209,11 @@ export function CalendarPage() {
   const filtered = useMemo(() => {
     return (appointments ?? []).filter((a) => {
       if (barberFilter && a.barber_id !== barberFilter) return false
-      if (statusFilter && a.status !== statusFilter) return false
+      if (statusFilter) {
+        if (a.status !== statusFilter) return false
+      } else if (a.status === 'cancelled') {
+        return false
+      }
       if (!isAdminRole(profile) && profile?.barber_id && a.barber_id !== profile.barber_id) {
         return false
       }
@@ -234,10 +305,10 @@ export function CalendarPage() {
   }, [barberFilter])
 
   return (
-    <div className="calendar-page -m-4 flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-4 md:-m-6 md:p-6 lg:-m-8 lg:p-8">
-      <div className="flex shrink-0 flex-nowrap items-center gap-2 overflow-x-auto">
+    <div className="calendar-page -m-4 flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto p-4 md:-m-6 md:overflow-hidden md:p-6 lg:-m-8 lg:p-8">
+      <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-nowrap sm:items-center">
         <h1 className="shrink-0 text-lg font-semibold tracking-tight">Calendario</h1>
-        <div className="ml-auto flex shrink-0 flex-nowrap items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:ml-auto sm:flex-nowrap">
           {isAdminRole(profile) && (
             <select
               className={selectClass}
@@ -258,10 +329,41 @@ export function CalendarPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">Todos los estados</option>
-            {Object.entries(APPOINTMENT_STATUS_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+            {APPOINTMENT_STATUS_OPTIONS.map((value) => (
+              <option key={value} value={value}>{APPOINTMENT_STATUS_LABELS[value]}</option>
             ))}
           </select>
+          <div
+            className="flex shrink-0 items-center gap-0.5"
+            role="group"
+            aria-label="Zoom del calendario"
+          >
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              className="size-8"
+              disabled={zoom <= MIN_ZOOM}
+              aria-label="Alejar"
+              onClick={() => applyZoom((current) => current - ZOOM_STEP)}
+            >
+              <Minus className="size-4" />
+            </Button>
+            <span className="text-muted-foreground w-11 text-center text-xs tabular-nums">
+              {Math.round(zoom * 100)}%
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              className="size-8"
+              disabled={zoom >= MAX_ZOOM}
+              aria-label="Acercar"
+              onClick={() => applyZoom((current) => current + ZOOM_STEP)}
+            >
+              <Plus className="size-4" />
+            </Button>
+          </div>
           <Button variant="accent" size="sm" className="h-8 shrink-0 gap-1.5" asChild>
             <Link to={newAppointmentHref}>
               <Plus className="size-4" />
@@ -290,17 +392,15 @@ export function CalendarPage() {
         )}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="font-medium text-foreground/70">Estado</span>
-          {(Object.entries(APPOINTMENT_STATUS_LABELS) as [AppointmentStatus, string][]).map(
-            ([status, label]) => (
+          {APPOINTMENT_STATUS_OPTIONS.map((status) => (
               <span key={status} className="inline-flex items-center gap-1">
                 <span
                   className={`calendar-status-dot ${STATUS_DOT_CLASS[status]}`}
                   aria-hidden="true"
                 />
-                {label}
+                {APPOINTMENT_STATUS_LABELS[status]}
               </span>
-            ),
-          )}
+            ))}
         </div>
         <span className="inline-flex items-center gap-1">
           <AlertTriangle className="calendar-overbooking-icon size-3" aria-hidden="true" />
@@ -312,12 +412,27 @@ export function CalendarPage() {
         <p className="text-muted-foreground shrink-0 text-xs">{message}</p>
       )}
 
-      <div className="calendar-shell min-h-0 flex-1 overflow-hidden rounded-xl border bg-card">
+      <div
+        ref={calendarShellRef}
+        className="calendar-shell min-h-[24rem] flex-1 overflow-hidden rounded-xl border bg-card md:min-h-0"
+      >
         {isLoading ? (
           <p className="text-muted-foreground p-3 text-sm">Cargando turnos…</p>
         ) : (
-          <div className="calendar-compact flex h-full min-h-0 flex-col p-1">
+          <div
+            className={cn(
+              'calendar-compact flex h-full min-h-0 flex-col p-1',
+              zoomed && 'calendar-compact--zoomed',
+            )}
+            style={
+              {
+                '--calendar-zoom': String(zoom),
+                '--calendar-slot-height': `${slotMinHeight}px`,
+              } as CSSProperties
+            }
+          >
             <FullCalendar
+              ref={calendarRef}
               key={initialView}
               plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
               initialView={initialView}
@@ -341,7 +456,7 @@ export function CalendarPage() {
               slotLabelInterval="01:00:00"
               allDaySlot={false}
               height="100%"
-              expandRows
+              expandRows={!zoomed}
               events={events}
               editable
               selectable

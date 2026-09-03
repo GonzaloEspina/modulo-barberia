@@ -417,7 +417,6 @@ export function SettingsPage() {
                 onChange={(e) => setSetting('default_appointment_status', e.target.value)}
               >
                 <option value="pending">Pendiente</option>
-                <option value="confirmed">Confirmado</option>
               </select>
             </div>
 

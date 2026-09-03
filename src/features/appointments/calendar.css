@@ -119,6 +119,14 @@
   font-weight: 500;
 }
 
+.calendar-compact--zoomed .fc-event {
+  font-size: calc(0.6875rem * min(var(--calendar-zoom, 1), 1.35));
+}
+
+.calendar-compact--zoomed .fc-event-time {
+  font-size: calc(0.625rem * min(var(--calendar-zoom, 1), 1.35));
+}
+
 .calendar-compact .fc-daygrid-day-number {
   padding: 0.25rem 0.375rem;
   font-size: 0.75rem;
@@ -138,25 +146,54 @@
   height: 100%;
 }
 
-.calendar-compact .fc-timegrid-body,
-.calendar-compact .fc-timegrid-slots table,
-.calendar-compact .fc-timegrid-cols table {
+.calendar-compact:not(.calendar-compact--zoomed) .fc-timegrid-body,
+.calendar-compact:not(.calendar-compact--zoomed) .fc-timegrid-slots table,
+.calendar-compact:not(.calendar-compact--zoomed) .fc-timegrid-cols table {
   height: 100%;
 }
 
-.calendar-compact .fc-scroller-liquid-absolute,
-.calendar-compact .fc-scroller {
-  overflow: hidden !important;
+.calendar-compact:not(.calendar-compact--zoomed) .fc-timegrid-slot {
+  min-height: 28px;
 }
 
-/* Custom event inner: status dot + overbooking + title */
+.calendar-compact--zoomed .fc-timegrid-body,
+.calendar-compact--zoomed .fc-timegrid-slots table,
+.calendar-compact--zoomed .fc-timegrid-cols table {
+  height: auto;
+}
+
+.calendar-compact--zoomed .fc-timegrid-slot {
+  height: var(--calendar-slot-height) !important;
+}
+
+.calendar-compact .fc-scroller {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.calendar-compact .fc-scroller-liquid-absolute {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* Custom event inner: name then time */
 .calendar-compact .fc-event-inner-custom {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.0625rem 0;
+  line-height: 1.15;
+}
+
+.calendar-compact .fc-event-heading {
   display: flex;
   align-items: center;
   gap: 0.1875rem;
   min-width: 0;
-  overflow: hidden;
-  padding: 0.0625rem 0;
 }
 
 .calendar-compact .fc-event-overbooking {
@@ -166,15 +203,24 @@
   opacity: 0.95;
 }
 
-.calendar-compact .fc-event-inner-custom .fc-event-time {
-  flex-shrink: 0;
+.calendar-compact .fc-event-inner-custom .fc-event-title {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
 }
 
-.calendar-compact .fc-event-inner-custom .fc-event-title {
+.calendar-compact .fc-event-inner-custom .fc-event-time {
+  display: block;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
+  opacity: 0.9;
+  padding-left: 0.6875rem;
 }
 
 /* List view */
@@ -210,14 +256,6 @@
   background: var(--muted-foreground);
 }
 
-.calendar-status-dot--confirmed {
-  background: var(--secondary-foreground);
-}
-
-.calendar-status-dot--in-progress {
-  background: var(--accent);
-}
-
 .calendar-status-dot--completed {
   background: var(--success);
 }
@@ -249,15 +287,17 @@
 
 @media (max-width: 767px) {
   .calendar-compact .fc-toolbar {
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: stretch;
     padding: 0.375rem 0.25rem 0;
   }
 
   .calendar-compact .fc-toolbar-chunk {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
     gap: 0.25rem;
   }
 
@@ -266,12 +306,13 @@
   }
 
   .calendar-compact .fc-toolbar-title {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
+    text-align: center;
   }
 
   .calendar-compact .fc-button {
-    padding: 0.1875rem 0.375rem;
-    font-size: 0.6875rem;
+    padding: 0.3125rem 0.5rem;
+    font-size: 0.75rem;
   }
 
   .calendar-compact .fc-list-event-title,

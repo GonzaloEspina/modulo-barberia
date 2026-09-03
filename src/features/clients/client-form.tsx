@@ -14,7 +14,7 @@ import { getBookingOverrideOptions } from '@/types/client'
 const clientSchema = z
   .object({
     first_name: z.string().min(1, 'El nombre es obligatorio'),
-    last_name: z.string().min(1, 'El apellido es obligatorio'),
+    last_name: z.string().optional(),
     phone: z.string().min(6, 'Ingresá un teléfono válido'),
     email: z.string().email('Correo inválido').optional().or(z.literal('')),
     nickname: z.string().optional(),
@@ -95,11 +95,8 @@ export function ClientForm({ client, isSubmitting, onSubmit, onCancel }: ClientF
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="last_name">Apellido</Label>
-          <Input id="last_name" {...register('last_name')} aria-invalid={!!errors.last_name} />
-          {errors.last_name && (
-            <p className="text-destructive text-sm">{errors.last_name.message}</p>
-          )}
+          <Label htmlFor="last_name">Apellido (opcional)</Label>
+          <Input id="last_name" {...register('last_name')} />
         </div>
       </div>
 

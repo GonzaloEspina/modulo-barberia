@@ -177,7 +177,7 @@ export function AppShell({ children }: AppShellProps) {
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
-      <SidebarInset className="min-h-0">
+      <SidebarInset className="min-h-0 min-w-0 overflow-x-clip">
         <header className="bg-background/80 sticky top-0 z-20 flex h-14 items-center gap-3 border-b px-4 backdrop-blur-sm">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="hidden h-5 sm:block" />
@@ -189,7 +189,7 @@ export function AppShell({ children }: AppShellProps) {
             Salir
           </Button>
         </header>
-        <main className={cn('flex min-h-0 flex-1 flex-col p-4 md:p-6 lg:p-8')}>{children}</main>
+        <main className={cn('flex min-h-0 min-w-0 flex-1 flex-col p-4 md:p-6 lg:p-8')}>{children}</main>
       </SidebarInset>
     </SidebarProvider>
   )

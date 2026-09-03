@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { APP_TIMEZONE } from '@/lib/constants'
 import type { Appointment } from '@/types/appointment'
+import { getClientFullName } from '@/types/client'
 import { formatServicePrice } from '@/types/service'
 import { cn } from '@/lib/utils'
 
@@ -32,9 +33,7 @@ export function AppointmentCard({
   variant = 'default',
   className,
 }: AppointmentCardProps) {
-  const clientName = appointment.client
-    ? `${appointment.client.first_name} ${appointment.client.last_name}`
-    : 'Cliente'
+  const clientName = appointment.client ? getClientFullName(appointment.client) : 'Cliente'
   const services =
     serviceLabel ??
     appointment.appointment_services?.map((s) => s.service_name).join(' · ') ??
@@ -49,17 +48,13 @@ export function AppointmentCard({
         )}
       >
         <div className="flex items-center gap-3">
-          <div className="w-[3.25rem] shrink-0 tabular-nums">
-            <p className="text-sm font-medium leading-tight">
-              {formatInTimeZone(appointment.starts_at, APP_TIMEZONE, 'HH:mm')}
-            </p>
-            <p className="text-muted-foreground text-xs leading-tight">
-              {formatInTimeZone(appointment.ends_at, APP_TIMEZONE, 'HH:mm')}
-            </p>
-          </div>
-
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{clientName}</p>
+            <p className="text-muted-foreground truncate text-xs tabular-nums">
+              {formatInTimeZone(appointment.starts_at, APP_TIMEZONE, 'HH:mm')}
+              {' – '}
+              {formatInTimeZone(appointment.ends_at, APP_TIMEZONE, 'HH:mm')}
+            </p>
             <p className="text-muted-foreground truncate text-xs">{services}</p>
           </div>
 
@@ -96,19 +91,17 @@ export function AppointmentCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-medium">
-              {formatInTimeZone(appointment.starts_at, APP_TIMEZONE, 'HH:mm')}
-              {' – '}
-              {formatInTimeZone(appointment.ends_at, APP_TIMEZONE, 'HH:mm')}
-            </p>
+            <p className="font-medium">{clientName}</p>
             <AppointmentStatusBadge status={appointment.status} />
             {appointment.is_overbooking && <OverbookingIndicator />}
           </div>
-          <div>
-            <p className="font-medium">{clientName}</p>
-            <p className="text-muted-foreground text-sm">{services}</p>
-          </div>
+          <p className="text-muted-foreground text-sm">{services}</p>
           <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            <span>
+              {formatInTimeZone(appointment.starts_at, APP_TIMEZONE, 'HH:mm')}
+              {' – '}
+              {formatInTimeZone(appointment.ends_at, APP_TIMEZONE, 'HH:mm')}
+            </span>
             <span>{appointment.barber?.name}</span>
             <span>{formatServicePrice(Number(appointment.total_amount))}</span>
             {paymentStatus && <span className="capitalize">{paymentStatus}</span>}

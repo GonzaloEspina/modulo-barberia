@@ -12,9 +12,9 @@ import { PortalBooking } from '@/features/portal/portal-booking'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pendiente',
-  confirmed: 'Confirmado',
-  in_progress: 'En curso',
-  completed: 'Completado',
+  confirmed: 'Pendiente',
+  in_progress: 'Pendiente',
+  completed: 'Asistió',
   cancelled: 'Cancelado',
   no_show: 'No asistió',
   requested: 'Solicitado',
