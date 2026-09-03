@@ -120,10 +120,7 @@ export function ClientForm({ client, isSubmitting, onSubmit, onCancel }: ClientF
         </div>
         <div className="space-y-2">
           <Label htmlFor="nickname">Apodo (opcional, solo staff)</Label>
-          <Input id="nickname" placeholder="Ej. Titi, El flaco…" {...register('nickname')} />
-          <p className="text-muted-foreground text-xs">
-            Visible para barberos y administración. No se muestra en el portal del cliente.
-          </p>
+          <Input id="nickname" {...register('nickname')} />
         </div>
       </div>
 

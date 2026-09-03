@@ -91,12 +91,12 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <SidebarProvider>
       <Sidebar variant="inset" collapsible="icon">
-        <SidebarHeader className="border-sidebar-border border-b">
+        <SidebarHeader className="border-sidebar-border border-b group-data-[collapsible=icon]:hidden">
           <div className="flex items-center gap-2 px-2 py-1">
             <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-lg">
               <Scissors className="size-4" />
             </div>
-            <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+            <div className="min-w-0">
               <p className="truncate text-sm font-semibold">{profile?.organization?.name ?? 'Barbatero'}</p>
               <p className="text-muted-foreground truncate text-xs">Gestión de barbería</p>
             </div>

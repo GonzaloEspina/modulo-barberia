@@ -180,7 +180,7 @@ export function ClientEditPage() {
             balance={balance?.balance ?? 0}
             nextExpiresAt={balance?.next_expires_at}
           />
-          <ClientPortalAccessPanel phoneDisplay={client.phone_display} />
+          <ClientPortalAccessPanel />
         </TabsContent>
 
         <TabsContent value="turnos" className="mt-4 space-y-3">
