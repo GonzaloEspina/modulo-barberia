@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageHeader } from '@/components/design-system/layout-primitives'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarberForm, type BarberFormValues } from '@/features/barbers/barber-form'
 import { BarberServicesPanel } from '@/features/barbers/barber-services-panel'
 import { BarberSchedulesPanel } from '@/features/barbers/barber-schedules-panel'
@@ -36,16 +37,14 @@ export function BarberEditPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{barber.name}</h1>
-        <p className="text-muted-foreground text-sm">Editar barbero</p>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Configuración</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="space-y-4">
+      <PageHeader title={barber.name} description="Editar barbero" />
+
+      <Card className="gap-0 rounded-xl py-0">
+        <div className="border-b px-3 py-2.5">
+          <p className="text-sm font-medium">Configuración</p>
+        </div>
+        <div className="p-3">
           <BarberForm
             barber={barber}
             isSubmitting={updateBarber.isPending}
@@ -59,14 +58,15 @@ export function BarberEditPage() {
               }
             }}
           />
-        </CardContent>
+        </div>
       </Card>
 
-      {profile?.organization_id && (
-        <BarberServicesPanel barber={barber} organizationId={profile.organization_id} />
-      )}
-
-      <BarberSchedulesPanel barber={barber} />
+      <div className="grid items-start gap-4 lg:grid-cols-2">
+        {profile?.organization_id && (
+          <BarberServicesPanel barber={barber} organizationId={profile.organization_id} />
+        )}
+        <BarberSchedulesPanel barber={barber} />
+      </div>
     </div>
   )
 }

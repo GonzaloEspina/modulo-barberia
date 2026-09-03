@@ -12,7 +12,7 @@ import { formatServicePrice } from '@/types/service'
 import type { AppointmentStatus } from '@/types/appointment'
 
 function formatAppointmentWhen(startsAt: string) {
-  return format(toZonedTime(startsAt, APP_TIMEZONE), "EEEE d/MM · HH:mm", { locale: es })
+  return format(toZonedTime(startsAt, APP_TIMEZONE), "EEEE dd/MM/yyyy · HH:mm", { locale: es })
 }
 
 function PortalAppointmentRow({ appointment }: { appointment: PortalAppointment }) {
@@ -43,9 +43,15 @@ interface PortalAppointmentsProps {
   upcoming: PortalAppointment[]
   past: PortalAppointment[]
   canBook?: boolean
+  hasUpcoming?: boolean
 }
 
-export function PortalAppointments({ upcoming, past, canBook = false }: PortalAppointmentsProps) {
+export function PortalAppointments({
+  upcoming,
+  past,
+  canBook = false,
+  hasUpcoming = false,
+}: PortalAppointmentsProps) {
   const [showHistory, setShowHistory] = useState(false)
 
   return (
@@ -67,9 +73,16 @@ export function PortalAppointments({ upcoming, past, canBook = false }: PortalAp
             </p>
           </div>
         ) : (
-          upcoming.map((appointment) => (
-            <PortalAppointmentRow key={appointment.id} appointment={appointment} />
-          ))
+          <>
+            {upcoming.map((appointment) => (
+              <PortalAppointmentRow key={appointment.id} appointment={appointment} />
+            ))}
+            {hasUpcoming && (
+              <p className="text-muted-foreground text-sm">
+                Ya tenés un turno a futuro. Si necesitás otro, pedilo en el local.
+              </p>
+            )}
+          </>
         )}
 
         {past.length > 0 && (

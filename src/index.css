@@ -177,18 +177,31 @@
     color: var(--surface-hover-foreground) !important;
   }
 
-  .group\/interactive-row:hover [data-slot='badge'][data-variant='outline'],
-  .hover-surface:hover [data-slot='badge'][data-variant='outline'] {
-    border-color: #ffffff;
-    background-color: #ffffff;
-    color: var(--foreground);
+  .group\/interactive-row:hover [data-slot='badge'],
+  .hover-surface:hover [data-slot='badge'] {
+    background-color: #ffffff !important;
+    border-color: #ffffff !important;
+    color: var(--foreground) !important;
   }
 
   .group\/interactive-row:hover [data-slot='badge'][data-variant='warning'],
   .hover-surface:hover [data-slot='badge'][data-variant='warning'] {
-    background-color: #ffffff;
-    border-color: #ffffff;
-    color: #78350f;
+    background-color: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #78350f !important;
+  }
+
+  .group\/interactive-row:hover [data-slot='badge'][data-variant='destructive'],
+  .hover-surface:hover [data-slot='badge'][data-variant='destructive'] {
+    color: var(--destructive) !important;
+  }
+
+  .hover-surface:hover [data-slot='progress-track'] {
+    background-color: color-mix(in oklab, #ffffff 35%, transparent) !important;
+  }
+
+  .hover-surface:hover [data-slot='progress-fill'] {
+    background-color: #ffffff !important;
   }
 
   [data-slot='command-item'][data-selected='true'] {
@@ -196,7 +209,7 @@
   }
 
   [data-slot='command-item'][data-selected='true'] .text-muted-foreground {
-    color: rgb(255 255 255 / 0.92);
+    color: var(--surface-hover-foreground) !important;
   }
 
   [data-slot='command-item'][data-selected='true'] svg:not([class*='text-']) {
@@ -225,10 +238,25 @@
     color: #ffffff;
   }
 
-  .hover-surface:hover [data-slot='badge'][data-variant='secondary'],
-  .group\/interactive-row:hover [data-slot='badge'][data-variant='secondary'] {
+  .group\/interactive-row:hover [data-slot='button'][data-variant='outline'],
+  .group\/interactive-row:hover [data-slot='button'][data-variant='ghost'],
+  .hover-surface:hover [data-slot='button'][data-variant='outline'],
+  .hover-surface:hover [data-slot='button'][data-variant='ghost'] {
     background-color: #ffffff;
     border-color: #ffffff;
-    color: var(--foreground);
+    color: var(--foreground) !important;
+  }
+
+  .group\/interactive-row:hover [data-slot='button'][data-variant='outline']:hover,
+  .group\/interactive-row:hover [data-slot='button'][data-variant='ghost']:hover,
+  .hover-surface:hover [data-slot='button'][data-variant='outline']:hover,
+  .hover-surface:hover [data-slot='button'][data-variant='ghost']:hover {
+    background-color: color-mix(in oklab, #ffffff 82%, var(--foreground));
+    color: var(--foreground) !important;
+  }
+
+  .group\/interactive-row:hover [data-slot='button'].text-destructive,
+  .hover-surface:hover [data-slot='button'].text-destructive {
+    color: var(--destructive) !important;
   }
 }

@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { LogOut, Scissors, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { NAV_GROUPS, NAV_PATHS, PLATFORM_NAV } from '@/config/navigation'
+import { NAV_GROUPS, NAV_PATHS, SYSTEM_NAV } from '@/config/navigation'
 import {
   Sidebar,
   SidebarContent,
@@ -135,14 +135,16 @@ export function AppShell({ children }: AppShellProps) {
               <SidebarGroupLabel>Sistema</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarNavLink
-                      to={PLATFORM_NAV.to}
-                      isActive={location.pathname.startsWith(PLATFORM_NAV.to)}
-                      label={PLATFORM_NAV.label}
-                      icon={PLATFORM_NAV.icon}
-                    />
-                  </SidebarMenuItem>
+                  {SYSTEM_NAV.map((item) => (
+                    <SidebarMenuItem key={item.to}>
+                      <SidebarNavLink
+                        to={item.to}
+                        isActive={isActivePath(location.pathname, item.to, NAV_PATHS)}
+                        label={item.label}
+                        icon={item.icon}
+                      />
+                    </SidebarMenuItem>
+                  ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

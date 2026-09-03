@@ -153,23 +153,28 @@ export function ClientsPage() {
             </Select>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 pb-0.5">
-            <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <Checkbox
-                checked={warningOnly}
-                onCheckedChange={(checked) => setWarningOnly(checked === true)}
-                aria-label="Solo clientes con advertencia"
-              />
-              Solo advertencias
-            </label>
-            <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <Checkbox
-                checked={hasUpcomingAppointment}
-                onCheckedChange={(checked) => setHasUpcomingAppointment(checked === true)}
-                aria-label="Solo clientes con turno próximo"
-              />
-              Con turno próximo
-            </label>
+          <div className="flex shrink-0 flex-col space-y-1.5">
+            <Label className="text-muted-foreground hidden text-xs opacity-0 sm:block" aria-hidden>
+              Filtros
+            </Label>
+            <div className="flex h-9 flex-wrap items-center gap-4">
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox
+                  checked={warningOnly}
+                  onCheckedChange={(checked) => setWarningOnly(checked === true)}
+                  aria-label="Solo clientes con advertencia"
+                />
+                Solo advertencias
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <Checkbox
+                  checked={hasUpcomingAppointment}
+                  onCheckedChange={(checked) => setHasUpcomingAppointment(checked === true)}
+                  aria-label="Solo clientes con turno próximo"
+                />
+                Con turno próximo
+              </label>
+            </div>
           </div>
         </div>
       </div>

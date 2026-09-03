@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { DatePicker } from '@/components/design-system/date-picker'
 import { ExpenseCard } from '@/components/design-system/expense-card'
 import { PageHeader, SectionHeader } from '@/components/design-system/layout-primitives'
 import { Button } from '@/components/ui/button'
@@ -120,7 +121,7 @@ export function ExpensesPage() {
         <CardContent className="grid gap-3 p-4 sm:grid-cols-4">
           <Input className="rounded-lg" placeholder="Descripción" value={desc} onChange={(e) => setDesc(e.target.value)} />
           <Input className="rounded-lg" type="number" placeholder="Monto" value={amount} onChange={(e) => setAmount(e.target.value)} />
-          <Input className="rounded-lg" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <DatePicker value={date} onChange={setDate} />
           <Button variant="accent" onClick={() => void create.mutateAsync().then((id) => setLastExpenseId(id))}>Agregar</Button>
         </CardContent>
       </Card>

@@ -9,6 +9,7 @@ export interface Service {
   display_order: number
   category_color: string | null
   is_active: boolean
+  visible_on_portal: boolean
   deleted_at: string | null
   created_at: string
   updated_at: string
@@ -23,6 +24,7 @@ export interface ServiceFormInput {
   display_order: number
   category_color?: string
   is_active: boolean
+  visible_on_portal: boolean
 }
 
 export interface BarberServiceRecord {

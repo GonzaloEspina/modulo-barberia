@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageHeader } from '@/components/design-system/layout-primitives'
+import { Card } from '@/components/ui/card'
 import { BarberForm, type BarberFormValues } from '@/features/barbers/barber-form'
 import { useBarberMutations } from '@/features/barbers/api'
 import { useProfile } from '@/hooks/use-profile'
@@ -18,17 +19,19 @@ export function BarberCreatePage() {
   const { createBarber } = useBarberMutations(profile?.organization_id)
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Nuevo barbero</h1>
-        <p className="text-muted-foreground text-sm">Configurá horarios, servicios y color en el calendario.</p>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Datos del barbero</CardTitle>
-          <CardDescription>Podés vincular un usuario con rol Barbero después de crearlo.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="space-y-4">
+      <PageHeader
+        title="Nuevo barbero"
+        description="Configurá horarios, servicios y color en el calendario."
+      />
+      <Card className="gap-0 rounded-xl py-0">
+        <div className="border-b px-3 py-2.5">
+          <p className="text-sm font-medium">Datos del barbero</p>
+          <p className="text-muted-foreground text-xs">
+            Podés vincular un usuario con rol Barbero después de crearlo.
+          </p>
+        </div>
+        <div className="p-3">
           <BarberForm
             isSubmitting={createBarber.isPending}
             onCancel={() => navigate('/barberos')}
@@ -41,7 +44,7 @@ export function BarberCreatePage() {
               }
             }}
           />
-        </CardContent>
+        </div>
       </Card>
     </div>
   )

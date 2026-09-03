@@ -1,6 +1,6 @@
-import { format } from 'date-fns'
 import { Receipt } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { formatAppDate } from '@/lib/app-datetime'
 import { formatServicePrice } from '@/types/service'
 import { cn } from '@/lib/utils'
 
@@ -28,9 +28,7 @@ export function ExpenseCard({
           </div>
           <div>
             <p className="font-medium">{description}</p>
-            <p className="text-muted-foreground text-sm">
-              {format(new Date(date), 'dd/MM/yyyy')}
-            </p>
+            <p className="text-muted-foreground text-sm">{formatAppDate(date)}</p>
           </div>
         </div>
         <div className="text-right">

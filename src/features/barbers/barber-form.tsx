@@ -81,103 +81,102 @@ export function BarberForm({ barber, isSubmitting, onSubmit, onCancel }: BarberF
   }, [barber, reset])
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <div className="space-y-2">
-        <Label htmlFor="name">Nombre</Label>
-        <Input id="name" {...register('name')} aria-invalid={!!errors.name} />
-        {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="name">Nombre</Label>
+          <Input id="name" {...register('name')} aria-invalid={!!errors.name} />
+          {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
+        </div>
+        <div className="space-y-1.5">
           <Label htmlFor="email">Correo (opcional)</Label>
           <Input id="email" type="email" {...register('email')} />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="phone">Teléfono (opcional)</Label>
           <Input id="phone" type="tel" {...register('phone')} />
         </div>
-      </div>
-
-      <div className="space-y-3">
-        <Label>Color en calendario</Label>
-        <div className="flex flex-wrap gap-2">
-          {BARBER_COLOR_PRESETS.map((color) => (
-            <button
-              key={color}
-              type="button"
-              className={cn(
-                'size-9 rounded-full border-2 transition-transform hover:scale-105',
-                selectedColor === color ? 'border-foreground scale-110' : 'border-transparent',
-              )}
-              style={{ backgroundColor: color }}
-              aria-label={`Color ${color}`}
-              onClick={() => setValue('calendar_color', color, { shouldValidate: true })}
-            />
-          ))}
+        <div className="space-y-1.5">
+          <Label htmlFor="display_order">Orden de visualización</Label>
+          <Input id="display_order" type="number" min={0} {...register('display_order', { valueAsNumber: true })} />
+          <p className="text-muted-foreground text-xs">
+            Menor número = mayor prioridad al asignar &quot;Cualquier barbero disponible&quot;.
+          </p>
         </div>
-        <Input type="color" className="h-10 w-24 p-1" {...register('calendar_color')} />
+        <div className="space-y-1.5">
+          <Label htmlFor="linked_profile_id">Usuario vinculado (opcional)</Label>
+          <select
+            id="linked_profile_id"
+            className="border-input bg-background flex h-9 w-full rounded-md border px-3 text-sm"
+            {...register('linked_profile_id')}
+          >
+            <option value="">Sin usuario vinculado</option>
+            {linkableProfiles?.map((profile) => (
+              <option key={profile.id} value={profile.id}>
+                {profile.full_name ?? profile.id}
+              </option>
+            ))}
+          </select>
+          <p className="text-muted-foreground text-xs">
+            Vincula un perfil con rol Barbero para que pueda iniciar sesión y ver sus turnos.
+          </p>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Color en calendario</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            {BARBER_COLOR_PRESETS.map((color) => (
+              <button
+                key={color}
+                type="button"
+                className={cn(
+                  'size-7 rounded-full border-2 transition-transform hover:scale-105',
+                  selectedColor === color ? 'border-foreground scale-110' : 'border-transparent',
+                )}
+                style={{ backgroundColor: color }}
+                aria-label={`Color ${color}`}
+                onClick={() => setValue('calendar_color', color, { shouldValidate: true })}
+              />
+            ))}
+            <Input type="color" className="h-8 w-12 p-0.5" {...register('calendar_color')} />
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="display_order">Orden de visualización</Label>
-        <Input id="display_order" type="number" min={0} {...register('display_order', { valueAsNumber: true })} />
-        <p className="text-muted-foreground text-xs">
-          Menor número = mayor prioridad al asignar &quot;Cualquier barbero disponible&quot;.
-        </p>
-      </div>
-
-      <fieldset className="space-y-3 rounded-md border p-4">
+      <fieldset className="rounded-md border px-3 py-2.5">
         <legend className="px-1 text-sm font-medium">Heredar configuración general</legend>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" className="size-4" {...register('use_general_schedules')} />
-          Usar horarios generales
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" className="size-4" {...register('use_general_services')} />
-          Usar servicios generales
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" className="size-4" {...register('use_general_prices')} />
-          Usar precios generales
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" className="size-4" {...register('use_general_durations')} />
-          Usar duraciones generales
-        </label>
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" className="size-4" {...register('use_general_schedules')} />
+            Horarios generales
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" className="size-4" {...register('use_general_services')} />
+            Servicios generales
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" className="size-4" {...register('use_general_prices')} />
+            Precios generales
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" className="size-4" {...register('use_general_durations')} />
+            Duraciones generales
+          </label>
+        </div>
       </fieldset>
 
-      <div className="space-y-2">
-        <Label htmlFor="linked_profile_id">Usuario vinculado (opcional)</Label>
-        <select
-          id="linked_profile_id"
-          className="border-input bg-background flex h-9 w-full rounded-md border px-3 text-sm"
-          {...register('linked_profile_id')}
-        >
-          <option value="">Sin usuario vinculado</option>
-          {linkableProfiles?.map((profile) => (
-            <option key={profile.id} value={profile.id}>
-              {profile.full_name ?? profile.id}
-            </option>
-          ))}
-        </select>
-        <p className="text-muted-foreground text-xs">
-          Vincula un perfil con rol Barbero para que pueda iniciar sesión y ver sus turnos.
-        </p>
-      </div>
-
-      <label className="flex items-center gap-2 text-sm font-medium">
-        <input type="checkbox" className="size-4" {...register('is_active')} />
-        Barbero activo
-      </label>
-
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button type="submit" variant="accent" disabled={isSubmitting}>
-          {isSubmitting ? 'Guardando…' : barber ? 'Guardar cambios' : 'Crear barbero'}
-        </Button>
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input type="checkbox" className="size-4" {...register('is_active')} />
+          Barbero activo
+        </label>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button type="submit" variant="accent" disabled={isSubmitting}>
+            {isSubmitting ? 'Guardando…' : barber ? 'Guardar cambios' : 'Crear barbero'}
+          </Button>
+        </div>
       </div>
     </form>
   )

@@ -1,3 +1,4 @@
+import { DatePicker } from '@/components/design-system/date-picker'
 import { PageHeader } from '@/components/design-system/layout-primitives'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
@@ -14,6 +15,7 @@ import {
 } from '@/features/schedules/exceptions-api'
 import { useProfile } from '@/hooks/use-profile'
 import { notifyError, confirmAction } from '@/lib/notify'
+import { formatAppDate } from '@/lib/app-datetime'
 import type { ScheduleException, ScheduleExceptionInput } from '@/types/schedule'
 import { formatTimeRange, getDayLabel } from '@/types/schedule'
 
@@ -46,8 +48,8 @@ function ExceptionSummary({ item }: { item: ScheduleException }) {
         {!item.is_active && <Badge variant="secondary">Inactivo</Badge>}
       </div>
       <p className="text-muted-foreground text-sm">
-        {item.start_date}
-        {item.end_date !== item.start_date ? ` → ${item.end_date}` : ''} · {timeLabel} · {scopeLabel}
+        {formatAppDate(item.start_date)}
+        {item.end_date !== item.start_date ? ` → ${formatAppDate(item.end_date)}` : ''} · {timeLabel} · {scopeLabel}
       </p>
     </div>
   )
@@ -193,18 +195,16 @@ export function ScheduleExceptionsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Desde</Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={form.start_date}
-                  onChange={(e) => setForm((prev) => ({ ...prev, start_date: e.target.value }))}
+                  onChange={(start_date) => setForm((prev) => ({ ...prev, start_date }))}
                 />
               </div>
               <div className="space-y-2">
                 <Label>Hasta</Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={form.end_date}
-                  onChange={(e) => setForm((prev) => ({ ...prev, end_date: e.target.value }))}
+                  onChange={(end_date) => setForm((prev) => ({ ...prev, end_date }))}
                 />
               </div>
             </div>

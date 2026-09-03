@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageHeader } from '@/components/design-system/layout-primitives'
+import { Card } from '@/components/ui/card'
 import { useOrgUserMutations } from '@/features/users/api'
 import { UserCreateForm, type UserCreateFormValues } from '@/features/users/user-form'
 import { notifyError, notifySuccess } from '@/lib/notify'
@@ -25,24 +26,22 @@ export function UserCreatePage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Nuevo usuario</h1>
-        <p className="text-muted-foreground text-sm">
-          Creá una cuenta de administrador o barbero para esta barbería.
-        </p>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Datos de acceso</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="space-y-4">
+      <PageHeader
+        title="Nuevo usuario"
+        description="Creá una cuenta de administrador o barbero para esta barbería."
+      />
+      <Card className="gap-0 rounded-xl py-0">
+        <div className="border-b px-3 py-2.5">
+          <p className="text-sm font-medium">Datos de acceso</p>
+        </div>
+        <div className="p-3">
           <UserCreateForm
             isSubmitting={createUser.isPending}
             onCancel={() => navigate('/usuarios')}
             onSubmit={handleSubmit}
           />
-        </CardContent>
+        </div>
       </Card>
     </div>
   )

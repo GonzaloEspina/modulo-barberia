@@ -3,6 +3,7 @@ import {
   Award,
   CalendarDays,
   CalendarRange,
+  ClipboardList,
   Clock,
   Download,
   Gift,
@@ -75,16 +76,16 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: '/horarios', label: 'Horarios', icon: Clock, adminOnly: true },
       { to: '/excepciones', label: 'Días bloqueados', icon: CalendarDays, adminOnly: true },
       { to: '/disponibilidad', label: 'Disponibilidad', icon: CalendarRange, adminOnly: true },
-      { to: '/auditoria', label: 'Auditoría', icon: Shield, adminOnly: true },
     ],
   },
 ]
 
-export const PLATFORM_NAV: NavItem = {
-  to: '/plataforma/organizaciones',
-  label: 'Plataforma',
-  icon: Shield,
-  platformOnly: true,
-}
+export const SYSTEM_NAV: NavItem[] = [
+  { to: '/auditoria', label: 'Auditoría', icon: ClipboardList, platformOnly: true },
+  { to: '/plataforma/organizaciones', label: 'Plataforma', icon: Shield, platformOnly: true },
+]
 
-export const NAV_PATHS = NAV_GROUPS.flatMap((group) => group.items.map((item) => item.to))
+export const NAV_PATHS = [
+  ...NAV_GROUPS.flatMap((group) => group.items.map((item) => item.to)),
+  ...SYSTEM_NAV.map((item) => item.to),
+]

@@ -4,11 +4,11 @@ import { formatInTimeZone, toZonedTime } from 'date-fns-tz'
 import { useEffect, useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import { DatePicker } from '@/components/design-system/date-picker'
 import { FilterBar } from '@/components/design-system/filter-bar'
 import { EmptyState, PageHeader, SectionHeader } from '@/components/design-system/layout-primitives'
 import { MetricCard } from '@/components/design-system/metric-card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useBarbers } from '@/features/barbers/api'
@@ -133,15 +133,25 @@ async function fetchBalanceDaily(
 
   if (barberId) appointmentsQuery = appointmentsQuery.eq('barber_id', barberId)
 
-  const [paymentsResult, expensesResult, appointmentsResult] = await Promise.all([
+  const [paymentsResult, expensesResult, appointmentsResult, membershipsResult] = await Promise.all([
     paymentsQuery,
     expensesQuery,
     appointmentsQuery,
+    !barberId && !serviceId && !paymentMethodId
+      ? supabase
+          .from('client_memberships')
+          .select('price_paid, purchased_at, payment_confirmed')
+          .is('deleted_at', null)
+          .neq('status', 'cancelled')
+          .gte('purchased_at', `${from}T00:00:00`)
+          .lt('purchased_at', `${endExclusive}T00:00:00`)
+      : Promise.resolve({ data: [], error: null }),
   ])
 
   if (paymentsResult.error) throw paymentsResult.error
   if (expensesResult.error) throw expensesResult.error
   if (appointmentsResult.error) throw appointmentsResult.error
+  if (membershipsResult.error) throw membershipsResult.error
 
   const buckets = new Map<string, DailyBalancePoint>()
 
@@ -167,6 +177,16 @@ async function fetchBalanceDaily(
     const date = dayKeyFromTimestamp(row.starts_at)
     const bucket = buckets.get(date)
     if (bucket) bucket.production += Number(row.total_amount ?? 0)
+  }
+
+  for (const membership of membershipsResult.data ?? []) {
+    const row = membership as { purchased_at: string; price_paid: number; payment_confirmed: boolean }
+    const date = dayKeyFromTimestamp(row.purchased_at)
+    const bucket = buckets.get(date)
+    if (!bucket) continue
+    const amount = Number(row.price_paid ?? 0)
+    bucket.production += amount
+    if (row.payment_confirmed) bucket.cash += amount
   }
 
   return Array.from(buckets.values()).sort((a, b) => a.date.localeCompare(b.date))
@@ -299,20 +319,18 @@ export function BalancePage() {
       <FilterBar className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <Label htmlFor="balance-from">Desde</Label>
-          <Input
+          <DatePicker
             id="balance-from"
-            type="date"
             value={draftFilters.from}
-            onChange={(e) => updateDraft({ from: e.target.value })}
+            onChange={(from) => updateDraft({ from })}
           />
         </div>
         <div>
           <Label htmlFor="balance-to">Hasta</Label>
-          <Input
+          <DatePicker
             id="balance-to"
-            type="date"
             value={draftFilters.to}
-            onChange={(e) => updateDraft({ to: e.target.value })}
+            onChange={(to) => updateDraft({ to })}
           />
         </div>
         {isAdmin && (

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import {
   getBarberDayBlocks,
   getBarberDayMode,
@@ -79,16 +79,16 @@ export function BarberSchedulesPanel({ barber }: BarberSchedulesPanelProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Horarios del barbero</CardTitle>
-        <CardDescription>
+    <Card className="min-w-0 gap-0 overflow-hidden rounded-xl py-0">
+      <div className="border-b px-3 py-2.5">
+        <p className="text-sm font-medium">Horarios</p>
+        <p className="text-muted-foreground text-xs">
           {barber.use_general_schedules
-            ? 'Por defecto hereda los horarios generales. Podés marcar días cerrados o personalizar bloques.'
-            : 'Este barbero no hereda horarios generales: configurá cada día laborable.'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+            ? 'Hereda los horarios generales. Podés cerrar un día o personalizar bloques.'
+            : 'No hereda horarios generales: configurá cada día laborable.'}
+        </p>
+      </div>
+      <div className="divide-y">
         {ISO_DAYS.map(({ value: day }) => {
           const draft = getDraft(day)
           const saved = savedSummary.find((s) => s.day === day)
@@ -98,57 +98,51 @@ export function BarberSchedulesPanel({ barber }: BarberSchedulesPanelProps) {
             JSON.stringify(draft.blocks) !== JSON.stringify(saved?.blocks ?? [])
 
           return (
-            <div key={day} className="space-y-3 rounded-md border p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="font-medium">{getDayLabel(day)}</p>
+            <div key={day} className="px-3 py-2">
+              <div className="flex items-center gap-2">
+                <p className="w-24 shrink-0 text-sm font-medium">{getDayLabel(day)}</p>
                 <select
-                  className="border-input bg-background h-9 rounded-md border px-3 text-sm"
+                  className="border-input bg-background h-8 min-w-0 flex-1 rounded-md border px-2 text-sm"
                   value={draft.mode}
                   onChange={(e) =>
                     updateDraft(day, { mode: e.target.value as BarberDayMode })
                   }
                 >
                   {barber.use_general_schedules && (
-                    <option value="general">Usar horario general</option>
+                    <option value="general">Horario general</option>
                   )}
-                  <option value="custom">Horario personalizado</option>
-                  <option value="closed">Día no laborable</option>
+                  <option value="custom">Personalizado</option>
+                  <option value="closed">No laborable</option>
                 </select>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0"
+                  disabled={!hasChanges || saveDay.isPending || clearDay.isPending}
+                  onClick={() => void handleSave(day)}
+                >
+                  Guardar
+                </Button>
               </div>
 
               {draft.mode === 'custom' && (
-                <ScheduleBlocksEditor
-                  blocks={draft.blocks}
-                  onChange={(blocks) => updateDraft(day, { blocks })}
-                />
-              )}
-
-              {draft.mode === 'general' && (
-                <p className="text-muted-foreground text-sm">Hereda bloques del horario general.</p>
-              )}
-
-              {draft.mode === 'closed' && (
-                <p className="text-muted-foreground text-sm">Sin turnos este día.</p>
+                <div className="mt-2">
+                  <ScheduleBlocksEditor
+                    blocks={draft.blocks}
+                    onChange={(blocks) => updateDraft(day, { blocks })}
+                  />
+                </div>
               )}
 
               {draft.mode === 'custom' && draft.blocks.length > 0 && (
-                <p className="text-muted-foreground text-xs">
+                <p className="text-muted-foreground mt-1 text-xs">
                   {draft.blocks.map((b) => formatTimeRange(b.start_time, b.end_time)).join(' · ')}
                 </p>
               )}
-
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!hasChanges || saveDay.isPending || clearDay.isPending}
-                onClick={() => void handleSave(day)}
-              >
-                Guardar {getDayLabel(day).toLowerCase()}
-              </Button>
             </div>
           )
         })}
-      </CardContent>
+      </div>
     </Card>
   )
 }

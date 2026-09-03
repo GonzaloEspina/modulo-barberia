@@ -43,37 +43,44 @@ export function AppointmentCard({
     return (
       <article
         className={cn(
-          'rounded-lg border bg-card px-3 py-2 hover-surface',
+          'rounded-lg border bg-card hover-surface',
           className,
         )}
       >
-        <div className="flex items-center gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{clientName}</p>
-            <p className="text-muted-foreground truncate text-xs tabular-nums">
-              {formatInTimeZone(appointment.starts_at, APP_TIMEZONE, 'HH:mm')}
-              {' – '}
-              {formatInTimeZone(appointment.ends_at, APP_TIMEZONE, 'HH:mm')}
-            </p>
-            <p className="text-muted-foreground truncate text-xs">{services}</p>
-          </div>
+        <div className="flex items-stretch">
+          <Link
+            to={`/turnos/${appointment.id}`}
+            className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{clientName}</p>
+              <p className="text-muted-foreground truncate text-xs tabular-nums">
+                {formatInTimeZone(appointment.starts_at, APP_TIMEZONE, 'HH:mm')}
+                {' – '}
+                {formatInTimeZone(appointment.ends_at, APP_TIMEZONE, 'HH:mm')}
+              </p>
+              <p className="text-muted-foreground truncate text-xs">{services}</p>
+            </div>
 
-          <div className="flex shrink-0 items-center gap-2">
-            <div className="hidden min-w-0 text-right sm:block">
-              <p className="text-muted-foreground truncate text-xs">
-                {appointment.barber?.name}
-              </p>
-              <p className="text-xs font-medium">
-                {formatServicePrice(Number(appointment.total_amount))}
-              </p>
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="hidden min-w-0 text-right sm:block">
+                <p className="text-muted-foreground truncate text-xs">
+                  {appointment.barber?.name}
+                </p>
+                <p className="text-xs font-medium">
+                  {formatServicePrice(Number(appointment.total_amount))}
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <AppointmentStatusBadge
+                  status={appointment.status}
+                  className="px-1.5 py-0 text-[10px]"
+                />
+                {appointment.is_overbooking && <OverbookingIndicator />}
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <AppointmentStatusBadge
-                status={appointment.status}
-                className="px-1.5 py-0 text-[10px]"
-              />
-              {appointment.is_overbooking && <OverbookingIndicator />}
-            </div>
+          </Link>
+          <div className="flex shrink-0 items-center pr-1">
             <AppointmentCardMenu appointmentId={appointment.id} />
           </div>
         </div>
@@ -84,30 +91,37 @@ export function AppointmentCard({
   return (
     <article
       className={cn(
-        'rounded-xl border bg-card p-4 hover-surface',
+        'rounded-xl border bg-card hover-surface',
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1 space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="font-medium">{clientName}</p>
-            <AppointmentStatusBadge status={appointment.status} />
-            {appointment.is_overbooking && <OverbookingIndicator />}
+      <div className="flex items-stretch">
+        <Link
+          to={`/turnos/${appointment.id}`}
+          className="flex min-w-0 flex-1 items-start justify-between gap-3 p-4"
+        >
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-medium">{clientName}</p>
+              <AppointmentStatusBadge status={appointment.status} />
+              {appointment.is_overbooking && <OverbookingIndicator />}
+            </div>
+            <p className="text-muted-foreground text-sm">{services}</p>
+            <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+              <span>
+                {formatInTimeZone(appointment.starts_at, APP_TIMEZONE, 'HH:mm')}
+                {' – '}
+                {formatInTimeZone(appointment.ends_at, APP_TIMEZONE, 'HH:mm')}
+              </span>
+              <span>{appointment.barber?.name}</span>
+              <span>{formatServicePrice(Number(appointment.total_amount))}</span>
+              {paymentStatus && <span className="capitalize">{paymentStatus}</span>}
+            </div>
           </div>
-          <p className="text-muted-foreground text-sm">{services}</p>
-          <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-            <span>
-              {formatInTimeZone(appointment.starts_at, APP_TIMEZONE, 'HH:mm')}
-              {' – '}
-              {formatInTimeZone(appointment.ends_at, APP_TIMEZONE, 'HH:mm')}
-            </span>
-            <span>{appointment.barber?.name}</span>
-            <span>{formatServicePrice(Number(appointment.total_amount))}</span>
-            {paymentStatus && <span className="capitalize">{paymentStatus}</span>}
-          </div>
+        </Link>
+        <div className="flex shrink-0 items-start pt-3 pr-3">
+          <AppointmentCardMenu appointmentId={appointment.id} />
         </div>
-        <AppointmentCardMenu appointmentId={appointment.id} />
       </div>
     </article>
   )

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { PageHeader } from '@/components/design-system/layout-primitives'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { formatAppDateTime } from '@/lib/app-datetime'
 import { getSupabaseClient } from '@/lib/supabase'
 
 interface AuditLogRow {
@@ -46,7 +47,7 @@ export function AuditPage() {
                 <div>
                   <p className="font-medium">{log.entity_type} · {log.action}</p>
                   <p className="text-muted-foreground text-xs">
-                    {new Date(log.created_at).toLocaleString('es-AR')}
+                    {formatAppDateTime(log.created_at)}
                     {log.entity_id && ` · ${log.entity_id.slice(0, 8)}…`}
                   </p>
                 </div>

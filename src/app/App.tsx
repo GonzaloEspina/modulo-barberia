@@ -163,13 +163,13 @@ export function App() {
 
                   <Route path="/gastos" element={<ExpensesPage />} />
 
-                  <Route path="/auditoria" element={<AuditPage />} />
-
                   <Route path="/configuracion" element={<SettingsPage />} />
 
                 </Route>
 
                 <Route element={<PlatformRoute />}>
+
+                  <Route path="/auditoria" element={<AuditPage />} />
 
                   <Route path="/plataforma" element={<PlatformIndexRedirect />} />
 

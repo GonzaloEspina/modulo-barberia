@@ -43,6 +43,9 @@ export function useMembershipMutations() {
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: ['membership-plans'] })
     void qc.invalidateQueries({ queryKey: ['client-memberships'] })
+    void qc.invalidateQueries({ queryKey: ['balance'] })
+    void qc.invalidateQueries({ queryKey: ['balance-daily'] })
+    void qc.invalidateQueries({ queryKey: ['dashboard-balance'] })
   }
 
   const purchase = useMutation({

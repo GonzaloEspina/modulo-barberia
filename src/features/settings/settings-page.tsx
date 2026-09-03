@@ -27,6 +27,8 @@ import { confirmAction, notifyError, notifySuccess } from '@/lib/notify'
 import { cn } from '@/lib/utils'
 import type { OrganizationSettings, PortalBookingMode } from '@/types/database'
 
+const SLOT_INTERVAL_OPTIONS = [5, 10, 15, 20, 30, 60] as const
+
 const DEFAULT_SETTINGS: OrganizationSettings = {
   appointment_slot_interval_minutes: 15,
   overbooking_requires_reason: true,
@@ -277,7 +279,7 @@ export function SettingsPage() {
 
   if (loadingOrg || !form) {
     return (
-      <div className="mx-auto max-w-3xl space-y-6">
+      <div className="space-y-4">
         <Skeleton className="h-16 rounded-xl" />
         <Skeleton className="h-10 w-full max-w-md rounded-lg" />
         <Skeleton className="h-64 rounded-xl" />
@@ -340,9 +342,15 @@ export function SettingsPage() {
 
   const paymentRows = (paymentMethods ?? []).map((m) => toPaymentMethodRow(m as Record<string, unknown>))
   const isSaving = updateOrganization.isPending || updatePointsConfig.isPending || updateAbsenceConfig.isPending
+  const currentInterval = form.settings.appointment_slot_interval_minutes
+  const slotIntervalOptions = SLOT_INTERVAL_OPTIONS.includes(
+    currentInterval as (typeof SLOT_INTERVAL_OPTIONS)[number],
+  )
+    ? [...SLOT_INTERVAL_OPTIONS]
+    : [...SLOT_INTERVAL_OPTIONS, currentInterval].sort((a, b) => a - b)
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title="Configuración"
         description="Datos y reglas de la barbería"
@@ -353,7 +361,7 @@ export function SettingsPage() {
         }
       />
 
-      <Tabs defaultValue="general" className="space-y-6">
+      <Tabs defaultValue="general" className="space-y-4">
         <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-xl p-1">
           <TabsTrigger value="general" className="gap-1.5 rounded-lg">
             <Store className="size-4" />
@@ -407,17 +415,40 @@ export function SettingsPage() {
         <TabsContent value="turnos" className="space-y-4">
           <SettingsSection
             title="Turnos y calendario"
-            description="Los horarios disponibles se calculan según la duración de los servicios elegidos"
+            description="Cómo se ofrecen los horarios al crear un turno y al consultar disponibilidad"
           >
-            <div className="space-y-2 sm:max-w-xs">
-              <Label>Estado inicial del turno</Label>
-              <select
-                className={selectClass}
-                value={form.settings.default_appointment_status}
-                onChange={(e) => setSetting('default_appointment_status', e.target.value)}
-              >
-                <option value="pending">Pendiente</option>
-              </select>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="slot-interval">Intervalo de horarios</Label>
+                <select
+                  id="slot-interval"
+                  className={selectClass}
+                  value={form.settings.appointment_slot_interval_minutes}
+                  onChange={(e) =>
+                    setSetting('appointment_slot_interval_minutes', Number(e.target.value))
+                  }
+                >
+                  {slotIntervalOptions.map((minutes) => (
+                    <option key={minutes} value={minutes}>
+                      Cada {minutes} minutos
+                    </option>
+                  ))}
+                </select>
+                <p className="text-muted-foreground text-xs">
+                  Cada cuántos minutos aparecen los horarios en la agenda. La duración del servicio sigue
+                  definiendo cuánto dura cada turno.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Estado inicial del turno</Label>
+                <select
+                  className={selectClass}
+                  value={form.settings.default_appointment_status}
+                  onChange={(e) => setSetting('default_appointment_status', e.target.value)}
+                >
+                  <option value="pending">Pendiente</option>
+                </select>
+              </div>
             </div>
 
             <Separator />

@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageHeader } from '@/components/design-system/layout-primitives'
+import { Card } from '@/components/ui/card'
 import { ClientForm } from '@/features/clients/client-form'
 import { clientFormValuesToInput } from '@/features/clients/client-form-mapper'
 import { useClientMutations } from '@/features/clients/api'
@@ -12,17 +13,16 @@ export function ClientCreatePage() {
   const { createClient } = useClientMutations(profile?.organization_id)
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Nuevo cliente</h1>
-        <p className="text-muted-foreground text-sm">Completá los datos del cliente.</p>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Datos del cliente</CardTitle>
-          <CardDescription>El teléfono se normaliza automáticamente para evitar duplicados.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="space-y-4">
+      <PageHeader title="Nuevo cliente" description="Completá los datos del cliente." />
+      <Card className="gap-0 rounded-xl py-0">
+        <div className="border-b px-3 py-2.5">
+          <p className="text-sm font-medium">Datos del cliente</p>
+          <p className="text-muted-foreground text-xs">
+            El teléfono se normaliza automáticamente para evitar duplicados.
+          </p>
+        </div>
+        <div className="p-3">
           <ClientForm
             isSubmitting={createClient.isPending}
             onCancel={() => navigate('/clientes')}
@@ -35,7 +35,7 @@ export function ClientCreatePage() {
               }
             }}
           />
-        </CardContent>
+        </div>
       </Card>
     </div>
   )

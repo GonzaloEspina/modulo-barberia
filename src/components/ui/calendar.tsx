@@ -1,4 +1,5 @@
 import * as React from "react"
+import { es } from "date-fns/locale"
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -21,6 +22,8 @@ function Calendar({
   buttonVariant = "ghost",
   formatters,
   components,
+  locale = es,
+  weekStartsOn = 1,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
@@ -29,6 +32,8 @@ function Calendar({
 
   return (
     <DayPicker
+      locale={locale}
+      weekStartsOn={weekStartsOn}
       showOutsideDays={showOutsideDays}
       className={cn(
         "group/calendar bg-background p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
@@ -39,7 +44,7 @@ function Calendar({
       captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+          date.toLocaleString("es-AR", { month: "short" }),
         ...formatters,
       }}
       classNames={{
@@ -195,7 +200,7 @@ function CalendarDayButton({
       ref={ref}
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString()}
+      data-day={day.date.toLocaleDateString("es-AR")}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&

@@ -11,11 +11,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAppointment, useAppointmentMutations } from '@/features/appointments/api'
+import { AppointmentCouponField } from '@/features/appointments/appointment-coupon-field'
 import { usePaymentMethods, usePaymentMutations, usePayments, usePaymentSummary } from '@/features/payments/api'
+import {
+  useAppointmentCoupon,
+  useAppointmentCouponMutations,
+  useClientAvailableCoupons,
+} from '@/features/points/api'
 import { ReceiptUploadButton } from '@/components/receipt-upload-button'
 import { useProfile } from '@/hooks/use-profile'
 import { APP_TIMEZONE } from '@/lib/constants'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import { confirmAction } from '@/lib/notify'
 import { validatePaymentAmount } from '@/lib/payment'
 import {
@@ -37,10 +43,14 @@ export function AppointmentDetailPage() {
   const { data: payments } = usePayments(id)
   const { data: methods } = usePaymentMethods()
   const { registerPayment } = usePaymentMutations()
+  const { data: appliedCoupon } = useAppointmentCoupon(id)
+  const { data: clientCoupons } = useClientAvailableCoupons(appt?.client_id)
+  const { applyCoupon } = useAppointmentCouponMutations()
 
   const [payAmount, setPayAmount] = useState('')
-
   const [payMethodId, setPayMethodId] = useState('')
+  const [redemptionId, setRedemptionId] = useState('')
+  const [couponCode, setCouponCode] = useState('')
 
   useEffect(() => {
     if (summary?.pending_amount != null) {
@@ -59,6 +69,26 @@ export function AppointmentDetailPage() {
 
   const clientName = appt.client ? getClientFullName(appt.client) : 'Cliente'
 
+  const handleApplyCoupon = async () => {
+    if (!appt) return
+    if (!redemptionId && !couponCode.trim()) {
+      notifyError('Seleccioná un cupón o ingresá el código')
+      return
+    }
+    try {
+      await applyCoupon.mutateAsync({
+        appointmentId: appt.id,
+        redemptionId: redemptionId || null,
+        code: redemptionId ? null : couponCode.trim(),
+      })
+      notifySuccess('Cupón aplicado')
+      setRedemptionId('')
+      setCouponCode('')
+    } catch (e) {
+      notifyError((e as Error).message)
+    }
+  }
+
   const handlePay = async () => {
     const amount = Number(payAmount)
     const err = validatePaymentAmount(amount, summary?.pending_amount ?? 0)
@@ -76,13 +106,14 @@ export function AppointmentDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title={clientName}
         description={`${formatInTimeZone(appt.starts_at, APP_TIMEZONE, 'dd/MM/yyyy HH:mm')} · ${appt.barber?.name}`}
       />
 
-      <Card className="rounded-xl">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
+      <Card className="min-w-0 rounded-xl">
         <CardHeader>
           <CardTitle className="flex flex-wrap gap-2">
             <AppointmentStatusBadge status={appt.status} />
@@ -98,7 +129,40 @@ export function AppointmentDetailPage() {
               </li>
             ))}
           </ul>
+          {Number(appt.discount_amount) > 0 && (
+            <p className="text-success text-sm">
+              Descuento: -{formatServicePrice(Number(appt.discount_amount))}
+            </p>
+          )}
           <p className="font-semibold">Total: {formatServicePrice(Number(appt.total_amount))}</p>
+
+          {appliedCoupon ? (
+            <div className="rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+              <p className="font-medium">{appliedCoupon.reward_name}</p>
+              <p className="text-muted-foreground">
+                Código {appliedCoupon.unique_code}
+              </p>
+            </div>
+          ) : appt.status !== 'cancelled' ? (
+            <div className="space-y-2">
+              <AppointmentCouponField
+                coupons={clientCoupons ?? []}
+                redemptionId={redemptionId}
+                code={couponCode}
+                onRedemptionIdChange={setRedemptionId}
+                onCodeChange={setCouponCode}
+                disabled={applyCoupon.isPending}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={applyCoupon.isPending || (!redemptionId && !couponCode.trim())}
+                onClick={() => void handleApplyCoupon()}
+              >
+                {applyCoupon.isPending ? 'Aplicando…' : 'Aplicar cupón'}
+              </Button>
+            </div>
+          ) : null}
 
           <div>
             <Label htmlFor="appointment-status">Estado</Label>
@@ -141,6 +205,7 @@ export function AppointmentDetailPage() {
         </CardContent>
       </Card>
 
+      <div className="min-w-0 space-y-4">
       <PaymentStatus
         total={Number(appt.total_amount)}
         paid={Number(summary?.paid_amount ?? 0)}
@@ -198,6 +263,8 @@ export function AppointmentDetailPage() {
           </ul>
         </CardContent>
       </Card>
+      </div>
+      </div>
     </div>
   )
 }

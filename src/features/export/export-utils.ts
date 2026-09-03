@@ -1,5 +1,6 @@
 import { formatInTimeZone } from 'date-fns-tz'
 import { useAppointments } from '@/features/appointments/api'
+import { formatAppDate } from '@/lib/app-datetime'
 import { APP_TIMEZONE } from '@/lib/constants'
 import { getClientFullName } from '@/types/client'
 import { createProWorkbook, downloadWorkbook } from '@/features/export/excel-pro'
@@ -9,7 +10,7 @@ export function exportAppointmentsCsv(from: string, to: string, appointments: Aw
   const rows = (appointments ?? []).map((a) => {
     const client = a.client ? getClientFullName(a.client) : ''
     return [
-      formatInTimeZone(a.starts_at, APP_TIMEZONE, 'yyyy-MM-dd'),
+      formatInTimeZone(a.starts_at, APP_TIMEZONE, 'dd/MM/yyyy'),
       formatInTimeZone(a.starts_at, APP_TIMEZONE, 'HH:mm'),
       client,
       a.barber?.name ?? '',
@@ -28,7 +29,7 @@ export function exportAppointmentsCsv(from: string, to: string, appointments: Aw
 
 export function exportAppointmentsExcel(from: string, to: string, appointments: Awaited<ReturnType<typeof useAppointments>>['data']) {
   const rows = (appointments ?? []).map((a) => ({
-    Fecha: formatInTimeZone(a.starts_at, APP_TIMEZONE, 'yyyy-MM-dd'),
+    Fecha: formatInTimeZone(a.starts_at, APP_TIMEZONE, 'dd/MM/yyyy'),
     Hora: formatInTimeZone(a.starts_at, APP_TIMEZONE, 'HH:mm'),
     Cliente: a.client ? getClientFullName(a.client) : '',
     Barbero: a.barber?.name ?? '',
@@ -54,7 +55,7 @@ export function exportBalanceExcel(
 
 export function exportExpensesExcel(expenses: Array<Record<string, unknown>>) {
   const rows = expenses.map((e) => ({
-    Fecha: e.expense_date as string,
+    Fecha: formatAppDate(String(e.expense_date)),
     Descripción: e.description as string,
     Monto: Number(e.amount),
     Tipo: e.expense_type as string,

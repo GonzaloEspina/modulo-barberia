@@ -19,6 +19,7 @@ const serviceSchema = z.object({
   display_order: z.number().int().min(0),
   category_color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color inválido').optional().or(z.literal('')),
   is_active: z.boolean(),
+  visible_on_portal: z.boolean(),
 })
 
 export type ServiceFormValues = z.infer<typeof serviceSchema>
@@ -49,6 +50,7 @@ export function ServiceForm({ service, isSubmitting, onSubmit, onCancel }: Servi
       display_order: 0,
       category_color: '#D97706',
       is_active: true,
+      visible_on_portal: true,
     },
   })
 
@@ -65,25 +67,24 @@ export function ServiceForm({ service, isSubmitting, onSubmit, onCancel }: Servi
         display_order: service.display_order,
         category_color: service.category_color ?? '#D97706',
         is_active: service.is_active,
+        visible_on_portal: service.visible_on_portal !== false,
       })
     }
   }, [service, reset])
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <div className="space-y-2">
-        <Label htmlFor="name">Nombre</Label>
-        <Input id="name" {...register('name')} aria-invalid={!!errors.name} />
-        {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Descripción (opcional)</Label>
-        <Textarea id="description" rows={2} {...register('description')} />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
+          <Label htmlFor="name">Nombre</Label>
+          <Input id="name" {...register('name')} aria-invalid={!!errors.name} />
+          {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
+        </div>
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="description">Descripción (opcional)</Label>
+          <Textarea id="description" rows={2} {...register('description')} />
+        </div>
+        <div className="space-y-1.5">
           <Label htmlFor="price">Precio ($)</Label>
           <Input
             id="price"
@@ -95,7 +96,7 @@ export function ServiceForm({ service, isSubmitting, onSubmit, onCancel }: Servi
           />
           {errors.price && <p className="text-destructive text-sm">{errors.price.message}</p>}
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="duration_minutes">Duración (min)</Label>
           <Input
             id="duration_minutes"
@@ -108,10 +109,7 @@ export function ServiceForm({ service, isSubmitting, onSubmit, onCancel }: Servi
             <p className="text-destructive text-sm">{errors.duration_minutes.message}</p>
           )}
         </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="points_awarded">Puntos otorgados</Label>
           <Input
             id="points_awarded"
@@ -124,7 +122,7 @@ export function ServiceForm({ service, isSubmitting, onSubmit, onCancel }: Servi
             <p className="text-destructive text-sm">{errors.points_awarded.message}</p>
           )}
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="display_order">Orden</Label>
           <Input
             id="display_order"
@@ -133,32 +131,42 @@ export function ServiceForm({ service, isSubmitting, onSubmit, onCancel }: Servi
             {...register('display_order', { valueAsNumber: true })}
           />
         </div>
-      </div>
-
-      <div className="space-y-3">
-        <Label>Color de categoría</Label>
-        <div className="flex flex-wrap gap-2">
-          {SERVICE_COLOR_PRESETS.map((color) => (
-            <button
-              key={color}
-              type="button"
-              className={cn(
-                'size-9 rounded-full border-2 transition-transform hover:scale-105',
-                selectedColor === color ? 'border-foreground scale-110' : 'border-transparent',
-              )}
-              style={{ backgroundColor: color }}
-              aria-label={`Color ${color}`}
-              onClick={() => setValue('category_color', color, { shouldValidate: true })}
-            />
-          ))}
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label>Color de categoría</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            {SERVICE_COLOR_PRESETS.map((color) => (
+              <button
+                key={color}
+                type="button"
+                className={cn(
+                  'size-7 rounded-full border-2 transition-transform hover:scale-105',
+                  selectedColor === color ? 'border-foreground scale-110' : 'border-transparent',
+                )}
+                style={{ backgroundColor: color }}
+                aria-label={`Color ${color}`}
+                onClick={() => setValue('category_color', color, { shouldValidate: true })}
+              />
+            ))}
+            <Input type="color" className="h-8 w-12 p-0.5" {...register('category_color')} />
+          </div>
         </div>
-        <Input type="color" className="h-10 w-24 p-1" {...register('category_color')} />
       </div>
 
-      <label className="flex items-center gap-2 text-sm font-medium">
-        <input type="checkbox" className="size-4" {...register('is_active')} />
-        Servicio activo
-      </label>
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input type="checkbox" className="size-4" {...register('is_active')} />
+          Servicio activo
+        </label>
+        <div className="space-y-1">
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" className="size-4" {...register('visible_on_portal')} />
+            Mostrar en el portal de clientes
+          </label>
+          <p className="text-muted-foreground pl-6 text-xs">
+            Si está desactivado, el servicio sigue disponible para turnos internos.
+          </p>
+        </div>
+      </div>
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="outline" onClick={onCancel}>

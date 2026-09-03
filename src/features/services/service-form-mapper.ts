@@ -11,5 +11,6 @@ export function serviceFormValuesToInput(values: ServiceFormValues): ServiceForm
     display_order: values.display_order,
     category_color: values.category_color,
     is_active: values.is_active,
+    visible_on_portal: values.visible_on_portal,
   }
 }

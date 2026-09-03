@@ -99,7 +99,6 @@ export function WeeklyScheduleEditor({
             <div key={index} className="flex flex-wrap items-center gap-1.5">
               <Input
                 type="time"
-                lang="en-GB"
                 step={60}
                 className="h-8 w-[5.5rem] px-2 text-sm"
                 value={toInputTime(block.start_time)}
@@ -108,7 +107,6 @@ export function WeeklyScheduleEditor({
               <span className="text-muted-foreground text-xs">a</span>
               <Input
                 type="time"
-                lang="en-GB"
                 step={60}
                 className="h-8 w-[5.5rem] px-2 text-sm"
                 value={toInputTime(block.end_time)}

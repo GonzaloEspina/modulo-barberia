@@ -14,7 +14,8 @@ import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { formatInTimeZone } from 'date-fns-tz'
 import { AlertTriangle, Minus, Plus } from 'lucide-react'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -45,6 +46,24 @@ const ZOOM_STORAGE_KEY = 'calendar-zoom'
 function clampZoom(value: number) {
   const stepped = Math.round(value / ZOOM_STEP) * ZOOM_STEP
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Number(stepped.toFixed(2))))
+}
+
+function formatSlotTime(value: string | null) {
+  if (!value) return null
+  const [hours, minutes] = value.split(':')
+  if (!hours || !minutes) return null
+  return `${hours}:${minutes}`
+}
+
+function findSlotLaneAtY(root: HTMLElement, clientY: number) {
+  const lanes = root.querySelectorAll<HTMLElement>(
+    '.fc-timegrid-slots td.fc-timegrid-slot-lane[data-time]',
+  )
+  for (const lane of lanes) {
+    const rect = lane.getBoundingClientRect()
+    if (clientY >= rect.top && clientY < rect.bottom) return lane
+  }
+  return null
 }
 
 function readStoredZoom() {
@@ -153,6 +172,9 @@ export function CalendarPage() {
 
   const calendarRef = useRef<FullCalendar>(null)
   const calendarShellRef = useRef<HTMLDivElement>(null)
+  const slotTimeTooltipRef = useRef<HTMLDivElement>(null)
+  const hoveredSlotRef = useRef<HTMLElement | null>(null)
+  const hoverTimeRef = useRef<string | null>(null)
   const baseSlotHeightRef = useRef(DEFAULT_SLOT_MIN_HEIGHT)
   const initialView = isMobile ? 'listDay' : 'timeGridWeek'
   const [zoom, setZoom] = useState(readStoredZoom)
@@ -191,6 +213,74 @@ export function CalendarPage() {
     el.addEventListener('wheel', onWheel, { passive: false })
     return () => el.removeEventListener('wheel', onWheel)
   }, [applyZoom])
+
+  const clearSlotHover = useCallback(() => {
+    hoveredSlotRef.current?.classList.remove('is-slot-hover')
+    hoveredSlotRef.current = null
+    hoverTimeRef.current = null
+    const tooltip = slotTimeTooltipRef.current
+    if (tooltip) tooltip.hidden = true
+  }, [])
+
+  const handleSlotPointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (event.pointerType === 'touch') {
+        clearSlotHover()
+        return
+      }
+
+      const root = event.currentTarget
+      const body = root.querySelector('.fc-timegrid-body')
+      if (!body) {
+        clearSlotHover()
+        return
+      }
+
+      const bodyRect = body.getBoundingClientRect()
+      const insideBody =
+        event.clientX >= bodyRect.left &&
+        event.clientX <= bodyRect.right &&
+        event.clientY >= bodyRect.top &&
+        event.clientY <= bodyRect.bottom
+
+      const lane = insideBody ? findSlotLaneAtY(root, event.clientY) : null
+      const time = formatSlotTime(lane?.getAttribute('data-time') ?? null)
+      const tooltip = slotTimeTooltipRef.current
+
+      if (!lane || !time || !tooltip) {
+        clearSlotHover()
+        return
+      }
+
+      if (hoveredSlotRef.current !== lane) {
+        hoveredSlotRef.current?.classList.remove('is-slot-hover')
+        hoveredSlotRef.current = lane
+        lane.classList.add('is-slot-hover')
+      }
+
+      if (hoverTimeRef.current !== time) {
+        tooltip.textContent = time
+        hoverTimeRef.current = time
+      }
+
+      tooltip.hidden = false
+      const offset = 14
+      const tooltipWidth = tooltip.offsetWidth || 48
+      const tooltipHeight = tooltip.offsetHeight || 24
+      const left = Math.min(event.clientX + offset, window.innerWidth - tooltipWidth - 8)
+      const top = Math.min(event.clientY + offset, window.innerHeight - tooltipHeight - 8)
+      tooltip.style.transform = `translate(${Math.max(8, left)}px, ${Math.max(8, top)}px)`
+    },
+    [clearSlotHover],
+  )
+
+  useEffect(() => {
+    const el = calendarShellRef.current
+    if (!el) return
+    const onScroll = () => clearSlotHover()
+    el.addEventListener('scroll', onScroll, true)
+    return () => el.removeEventListener('scroll', onScroll, true)
+  }, [clearSlotHover])
 
   const slotMinHeight = zoomed
     ? Math.round(baseSlotHeightRef.current * zoom)
@@ -430,6 +520,8 @@ export function CalendarPage() {
                 '--calendar-slot-height': `${slotMinHeight}px`,
               } as CSSProperties
             }
+            onPointerMove={handleSlotPointerMove}
+            onPointerLeave={clearSlotHover}
           >
             <FullCalendar
               ref={calendarRef}
@@ -478,6 +570,16 @@ export function CalendarPage() {
           </div>
         )}
       </div>
+      {createPortal(
+        <div
+          ref={slotTimeTooltipRef}
+          hidden
+          className="calendar-slot-time-tooltip"
+          role="status"
+          aria-live="polite"
+        />,
+        document.body,
+      )}
     </div>
   )
 }

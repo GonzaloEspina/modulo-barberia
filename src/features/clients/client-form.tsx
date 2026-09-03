@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
+import { DatePicker } from '@/components/design-system/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -47,6 +48,7 @@ export function ClientForm({ client, isSubmitting, onSubmit, onCancel }: ClientF
     register,
     handleSubmit,
     watch,
+    setValue,
     reset,
     formState: { errors },
   } = useForm<ClientFormValues>({
@@ -100,19 +102,18 @@ export function ClientForm({ client, isSubmitting, onSubmit, onCancel }: ClientF
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="phone">Teléfono</Label>
-        <Input
-          id="phone"
-          type="tel"
-          placeholder="11 1234-5678"
-          {...register('phone')}
-          aria-invalid={!!errors.phone}
-        />
-        {errors.phone && <p className="text-destructive text-sm">{errors.phone.message}</p>}
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-2">
+          <Label htmlFor="phone">Teléfono</Label>
+          <Input
+            id="phone"
+            type="tel"
+            placeholder="11 1234-5678"
+            {...register('phone')}
+            aria-invalid={!!errors.phone}
+          />
+          {errors.phone && <p className="text-destructive text-sm">{errors.phone.message}</p>}
+        </div>
         <div className="space-y-2">
           <Label htmlFor="email">Correo (opcional)</Label>
           <Input id="email" type="email" {...register('email')} />
@@ -122,11 +123,16 @@ export function ClientForm({ client, isSubmitting, onSubmit, onCancel }: ClientF
           <Label htmlFor="nickname">Apodo (opcional, solo staff)</Label>
           <Input id="nickname" {...register('nickname')} />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="birth_date">Fecha de nacimiento (opcional)</Label>
-        <Input id="birth_date" type="date" {...register('birth_date')} />
+        <div className="space-y-2">
+          <Label htmlFor="birth_date">Fecha de nacimiento (opcional)</Label>
+          <DatePicker
+            id="birth_date"
+            value={watch('birth_date') ?? ''}
+            fromYear={1920}
+            toYear={new Date().getFullYear()}
+            onChange={(next) => setValue('birth_date', next, { shouldDirty: true })}
+          />
+        </div>
       </div>
 
       <div className="space-y-2">

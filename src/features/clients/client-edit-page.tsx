@@ -17,6 +17,7 @@ import { ClientForm } from '@/features/clients/client-form'
 import { clientFormValuesToInput } from '@/features/clients/client-form-mapper'
 import { useClient, useClientMutations } from '@/features/clients/api'
 import { useClientPointBalance, useRedemptions } from '@/features/points/api'
+import { AdjustPointsForm } from '@/features/points/adjust-points-form'
 import { useProfile } from '@/hooks/use-profile'
 import { APP_TIMEZONE } from '@/lib/constants'
 import { notifyError, notifySuccess } from '@/lib/notify'
@@ -100,7 +101,7 @@ export function ClientEditPage() {
   const past = (appointments ?? []).filter((a) => new Date(a.starts_at as string) < new Date())
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title={fullName}
         description={
@@ -226,6 +227,11 @@ export function ClientEditPage() {
           <PointsBalance
             balance={balance?.balance ?? 0}
             nextExpiresAt={balance?.next_expires_at}
+          />
+          <AdjustPointsForm
+            clientId={client.id}
+            clientName={fullName}
+            currentBalance={balance?.balance ?? 0}
           />
           <PointsMovementList
             movements={(movements ?? []).map((m) => ({

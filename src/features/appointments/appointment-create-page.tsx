@@ -22,14 +22,17 @@ import { useGeneralSchedules } from '@/features/schedules/api'
 import { resolveServiceSelection } from '@/lib/service-selection'
 import { formatServiceDuration, formatServicePrice } from '@/types/service'
 import { useAppointmentMutations } from '@/features/appointments/api'
+import { AppointmentCouponField } from '@/features/appointments/appointment-coupon-field'
 import { useBarbers } from '@/features/barbers/api'
 import { useClient, useClients } from '@/features/clients/api'
 import { useClientAbsenceWarning } from '@/features/clients/absence-api'
 import { useClientMemberships } from '@/features/memberships/api'
+import { useAppointmentCouponMutations, useClientAvailableCoupons } from '@/features/points/api'
 import { useServices } from '@/features/services/api'
 import { isAdminRole, useProfile } from '@/hooks/use-profile'
 import { appIsoDayOfWeek, appToday, clampAppDate, isAppPastDate, isAppPastInstant } from '@/lib/app-datetime'
 import { APP_TIMEZONE } from '@/lib/constants'
+import { computeCouponDiscount } from '@/lib/coupon-discount'
 import { cn } from '@/lib/utils'
 import { getClientFullName } from '@/types/client'
 
@@ -44,6 +47,7 @@ export function AppointmentCreatePage() {
   const { data: barbers } = useBarbers(false)
   const { data: generalSchedules } = useGeneralSchedules()
   const { createAppointment } = useAppointmentMutations()
+  const { applyCoupon } = useAppointmentCouponMutations()
 
   const [clientId, setClientId] = useState(searchParams.get('client') ?? '')
   const [barberId, setBarberId] = useState(
@@ -62,10 +66,13 @@ export function AppointmentCreatePage() {
   const [overbooking, setOverbooking] = useState(false)
   const [overbookingReason, setOverbookingReason] = useState('')
   const [overbookingTime, setOverbookingTime] = useState('')
+  const [redemptionId, setRedemptionId] = useState('')
+  const [couponCode, setCouponCode] = useState('')
 
   const { data: selectedClient } = useClient(clientId || undefined)
   const { data: absenceWarning } = useClientAbsenceWarning(clientId || undefined)
   const { data: clientMemberships } = useClientMemberships(clientId || undefined)
+  const { data: clientCoupons } = useClientAvailableCoupons(clientId || undefined)
 
   const isAdmin = profile && isAdminRole(profile)
 
@@ -87,6 +94,8 @@ export function AppointmentCreatePage() {
 
   useEffect(() => {
     setMembershipId('')
+    setRedemptionId('')
+    setCouponCode('')
   }, [clientId])
 
   const { data: slotsRaw } = useAvailableSlots(
@@ -169,11 +178,24 @@ export function AppointmentCreatePage() {
     [services, selectedServices],
   )
 
+  const selectedCoupon = useMemo(
+    () => (clientCoupons ?? []).find((coupon) => coupon.id === redemptionId) ?? null,
+    [clientCoupons, redemptionId],
+  )
+
   const totals = useMemo(() => {
     const duration = selectedServiceRows.reduce((sum, s) => sum + s.duration_minutes, 0)
     const subtotal = selectedServiceRows.reduce((sum, s) => sum + Number(s.price), 0)
-    return { duration, subtotal, total: membershipId ? 0 : subtotal }
-  }, [selectedServiceRows, membershipId])
+    const discount = selectedCoupon
+      ? computeCouponDiscount(
+          selectedCoupon,
+          subtotal,
+          selectedServiceRows.map((s) => ({ id: s.id, price: Number(s.price) })),
+        )
+      : 0
+    const total = membershipId ? 0 : Math.max(subtotal - discount, 0)
+    return { duration, subtotal, discount, total }
+  }, [selectedServiceRows, membershipId, selectedCoupon])
 
   const selectedBarber = barbers?.find((b) => b.id === barberId)
 
@@ -287,7 +309,7 @@ export function AppointmentCreatePage() {
         slotBlock != null &&
         slotBlock.durationMinutes > totals.duration
 
-      await createAppointment.mutateAsync({
+      const appointmentId = await createAppointment.mutateAsync({
         client_id: clientId,
         barber_id: barberId,
         starts_at: startsAt,
@@ -298,6 +320,19 @@ export function AppointmentCreatePage() {
         overbooking_reason: overbooking ? overbookingReason : null,
         notes: notes || null,
       })
+      if (redemptionId || couponCode.trim()) {
+        try {
+          await applyCoupon.mutateAsync({
+            appointmentId,
+            redemptionId: redemptionId || null,
+            code: redemptionId ? null : couponCode.trim(),
+          })
+        } catch (couponError) {
+          toast.error((couponError as Error).message)
+          navigate(`/turnos/${appointmentId}`)
+          return
+        }
+      }
       toast.success('Turno creado correctamente')
       navigate('/turnos')
     } catch (err) {
@@ -331,6 +366,17 @@ export function AppointmentCreatePage() {
               value={clientId}
               onChange={setClientId}
             />
+            {clientId && (
+              <div className="mt-4">
+                <AppointmentCouponField
+                  coupons={clientCoupons ?? []}
+                  redemptionId={redemptionId}
+                  code={couponCode}
+                  onRedemptionIdChange={setRedemptionId}
+                  onCodeChange={setCouponCode}
+                />
+              </div>
+            )}
           </section>
 
           <section className="rounded-xl border bg-card p-5">
@@ -606,6 +652,7 @@ export function AppointmentCreatePage() {
             timeRange={timeRange}
             barberName={selectedBarber?.name}
             subtotal={totals.subtotal}
+            discount={membershipId ? 0 : totals.discount}
             total={totals.total}
             membershipNote={
               membershipId ? 'Se descontará 1 turno de la membresía al confirmar.' : undefined
@@ -615,7 +662,7 @@ export function AppointmentCreatePage() {
                 <Button
                   variant="accent"
                   className="w-full"
-                  disabled={!canConfirm || createAppointment.isPending}
+                  disabled={!canConfirm || createAppointment.isPending || applyCoupon.isPending}
                   onClick={() => void handleSubmit()}
                 >
                   Confirmar turno
@@ -661,6 +708,12 @@ export function AppointmentCreatePage() {
                   <dd className="font-medium">{timeRange}</dd>
                 </div>
               )}
+              {!membershipId && totals.discount > 0 && (
+                <div className="flex justify-between gap-4 text-success">
+                  <dt>Descuento</dt>
+                  <dd>-{formatServicePrice(totals.discount)}</dd>
+                </div>
+              )}
               <div className="flex justify-between gap-4 font-semibold">
                 <dt>Total</dt>
                 <dd>
@@ -676,7 +729,7 @@ export function AppointmentCreatePage() {
           <Button
             variant="accent"
             className="w-full"
-            disabled={!canConfirm || createAppointment.isPending}
+            disabled={!canConfirm || createAppointment.isPending || applyCoupon.isPending}
             onClick={() => void handleSubmit()}
           >
             Confirmar turno

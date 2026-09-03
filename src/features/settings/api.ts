@@ -98,6 +98,8 @@ export function useSettingsMutations(organizationId: string | undefined) {
   const invalidateOrg = () => {
     void qc.invalidateQueries({ queryKey: ['organization', organizationId] })
     void qc.invalidateQueries({ queryKey: ['profile'] })
+    void qc.invalidateQueries({ queryKey: ['available-slots'] })
+    void qc.invalidateQueries({ queryKey: ['schedule-gaps'] })
   }
 
   const updateOrganization = useMutation({

@@ -3,7 +3,7 @@ import { getSupabaseClient } from '@/lib/supabase'
 import type { Service, ServiceFormInput } from '@/types/service'
 
 const SERVICE_COLUMNS =
-  'id, organization_id, name, description, price, duration_minutes, points_awarded, display_order, category_color, is_active, deleted_at, created_at, updated_at'
+  'id, organization_id, name, description, price, duration_minutes, points_awarded, display_order, category_color, is_active, visible_on_portal, deleted_at, created_at, updated_at'
 
 export function useServices(search: string, showInactive = false) {
   return useQuery({
@@ -52,6 +52,7 @@ function normalizeService(row: Record<string, unknown>): Service {
   return {
     ...(row as unknown as Service),
     price: Number(row.price),
+    visible_on_portal: row.visible_on_portal !== false,
   }
 }
 
@@ -66,6 +67,7 @@ function toDbPayload(input: ServiceFormInput, organizationId: string) {
     display_order: input.display_order,
     category_color: input.category_color?.trim() || null,
     is_active: input.is_active,
+    visible_on_portal: input.visible_on_portal,
   }
 }
 

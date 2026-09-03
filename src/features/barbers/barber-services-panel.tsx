@@ -1,8 +1,8 @@
-import { Plus, Trash2 } from 'lucide-react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -166,18 +166,19 @@ export function BarberServicesPanel({ barber, organizationId }: BarberServicesPa
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Servicios generales</CardTitle>
-          <CardDescription>
-            {barber.use_general_services
-              ? 'Por defecto ofrece todos los servicios activos. Podés deshabilitar o personalizar valores.'
-              : 'Este barbero no hereda el catálogo general: habilitá servicios con overrides.'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {services?.map((service) => {
+    <Card className="min-w-0 gap-0 overflow-hidden rounded-xl py-0">
+      <div className="border-b px-3 py-2.5">
+        <p className="text-sm font-medium">Servicios generales</p>
+        <p className="text-muted-foreground text-xs">
+          {barber.use_general_services
+            ? 'Ofrece el catálogo activo. Podés personalizar precio, duración o puntos.'
+            : 'No hereda el catálogo: habilitá servicios con valores propios.'}
+        </p>
+      </div>
+
+      {services?.length ? (
+        <div className="divide-y">
+          {services.map((service) => {
             const override = overridesByServiceId.get(service.id)
             const draft = getDraft(service.id, override)
             const effective = resolveEffectiveGeneralService({
@@ -185,62 +186,79 @@ export function BarberServicesPanel({ barber, organizationId }: BarberServicesPa
               service,
               override: override ?? null,
             })
+            const effectiveLabel = effective.is_available
+              ? `${formatServicePrice(effective.price)} · ${formatServiceDuration(effective.duration_minutes)} · ${effective.points_awarded} pts`
+              : 'No disponible'
+            const generalLabel = `${formatServicePrice(service.price)} · ${formatServiceDuration(service.duration_minutes)} · ${service.points_awarded} pts`
 
             return (
-              <div key={service.id} className="space-y-3 rounded-md border p-4">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <p className="font-medium">{service.name}</p>
-                    <p className="text-muted-foreground text-sm">
-                      General: {formatServicePrice(service.price)} ·{' '}
-                      {formatServiceDuration(service.duration_minutes)} · {service.points_awarded} pts
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      Efectivo:{' '}
-                      {effective.is_available
-                        ? `${formatServicePrice(effective.price)} · ${formatServiceDuration(effective.duration_minutes)} · ${effective.points_awarded} pts`
-                        : 'No disponible'}
+              <div key={service.id} className="px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{service.name}</p>
+                    <p className="text-muted-foreground truncate text-xs">
+                      {generalLabel}
+                      {override && ` · efectivo ${effectiveLabel}`}
                     </p>
                   </div>
-                  {override && <Badge variant="outline">Override guardado</Badge>}
+                  {override && (
+                    <Badge variant="outline" className="shrink-0">
+                      Personalizado
+                    </Badge>
+                  )}
+                  <label className="flex shrink-0 items-center gap-1.5 text-xs">
+                    <input
+                      type="checkbox"
+                      className="size-3.5"
+                      checked={draft.has_override}
+                      onChange={(e) => {
+                        const checked = e.target.checked
+                        updateDraft(service.id, { has_override: checked })
+                        if (!checked && overridesByServiceId.has(service.id)) {
+                          void mutations.removeOverride.mutateAsync(service.id)
+                            .then(() => {
+                              setDrafts((prev) => {
+                                const next = { ...prev }
+                                delete next[service.id]
+                                return next
+                              })
+                            })
+                            .catch((err) => notifyError((err as Error).message))
+                        }
+                      }}
+                    />
+                    Ajustar
+                  </label>
                 </div>
 
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="size-4"
-                    checked={draft.has_override}
-                    onChange={(e) => updateDraft(service.id, { has_override: e.target.checked })}
-                  />
-                  Configurar override para este barbero
-                </label>
-
                 {draft.has_override && (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="flex items-center gap-2 text-sm sm:col-span-2">
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                    <label className="flex items-center gap-2 text-xs sm:col-span-3">
                       <input
                         type="checkbox"
-                        className="size-4"
+                        className="size-3.5"
                         checked={draft.is_enabled}
                         onChange={(e) => updateDraft(service.id, { is_enabled: e.target.checked })}
                       />
-                      Servicio habilitado para este barbero
+                      Habilitado para este barbero
                     </label>
                     <div className="space-y-1">
-                      <Label>Precio override ($)</Label>
+                      <Label className="text-xs">Precio ($)</Label>
                       <Input
                         type="number"
                         min={0}
+                        className="h-8"
                         placeholder={service.price.toString()}
                         value={draft.price_override}
                         onChange={(e) => updateDraft(service.id, { price_override: e.target.value })}
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label>Duración override (min)</Label>
+                      <Label className="text-xs">Duración (min)</Label>
                       <Input
                         type="number"
                         min={1}
+                        className="h-8"
                         placeholder={service.duration_minutes.toString()}
                         value={draft.duration_override}
                         onChange={(e) =>
@@ -249,172 +267,181 @@ export function BarberServicesPanel({ barber, organizationId }: BarberServicesPa
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label>Puntos override</Label>
+                      <Label className="text-xs">Puntos</Label>
                       <Input
                         type="number"
                         min={0}
+                        className="h-8"
                         placeholder={service.points_awarded.toString()}
                         value={draft.points_override}
                         onChange={(e) => updateDraft(service.id, { points_override: e.target.value })}
                       />
                     </div>
+                    <div className="sm:col-span-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={mutations.upsertOverride.isPending || mutations.removeOverride.isPending}
+                        onClick={() => void saveOverride(service.id).catch((err) => notifyError((err as Error).message))}
+                      >
+                        Guardar ajuste
+                      </Button>
+                    </div>
                   </div>
-                )}
-
-                {draft.has_override && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={mutations.upsertOverride.isPending || mutations.removeOverride.isPending}
-                    onClick={() => void saveOverride(service.id).catch((err) => notifyError((err as Error).message))}
-                  >
-                    Guardar override
-                  </Button>
                 )}
               </div>
             )
           })}
-        </CardContent>
-      </Card>
+        </div>
+      ) : (
+        <p className="text-muted-foreground px-3 py-3 text-sm">No hay servicios en el catálogo.</p>
+      )}
 
-      <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
-          <div>
-            <CardTitle>Servicios exclusivos</CardTitle>
-            <CardDescription>Solo visibles para este barbero.</CardDescription>
-          </div>
-          {!showExclusiveForm && (
-            <Button size="sm" variant="outline" onClick={() => setShowExclusiveForm(true)}>
-              <Plus className="size-4" aria-hidden="true" />
-              Agregar
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="flex items-center justify-between gap-2 border-t px-3 py-2.5">
+        <div>
+          <p className="text-sm font-medium">Servicios exclusivos</p>
+          <p className="text-muted-foreground text-xs">Solo visibles para este barbero.</p>
+        </div>
+        {!showExclusiveForm && (
+          <Button size="sm" variant="outline" onClick={() => setShowExclusiveForm(true)}>
+            <Plus className="size-4" aria-hidden="true" />
+            Agregar
+          </Button>
+        )}
+      </div>
+
+      {exclusiveServices.length > 0 && (
+        <div className="divide-y border-t">
           {exclusiveServices.map((exclusive) => (
-            <div key={exclusive.id} className="flex flex-col gap-2 rounded-md border p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="font-medium">{exclusive.exclusive_name}</p>
-                <p className="text-muted-foreground text-sm">
+            <div key={exclusive.id} className="hover-surface flex items-center gap-2 px-3 py-2">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{exclusive.exclusive_name}</p>
+                <p className="text-muted-foreground truncate text-xs">
                   {formatServicePrice(exclusive.exclusive_price ?? 0)} ·{' '}
                   {formatServiceDuration(exclusive.exclusive_duration ?? 0)} ·{' '}
                   {exclusive.exclusive_points ?? 0} pts
+                  {!exclusive.is_enabled && ' · deshabilitado'}
                 </p>
-                {!exclusive.is_enabled && <Badge variant="secondary">Deshabilitado</Badge>}
               </div>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setEditingExclusiveId(exclusive.id)
-                    setShowExclusiveForm(true)
-                    setExclusiveForm({
-                      name: exclusive.exclusive_name ?? '',
-                      price: String(exclusive.exclusive_price ?? ''),
-                      duration: String(exclusive.exclusive_duration ?? ''),
-                      points: String(exclusive.exclusive_points ?? 0),
-                      is_enabled: exclusive.is_enabled,
-                    })
-                  }}
-                >
-                  Editar
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={mutations.deleteExclusive.isPending}
-                  onClick={() => {
-                    void confirmAction(`¿Eliminar ${exclusive.exclusive_name}?`).then((ok) => {
-                      if (!ok) return
-                      void mutations.deleteExclusive.mutateAsync(exclusive.id)
-                    })
-                  }}
-                >
-                  <Trash2 className="size-4" aria-hidden="true" />
-                </Button>
-              </div>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                aria-label={`Editar ${exclusive.exclusive_name}`}
+                onClick={() => {
+                  setEditingExclusiveId(exclusive.id)
+                  setShowExclusiveForm(true)
+                  setExclusiveForm({
+                    name: exclusive.exclusive_name ?? '',
+                    price: String(exclusive.exclusive_price ?? ''),
+                    duration: String(exclusive.exclusive_duration ?? ''),
+                    points: String(exclusive.exclusive_points ?? 0),
+                    is_enabled: exclusive.is_enabled,
+                  })
+                }}
+              >
+                <Pencil className="size-4" />
+              </Button>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                className="text-destructive"
+                aria-label={`Eliminar ${exclusive.exclusive_name}`}
+                disabled={mutations.deleteExclusive.isPending}
+                onClick={() => {
+                  void confirmAction(`¿Eliminar ${exclusive.exclusive_name}?`).then((ok) => {
+                    if (!ok) return
+                    void mutations.deleteExclusive.mutateAsync(exclusive.id)
+                  })
+                }}
+              >
+                <Trash2 className="size-4" />
+              </Button>
             </div>
           ))}
+        </div>
+      )}
 
-          {showExclusiveForm && (
-            <div className="space-y-3 rounded-md border border-dashed p-4">
-              <div className="space-y-1">
-                <Label>Nombre</Label>
-                <Input
-                  value={exclusiveForm.name}
-                  onChange={(e) => setExclusiveForm((prev) => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div className="space-y-1">
-                  <Label>Precio ($)</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={exclusiveForm.price}
-                    onChange={(e) => setExclusiveForm((prev) => ({ ...prev, price: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Duración (min)</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={exclusiveForm.duration}
-                    onChange={(e) => setExclusiveForm((prev) => ({ ...prev, duration: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Puntos</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={exclusiveForm.points}
-                    onChange={(e) => setExclusiveForm((prev) => ({ ...prev, points: e.target.value }))}
-                  />
-                </div>
-              </div>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  className="size-4"
-                  checked={exclusiveForm.is_enabled}
-                  onChange={(e) =>
-                    setExclusiveForm((prev) => ({ ...prev, is_enabled: e.target.checked }))
-                  }
-                />
-                Habilitado
-              </label>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="accent"
-                  disabled={mutations.createExclusive.isPending || mutations.updateExclusive.isPending}
-                  onClick={() => void saveExclusive()}
-                >
-                  {editingExclusiveId ? 'Actualizar' : 'Crear'} exclusivo
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setShowExclusiveForm(false)
-                    setEditingExclusiveId(null)
-                    setExclusiveForm({ name: '', price: '', duration: '30', points: '0', is_enabled: true })
-                  }}
-                >
-                  Cancelar
-                </Button>
-              </div>
+      {showExclusiveForm && (
+        <div className="grid gap-2 border-t p-3">
+          <p className="text-sm font-medium">{editingExclusiveId ? 'Editar exclusivo' : 'Nuevo exclusivo'}</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="space-y-1 sm:col-span-2">
+              <Label className="text-xs">Nombre</Label>
+              <Input
+                className="h-8"
+                value={exclusiveForm.name}
+                onChange={(e) => setExclusiveForm((prev) => ({ ...prev, name: e.target.value }))}
+              />
             </div>
-          )}
+            <div className="space-y-1">
+              <Label className="text-xs">Precio ($)</Label>
+              <Input
+                type="number"
+                min={0}
+                className="h-8"
+                value={exclusiveForm.price}
+                onChange={(e) => setExclusiveForm((prev) => ({ ...prev, price: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Duración (min)</Label>
+              <Input
+                type="number"
+                min={1}
+                className="h-8"
+                value={exclusiveForm.duration}
+                onChange={(e) => setExclusiveForm((prev) => ({ ...prev, duration: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Puntos</Label>
+              <Input
+                type="number"
+                min={0}
+                className="h-8"
+                value={exclusiveForm.points}
+                onChange={(e) => setExclusiveForm((prev) => ({ ...prev, points: e.target.value }))}
+              />
+            </div>
+            <label className="flex items-center gap-2 text-xs">
+              <input
+                type="checkbox"
+                className="size-3.5"
+                checked={exclusiveForm.is_enabled}
+                onChange={(e) =>
+                  setExclusiveForm((prev) => ({ ...prev, is_enabled: e.target.checked }))
+                }
+              />
+              Habilitado
+            </label>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="accent"
+              disabled={mutations.createExclusive.isPending || mutations.updateExclusive.isPending}
+              onClick={() => void saveExclusive()}
+            >
+              {editingExclusiveId ? 'Actualizar' : 'Crear'}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setShowExclusiveForm(false)
+                setEditingExclusiveId(null)
+                setExclusiveForm({ name: '', price: '', duration: '30', points: '0', is_enabled: true })
+              }}
+            >
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      )}
 
-          {exclusiveServices.length === 0 && !showExclusiveForm && (
-            <p className="text-muted-foreground text-sm">Sin servicios exclusivos.</p>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+      {exclusiveServices.length === 0 && !showExclusiveForm && (
+        <p className="text-muted-foreground px-3 py-3 text-sm">Sin servicios exclusivos.</p>
+      )}
+    </Card>
   )
 }

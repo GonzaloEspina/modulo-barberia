@@ -20,6 +20,7 @@ interface ClientComboboxProps {
   value: string
   onChange: (clientId: string) => void
   placeholder?: string
+  showCreateClient?: boolean
 }
 
 function ClientWarningIcon({ reason }: { reason: string | null }) {
@@ -48,6 +49,7 @@ export function ClientCombobox({
   value,
   onChange,
   placeholder = 'Buscar cliente…',
+  showCreateClient = true,
 }: ClientComboboxProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -140,12 +142,14 @@ export function ClientCombobox({
           </Command>
         </PopoverContent>
       </Popover>
-      <Button variant="ghost" size="sm" asChild>
-        <Link to="/clientes/nuevo">
-          <Plus className="size-4" />
-          Nuevo cliente
-        </Link>
-      </Button>
+      {showCreateClient && (
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/clientes/nuevo">
+            <Plus className="size-4" />
+            Nuevo cliente
+          </Link>
+        </Button>
+      )}
     </div>
   )
 }

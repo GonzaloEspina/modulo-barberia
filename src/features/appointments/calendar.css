@@ -89,6 +89,28 @@
   cursor: pointer;
 }
 
+.calendar-compact .fc-timegrid-slot-lane.is-slot-hover {
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
+}
+
+.calendar-slot-time-tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 80;
+  width: max-content;
+  pointer-events: none;
+  border-radius: 0.375rem;
+  background: var(--surface-hover, #b0823f);
+  color: var(--surface-hover-foreground, #ffffff);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.16);
+  will-change: transform;
+}
+
 .calendar-compact .fc-daygrid-day {
   cursor: pointer;
 }

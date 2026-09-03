@@ -1,6 +1,5 @@
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { TrendingDown, TrendingUp } from 'lucide-react'
+import { formatAppDate } from '@/lib/app-datetime'
 import { cn } from '@/lib/utils'
 
 interface PointsBalanceProps {
@@ -28,7 +27,7 @@ export function PointsBalance({
       {nextExpiresAt && (
         <p className="text-muted-foreground mt-2 text-sm">
           Próximo vencimiento:{' '}
-          {format(new Date(nextExpiresAt), "d 'de' MMMM", { locale: es })}
+          {formatAppDate(nextExpiresAt)}
         </p>
       )}
       {progress != null && (

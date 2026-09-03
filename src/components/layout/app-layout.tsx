@@ -32,12 +32,14 @@ function useNavItems() {
       { to: '/membresias', label: 'Membresías' },
       { to: '/puntos', label: 'Puntos' },
       { to: '/gastos', label: 'Gastos' },
-      { to: '/auditoria', label: 'Auditoría' },
       { to: '/configuracion', label: 'Configuración' },
     )
   }
   if (isPlatformAdmin) {
-    items.push({ to: '/plataforma/organizaciones', label: 'Plataforma' })
+    items.push(
+      { to: '/auditoria', label: 'Auditoría' },
+      { to: '/plataforma/organizaciones', label: 'Plataforma' },
+    )
   }
   return items
 }

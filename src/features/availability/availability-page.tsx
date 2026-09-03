@@ -2,13 +2,14 @@ import { formatInTimeZone } from 'date-fns-tz'
 import { CalendarSearch } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { EmptyState, PageHeader } from '@/components/design-system/layout-primitives'
+import { DatePicker } from '@/components/design-system/date-picker'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAvailableSlots } from '@/features/availability/api'
 import { useBarbers } from '@/features/barbers/api'
 import { useServices } from '@/features/services/api'
+import { useProfile } from '@/hooks/use-profile'
 import { APP_TIMEZONE } from '@/lib/constants'
 import { formatServiceDuration } from '@/types/service'
 
@@ -17,6 +18,8 @@ function todayIsoDate(): string {
 }
 
 export function AvailabilityPage() {
+  const { data: profile } = useProfile()
+  const slotInterval = profile?.organization?.settings?.appointment_slot_interval_minutes ?? 15
   const [date, setDate] = useState(todayIsoDate)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [barberId, setBarberId] = useState<string>('')
@@ -64,19 +67,17 @@ export function AvailabilityPage() {
         <CardHeader>
           <CardTitle>Consulta</CardTitle>
           <CardDescription>
-            Intervalo de {15} min según configuración de la organización.
+            Intervalo de {slotInterval} min según configuración de la organización.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="availability-date">Fecha</Label>
-              <Input
+              <DatePicker
                 id="availability-date"
-                type="date"
-                className="rounded-lg"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={setDate}
               />
             </div>
             <div className="space-y-2">

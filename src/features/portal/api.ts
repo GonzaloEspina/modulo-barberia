@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { PORTAL_ORG_ID } from '@/lib/constants'
+import type { AppointmentCoupon } from '@/lib/coupon-discount'
 import { getSupabaseClient } from '@/lib/supabase'
 import {
   clearPortalSession,
@@ -24,6 +25,7 @@ export interface PortalDashboard {
   portal_booking_mode: 'all_except_denied' | 'allowlist_only' | 'disabled'
   booking_override: 'inherit' | 'allowed' | 'denied'
   can_book: boolean
+  has_upcoming_appointment?: boolean
   upcoming_appointments: PortalAppointment[]
   past_appointments: PortalAppointment[]
   memberships: Array<{
@@ -35,14 +37,58 @@ export interface PortalDashboard {
     status: string
   }>
   point_balance: number
-  redemptions: Array<{
-    id: string
-    unique_code: string
-    status: string
-    points_used: number
-    reward_name: string
-    created_at: string
-  }>
+  point_next_expires_at?: string | null
+  rewards: PortalReward[]
+  redemptions: PortalRedemption[]
+}
+
+export interface PortalReward {
+  id: string
+  name: string
+  description: string | null
+  points_required: number
+  reward_type: string
+  value: number | null
+  stock: number | null
+  can_redeem: boolean
+}
+
+export interface PortalRedemption {
+  id: string
+  unique_code: string
+  status: string
+  points_used: number
+  reward_name: string
+  reward_type?: string | null
+  value?: number | null
+  service_id?: string | null
+  appointment_id?: string | null
+  created_at: string
+}
+
+const BOOKING_COUPON_TYPES = new Set([
+  'percentage_discount',
+  'fixed_discount',
+  'free_service',
+])
+
+export function availablePortalCoupons(redemptions: PortalRedemption[]): AppointmentCoupon[] {
+  return redemptions
+    .filter((redemption) =>
+      (redemption.status === 'requested' || redemption.status === 'approved')
+      && !redemption.appointment_id
+      && BOOKING_COUPON_TYPES.has(redemption.reward_type ?? ''),
+    )
+    .map((redemption) => ({
+      id: redemption.id,
+      unique_code: redemption.unique_code,
+      status: redemption.status,
+      reward_name: redemption.reward_name,
+      reward_type: redemption.reward_type ?? '',
+      value: redemption.value ?? null,
+      service_id: redemption.service_id,
+      points_used: redemption.points_used,
+    }))
 }
 
 export function usePortalSession() {
@@ -191,6 +237,8 @@ export function usePortalBookingMutations() {
       startsAt: string
       serviceIds: string[]
       notes?: string
+      redemptionId?: string | null
+      code?: string | null
     }) => {
       const { data, error } = await getSupabaseClient().rpc('portal_create_appointment', {
         p_session_token: input.token,
@@ -198,6 +246,8 @@ export function usePortalBookingMutations() {
         p_starts_at: input.startsAt,
         p_service_ids: input.serviceIds,
         p_notes: input.notes ?? null,
+        p_redemption_id: input.redemptionId ?? null,
+        p_code: input.code ?? null,
       })
       if (error) throw error
       return data as string
@@ -209,4 +259,24 @@ export function usePortalBookingMutations() {
   })
 
   return { bookAppointment }
+}
+
+export function usePortalRedeemMutations() {
+  const qc = useQueryClient()
+
+  const redeemReward = useMutation({
+    mutationFn: async (input: { token: string; rewardId: string }) => {
+      const { data, error } = await getSupabaseClient().rpc('portal_redeem_reward', {
+        p_session_token: input.token,
+        p_reward_id: input.rewardId,
+      })
+      if (error) throw error
+      return data as string
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['portal-dashboard'] })
+    },
+  })
+
+  return { redeemReward }
 }

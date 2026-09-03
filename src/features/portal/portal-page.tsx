@@ -1,8 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Gift, LogOut, Scissors, Ticket } from 'lucide-react'
+import { LogOut, Scissors, Ticket } from 'lucide-react'
 import { useState } from 'react'
-import { PointsBalance } from '@/components/design-system/points-components'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -11,19 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { usePortalDashboard, usePortalMutations, usePortalSession } from '@/features/portal/api'
 import { PortalAppointments } from '@/features/portal/portal-appointments'
 import { PortalBooking } from '@/features/portal/portal-booking'
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'Pendiente',
-  confirmed: 'Pendiente',
-  in_progress: 'Pendiente',
-  completed: 'Asistió',
-  cancelled: 'Cancelado',
-  no_show: 'No asistió',
-  requested: 'Solicitado',
-  approved: 'Aprobado',
-  delivered: 'Entregado',
-  expired: 'Vencido',
-}
+import { PortalPoints } from '@/features/portal/portal-points'
+import { formatAppDate } from '@/lib/app-datetime'
 
 function portalGreetingName(sessionName: string, firstName?: string | null) {
   const first = firstName?.trim()
@@ -61,7 +48,8 @@ export function PortalPage() {
   }
 
   if (session && !error) {
-    const showBooking = dashboard?.can_book ?? false
+    const showBooking =
+      (dashboard?.can_book ?? false) && !(dashboard?.has_upcoming_appointment ?? false)
     const orgName = dashboard?.organization.name ?? 'Barbatero'
     const greetingName = portalGreetingName(session.clientName, dashboard?.client.first_name)
 
@@ -88,74 +76,58 @@ export function PortalPage() {
         <main className="mx-auto max-w-2xl space-y-6 px-4 py-8">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Hola, {greetingName}</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Reservá tu turno o consultá tu historial.</p>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Consultá tus puntos, canjes y turnos.
+            </p>
           </div>
 
           {isLoading && (
             <div className="space-y-4">
-              <Skeleton className="h-36 rounded-xl bg-muted" />
+              <Skeleton className="h-24 rounded-xl bg-muted" />
               <Skeleton className="h-64 rounded-xl bg-muted" />
             </div>
           )}
 
           {dashboard && (
             <>
+              <PortalPoints
+                sessionToken={session.token}
+                balance={Number(dashboard.point_balance) || 0}
+                nextExpiresAt={dashboard.point_next_expires_at}
+                rewards={dashboard.rewards ?? []}
+                redemptions={dashboard.redemptions ?? []}
+              />
+
               <PortalAppointments
                 upcoming={dashboard.upcoming_appointments}
                 past={dashboard.past_appointments}
                 canBook={showBooking}
+                hasUpcoming={dashboard.has_upcoming_appointment ?? dashboard.upcoming_appointments.length > 0}
               />
 
               {showBooking && session.token && (
                 <PortalBooking
                   sessionToken={session.token}
+                  redemptions={dashboard.redemptions ?? []}
                   onBooked={() => void qc.invalidateQueries({ queryKey: ['portal-dashboard'] })}
                 />
               )}
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <PointsBalance balance={dashboard.point_balance} className="rounded-xl shadow-sm" />
-
-                {dashboard.memberships.length > 0 && (
-                  <Card className="gap-3 py-5 shadow-sm">
-                    <CardHeader className="px-5">
-                      <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
-                        <Ticket className="size-4" aria-hidden />
-                        Membresías
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 px-5">
-                      {dashboard.memberships.map((m) => (
-                        <div key={m.id}>
-                          <p className="font-medium">{m.plan_name}</p>
-                          <p className="text-muted-foreground text-sm">
-                            {m.appointments_remaining}/{m.appointments_total} turnos · vence {m.expires_at}
-                          </p>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-
-              {dashboard.redemptions.length > 0 && (
-                <Card className="gap-4 py-5 shadow-sm">
+              {dashboard.memberships.length > 0 && (
+                <Card className="gap-3 py-5 shadow-sm">
                   <CardHeader className="px-5">
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Gift className="size-4" aria-hidden />
-                      Canjes
+                    <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
+                      <Ticket className="size-4" aria-hidden />
+                      Membresías
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3 px-5 text-sm">
-                    {dashboard.redemptions.map((r) => (
-                      <div key={r.id} className="rounded-xl border p-3">
-                        <p className="font-medium">{r.reward_name}</p>
-                        <p className="text-muted-foreground">
-                          Código {r.unique_code} · {r.points_used} pts
+                  <CardContent className="space-y-3 px-5">
+                    {dashboard.memberships.map((m) => (
+                      <div key={m.id}>
+                        <p className="font-medium">{m.plan_name}</p>
+                        <p className="text-muted-foreground text-sm">
+                          {m.appointments_remaining}/{m.appointments_total} turnos · vence {formatAppDate(m.expires_at)}
                         </p>
-                        <Badge variant="outline" className="mt-1">
-                          {STATUS_LABELS[r.status] ?? r.status}
-                        </Badge>
                       </div>
                     ))}
                   </CardContent>

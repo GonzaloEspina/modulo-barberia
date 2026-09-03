@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useAuth } from '@/features/auth/auth-context'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export interface PlatformOrganization {
@@ -15,11 +16,12 @@ export interface PlatformOrganization {
 }
 
 export function useIsPlatformAdmin() {
+  const { user, isConfigured } = useAuth()
+
   return useQuery({
-    queryKey: ['platform-admin'],
+    queryKey: ['platform-admin', user?.id],
     queryFn: async () => {
-      const { data: { user } } = await getSupabaseClient().auth.getUser()
-      if (!user) return false
+      if (!user?.id) return false
       const { data, error } = await getSupabaseClient()
         .from('platform_admins')
         .select('user_id')
@@ -28,6 +30,7 @@ export function useIsPlatformAdmin() {
       if (error) return false
       return Boolean(data)
     },
+    enabled: isConfigured && !!user?.id,
     staleTime: 60_000,
   })
 }

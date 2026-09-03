@@ -433,7 +433,8 @@ export function buildSqlBatches(transformed) {
     'validity_months', 'display_order', 'is_active',
   ], transformed.membershipPlans))
 
-  batches.push(`INSERT INTO client_memberships (
+  if (transformed.clientMemberships.length) {
+    batches.push(`INSERT INTO client_memberships (
     id, organization_id, client_id, membership_plan_id, plan_name, price_paid,
     appointments_total, appointments_remaining, payment_confirmed,
     starts_at, expires_at, status, is_active
@@ -453,6 +454,7 @@ export function buildSqlBatches(transformed) {
     TRUE
   )`).join(',\n')}
   ON CONFLICT (id) DO NOTHING;`)
+  }
 
   for (const part of chunk(transformed.appointments, 80)) {
     batches.push(buildAppointmentInsert(part))
@@ -611,6 +613,52 @@ async function main() {
   if (mode === 'import') {
     await importWithSupabase(transformed)
     console.log('Importación completada')
+    return
+  }
+
+  if (mode === 'delta-sql') {
+    const existingPath = join(__dirname, '.import-output', 'existing-ids.json')
+    const { readFile } = await import('node:fs/promises')
+    const existing = JSON.parse(await readFile(existingPath, 'utf8'))
+    const clientSet = new Set(existing.clients)
+    const apptSet = new Set(existing.appointments)
+    const memSet = new Set(existing.memberships ?? [])
+    const serviceSet = new Set(existing.services ?? [])
+    const planSet = new Set(existing.plans ?? [])
+
+    const delta = {
+      clients: transformed.clients.filter((r) => !clientSet.has(r.id)),
+      services: transformed.services.filter((r) => !serviceSet.has(r.id)),
+      membershipPlans: transformed.membershipPlans.filter((r) => !planSet.has(r.id)),
+      clientMemberships: transformed.clientMemberships.filter((r) => !memSet.has(r.id)),
+      appointments: transformed.appointments.filter((r) => !apptSet.has(r.id)),
+      appointmentServices: transformed.appointmentServices.filter((r) => !apptSet.has(r.appointment_id)),
+      payments: transformed.payments.filter((r) => !apptSet.has(r.appointment_id)),
+      fixedExpenses: [],
+      expenses: transformed.expenses.filter((r) => {
+        const key = `${r.expense_date}|${r.description}|${r.amount}`
+        return !(existing.expenseKeys ?? []).includes(key)
+      }),
+    }
+
+    console.log('Delta:', Object.fromEntries(
+      Object.entries(delta).map(([k, v]) => [k, Array.isArray(v) ? v.length : 0]),
+    ))
+
+    const outDir = join(__dirname, '.import-output', 'delta')
+    await mkdir(outDir, { recursive: true })
+    await writeFile(join(outDir, 'delta.json'), JSON.stringify({
+      clients: delta.clients.length,
+      appointments: delta.appointments.length,
+      payments: delta.payments.length,
+      memberships: delta.clientMemberships.length,
+      newClientPhones: delta.clients.map((c) => `${c.first_name} ${c.last_name}`),
+    }, null, 2))
+    const batches = buildSqlBatches(delta)
+    for (let i = 0; i < batches.length; i++) {
+      await writeFile(join(outDir, `batch-${String(i + 1).padStart(3, '0')}.sql`), batches[i])
+    }
+    console.log(`Delta SQL: ${batches.length} archivos en ${outDir}`)
     return
   }
 
