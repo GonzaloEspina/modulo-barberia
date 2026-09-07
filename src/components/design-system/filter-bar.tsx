@@ -8,7 +8,7 @@ interface FilterBarProps {
 
 export function FilterBar({ children, className }: FilterBarProps) {
   return (
-    <div className={cn('grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4', className)}>
+    <div className={cn('grid gap-3 listing-sheet rounded-sm p-4 sm:grid-cols-2 lg:grid-cols-4', className)}>
       {children}
     </div>
   )

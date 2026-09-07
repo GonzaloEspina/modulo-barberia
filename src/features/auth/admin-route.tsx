@@ -5,7 +5,7 @@ import { isAdminRole, useProfile } from '@/hooks/use-profile'
 export function AdminRoute() {
   const { data: profile, isLoading } = useProfile()
 
-  if (isLoading) {
+  if (isLoading && !profile) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <p className="text-muted-foreground text-sm">Cargando…</p>

@@ -14,7 +14,7 @@ export function ServiceEditPage() {
   const { data: service, isLoading, isError } = useService(id)
   const { updateService } = useServiceMutations(profile?.organization_id)
 
-  if (isLoading) {
+  if (isLoading && !service) {
     return <p className="text-muted-foreground text-sm">Cargando servicio…</p>
   }
 

@@ -1,0 +1,165 @@
+{
+  "title": "Elegí el mundo visual",
+  "question": "El roll asignó Cartelera de sesiones. Conservalo, tomá una alternativa, o pedí otra mano.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Cartelera de sesiones",
+      "kicker": "THE ROLL",
+      "lineage": "cartelera de cine de barrio: columnas de horario, títulos, salas",
+      "thesis": "El día de silla se lee como la cartelera del cine: hora, título, sala; caja y producción se oponen como taquilla.",
+      "palette": ["#eef1f6", "#ffffff", "#141820", "#c41230", "#1f7a4d"],
+      "materials": ["papel de cartelera bajo tubo fluorescente", "tipo condensado de listado", "placa AHORA en vermellón"],
+      "viewport": "Masthead con fecha y org; listado de hoy como filas hora | cliente | servicio | sala; franja de taquilla producción vs caja.",
+      "risk": "Si se ablanda a cards genéricas, se vuelve otro dashboard SaaS con un rojo de acento.",
+      "raised": [
+        { "from": "challenger-jcard", "raise": "Cada sesión lleva duración alineada a la derecha; el día no puede desbordar el listado." },
+        { "from": "challenger-terminal", "raise": "Los estados (en curso, pagado, ausente) son placas de registro completo, no badges diminutos." },
+        { "from": "challenger-quotes", "raise": "Cada zona se nombra como placa literal (Agenda, Caja), no solo con íconos." },
+        { "from": "challenger-tensegrity", "raise": "Producción y caja se leen como fuerzas opuestas en una sola franja, no como cuatro tiles iguales." },
+        { "from": "challenger-onebit", "raise": "La fila activa se invierte; lo deshabilitado queda como fantasma fijo, no gris suave." }
+      ],
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          { "label": "masthead", "x": 0, "y": 0, "w": 12, "h": 1, "accent": true },
+          { "label": "nav rail", "x": 0, "y": 1, "w": 2, "h": 9 },
+          { "label": "today listing", "x": 2, "y": 1, "w": 7, "h": 7, "accent": true },
+          { "label": "box office", "x": 9, "y": 1, "w": 3, "h": 4 },
+          { "label": "next action", "x": 9, "y": 5, "w": 3, "h": 3 }
+        ]
+      },
+      "comp": ".impeccable/mocks/decision/assigned.webp",
+      "riskDetail": "Familiaridad de timetable es alta; el riesgo es ejecutarla tímida."
+    },
+    {
+      "id": "model-pick",
+      "label": "Libreta de silla",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "cuaderno de turnos al lado de la silla, birome y tachados",
+      "thesis": "La app es la libreta: grilla de horas, nombres a birome, ausentes tachados.",
+      "palette": ["#f7f3ea", "#1c1915", "#2c5aa0", "#c45c4a"],
+      "materials": ["papel rayado", "tinta de birome", "tachado de ausente"],
+      "viewport": "Una página abierta del día, horas en el margen, nombres en renglones, Nuevo turno como anotar.",
+      "risk": "Es donde más corridas de esta categoría aterrizan: el cuaderno de oficio.",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          { "label": "page header", "x": 1, "y": 0, "w": 10, "h": 1 },
+          { "label": "time margin", "x": 1, "y": 1, "w": 2, "h": 9, "accent": true },
+          { "label": "names", "x": 3, "y": 1, "w": 8, "h": 9 }
+        ]
+      },
+      "comp": ".impeccable/mocks/decision/model-pick.webp"
+    },
+    {
+      "id": "challenger-seven-segment",
+      "label": "Reloj de segmentos",
+      "verdict": "competitive",
+      "lineage": "relojes de cabecera, tótems de nafta, marcadores",
+      "thesis": "Hora y caja viven en una máscara de segmentos; el resto del día se lee alrededor de esos dígitos.",
+      "palette": ["#0b0c0e", "#ff3b30", "#3dff6e", "#2a2d32"],
+      "materials": ["LED de siete segmentos", "celdas fantasma", "plástico mate negro"],
+      "viewport": "Cuatro dígitos de hora + montos de caja a escala de marcador; listado debajo en celdas rígidas.",
+      "case": "Gana claridad en números (hora, ARS); pierde identificación: el local no es una estación de servicio, y los nombres de clientes no caben en segmentos.",
+      "risk": "Nombres y servicios se vuelven secundarios frente al reloj.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-seven-segment-alarm-clock-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/signals-instruments-seven-segment-alarm-clock.webp",
+      "comp": ".impeccable/mocks/decision/challenger-seven-segment.webp",
+      "wireframe": {
+        "cols": 12,
+        "rows": 10,
+        "regions": [
+          { "label": "clock digits", "x": 0, "y": 0, "w": 8, "h": 4, "accent": true },
+          { "label": "cash digits", "x": 8, "y": 0, "w": 4, "h": 4 },
+          { "label": "listing cells", "x": 0, "y": 4, "w": 12, "h": 6 }
+        ]
+      }
+    },
+    {
+      "id": "challenger-jcard",
+      "label": "J-card de cassette",
+      "verdict": "declined",
+      "lineage": "inlays TDK/Maxell, side A / side B a birome",
+      "thesis": "Agenda y caja como caras A y B de un mismo pliegue, con duraciones a la derecha.",
+      "palette": ["#f4f6f8", "#1a4f9c", "#c41e3a", "#6b7280"],
+      "materials": ["cartulina lined inlay", "birome azul", "franja de marca"],
+      "viewport": "Un pliegue: lomo = org, interior = tracklist del día.",
+      "case": "El local no se identifica con un mixtape; la claridad de turnos se diluye en la metáfora musical.",
+      "kept": "Listados cronometrados con duración a la derecha y un día que no desborda.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-cassette-j-card-hero.webp",
+      "risk": "Lee hobby, no oficio."
+    },
+    {
+      "id": "challenger-terminal",
+      "label": "Terminal de nave",
+      "verdict": "declined",
+      "lineage": "CRT fósforo verde/ámbar, pictogramas de riesgo",
+      "thesis": "Consultas en mayúsculas sobre vidrio curvo; estados de peligro en ámbar.",
+      "palette": ["#050805", "#3dff6e", "#ffbf00", "#d8d4c8"],
+      "materials": ["fósforo CRT", "panel sucio off-white", "stencil"],
+      "viewport": "Una línea de query y páginas tipeadas.",
+      "case": "Cero identificación de barbería de barrio; peor para tocar en el teléfono.",
+      "kept": "Placas de estado que cambian el registro entero.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-industrial-starship-terminal-hero.webp",
+      "risk": "Ciencia ficción, no silla."
+    },
+    {
+      "id": "challenger-quotes",
+      "label": "Gramática de quotes",
+      "verdict": "declined",
+      "lineage": "streetwear industrial, palabras entre comillas, cintas de riesgo",
+      "thesis": "Cada zona se llama por su nombre entre comillas; lo activo lleva precinto naranja.",
+      "palette": ["#f5f5f5", "#111111", "#ff5a1f", "#000000"],
+      "materials": ["algodón de depósito", "nylon negro", "precinto naranja"],
+      "viewport": "Etiquetas gigantes entre comillas y una franja diagonal bajo lo que importa.",
+      "case": "Identifica depósito de moda, no el local; el ruido gráfico tapa la tarea.",
+      "kept": "Zonas nombradas como placas literales, no solo íconos.",
+      "hero": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-industrial-quote-grammar-hero.webp",
+      "risk": "Moda, no operación."
+    },
+    {
+      "id": "challenger-tensegrity",
+      "label": "Columna de tensegridad",
+      "verdict": "declined",
+      "lineage": "varillas de carbono y cordón rojo en equilibrio",
+      "thesis": "Producción y caja como tensión y compresión de un mismo cuerpo.",
+      "palette": ["#eceae6", "#111111", "#e10600", "#8a8a86"],
+      "materials": ["carbono mate", "cordón rojo", "hormigón pálido"],
+      "viewport": "Diagrama de fuerzas del día, no una grilla de cards.",
+      "case": "Demasiado abstracto para cobrar un corte; el oficinista no lee tensegridad.",
+      "kept": "Ledgers opuestos como contrafuerzas visibles.",
+      "hero": "https://impeccable.style/worlds/cards/kinetic-sculpture-automata-tensegrity-breathing-column-hero.webp",
+      "risk": "Escultura, no caja."
+    },
+    {
+      "id": "challenger-onebit",
+      "label": "Escritorio de 1 bit",
+      "verdict": "declined",
+      "lineage": "System 1–7: dither, title bars, marching ants",
+      "thesis": "Agenda y caja como ventanas superpuestas en un escritorio de dos colores.",
+      "palette": ["#ffffff", "#000000", "#808080"],
+      "materials": ["píxel 1-bit", "dither ordenado", "cromado de 1px"],
+      "viewport": "Ventanas superpuestas; la selección marcha con hormigas.",
+      "case": "El Mac clásico no es el mundo del local; las ventanas fallan en el celular.",
+      "kept": "Selección que invierte; deshabilitado como fantasma fijo.",
+      "hero": "https://impeccable.style/worlds/cards/medium-native-one-bit-desktop-hero.webp",
+      "risk": "Nostalgia de OS, no de oficio."
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code", "toggle": false },
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "Dashboard shadcn con sidebar, metric cards y tablas, ejecutado a full craft.",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["grid limpio", "cards", "sans de producto"],
+    "viewport": "Sidebar + header + KPI row + tabla, lo que el visitante espera.",
+    "risk": "Indistinguible del SaaS vecino, a propósito.",
+    "comp": ".impeccable/mocks/decision/canon.webp"
+  },
+  "steer": true
+}

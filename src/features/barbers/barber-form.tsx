@@ -63,22 +63,21 @@ export function BarberForm({ barber, isSubmitting, onSubmit, onCancel }: BarberF
   const selectedColor = watch('calendar_color')
 
   useEffect(() => {
-    if (barber) {
-      reset({
-        name: barber.name,
-        email: barber.email ?? '',
-        phone: barber.phone ?? '',
-        calendar_color: barber.calendar_color,
-        display_order: barber.display_order,
-        use_general_schedules: barber.use_general_schedules,
-        use_general_services: barber.use_general_services,
-        use_general_prices: barber.use_general_prices,
-        use_general_durations: barber.use_general_durations,
-        is_active: barber.is_active,
-        linked_profile_id: barber.user_id ?? '',
-      })
-    }
-  }, [barber, reset])
+    if (!barber) return
+    reset({
+      name: barber.name,
+      email: barber.email ?? '',
+      phone: barber.phone ?? '',
+      calendar_color: barber.calendar_color,
+      display_order: barber.display_order,
+      use_general_schedules: barber.use_general_schedules,
+      use_general_services: barber.use_general_services,
+      use_general_prices: barber.use_general_prices,
+      use_general_durations: barber.use_general_durations,
+      is_active: barber.is_active,
+      linked_profile_id: barber.user_id ?? '',
+    })
+  }, [barber?.id, reset])
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>

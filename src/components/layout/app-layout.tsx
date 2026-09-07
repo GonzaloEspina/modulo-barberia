@@ -70,11 +70,11 @@ export function AppLayout({ children }: AppLayoutProps) {
               {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </Button>
             <div className="flex items-center gap-2">
-              <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
+            <div className="bg-accent text-accent-foreground flex size-8 items-center justify-center rounded-sm">
                 <Scissors className="size-4" aria-hidden="true" />
               </div>
               <div className="leading-tight">
-                <p className="text-sm font-semibold">{orgName}</p>
+                <p className="font-display text-sm font-semibold tracking-wide uppercase">{orgName}</p>
                 <p className="text-muted-foreground text-xs">
                   {isLoading ? 'Cargando…' : roleLabel}
                 </p>

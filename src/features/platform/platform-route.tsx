@@ -5,7 +5,7 @@ import { useIsPlatformAdmin } from '@/features/platform/api'
 export function PlatformRoute() {
   const { data: isPlatformAdmin, isLoading } = useIsPlatformAdmin()
 
-  if (isLoading) {
+  if (isLoading && isPlatformAdmin == null) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <p className="text-muted-foreground text-sm">Cargando…</p>
@@ -29,7 +29,7 @@ export function PlatformRoute() {
 
 export function PlatformIndexRedirect() {
   const { data: isPlatformAdmin, isLoading } = useIsPlatformAdmin()
-  if (isLoading) return null
+  if (isLoading && isPlatformAdmin == null) return null
   if (!isPlatformAdmin) return <Navigate to="/" replace />
   return <Navigate to="/plataforma/organizaciones" replace />
 }

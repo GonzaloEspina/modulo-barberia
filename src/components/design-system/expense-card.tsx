@@ -20,10 +20,10 @@ export function ExpenseCard({
   className,
 }: ExpenseCardProps) {
   return (
-    <article className={cn('hover-surface rounded-xl border bg-card p-4', className)}>
+    <article className={cn('hover-surface listing-sheet rounded-sm p-4', className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex gap-3">
-          <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-sm">
             <Receipt className="size-4" />
           </div>
           <div>

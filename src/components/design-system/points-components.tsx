@@ -21,9 +21,9 @@ export function PointsBalance({
       : null
 
   return (
-    <div className={cn('rounded-xl border bg-card p-5', className)}>
+    <div className={cn('listing-sheet rounded-sm p-5', className)}>
       <p className="text-muted-foreground text-sm">Saldo de puntos</p>
-      <p className="mt-1 text-3xl font-semibold">{balance}</p>
+      <p className="font-listing mt-1 text-3xl font-semibold tabular-nums">{balance}</p>
       {nextExpiresAt && (
         <p className="text-muted-foreground mt-2 text-sm">
           Próximo vencimiento:{' '}
@@ -32,8 +32,8 @@ export function PointsBalance({
       )}
       {progress != null && (
         <div className="mt-4 space-y-2">
-          <div className="bg-muted h-2 overflow-hidden rounded-full">
-            <div className="bg-accent h-full rounded-full" style={{ width: `${progress}%` }} />
+          <div className="bg-muted h-1.5 overflow-hidden rounded-sm">
+            <div className="bg-accent h-full" style={{ width: `${progress}%` }} />
           </div>
           <p className="text-muted-foreground text-xs">
             Te faltan {Math.max(targetPoints! - balance, 0)} pts para el próximo premio

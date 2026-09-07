@@ -45,14 +45,14 @@ export function WeeklyScheduleEditor({
   return (
     <section
       className={cn(
-        'rounded-xl border bg-card p-3',
+        'rounded-sm border bg-card p-3',
         dirty && 'border-warning/40',
         className,
       )}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-          <h3 className="text-sm font-semibold">{getDayLabel(day)}</h3>
+          <h3 className="font-display text-sm font-semibold tracking-wide uppercase">{getDayLabel(day)}</h3>
           {dirty && (
             <span className="text-warning text-xs font-medium">Sin guardar</span>
           )}

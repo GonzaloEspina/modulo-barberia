@@ -58,7 +58,16 @@ export function AppointmentDetailPage() {
     }
   }, [summary?.pending_amount])
 
-  if (isLoading || !appt) {
+  if (isLoading && !appt) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-16 rounded-xl" />
+        <Skeleton className="h-48 rounded-xl" />
+      </div>
+    )
+  }
+
+  if (!appt) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-16 rounded-xl" />

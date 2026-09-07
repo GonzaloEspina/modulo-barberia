@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getSupabaseClient } from '@/lib/supabase'
 import type { Service, ServiceFormInput } from '@/types/service'
 
@@ -8,6 +8,7 @@ const SERVICE_COLUMNS =
 export function useServices(search: string, showInactive = false) {
   return useQuery({
     queryKey: ['services', search, showInactive],
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       let query = getSupabaseClient()
         .from('services')

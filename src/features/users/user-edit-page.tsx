@@ -42,7 +42,7 @@ export function UserEditPage() {
     defaultValues: { password: '', confirm: '' },
   })
 
-  if (isLoading) {
+  if (isLoading && !orgUser) {
     return <Skeleton className="h-64 rounded-xl" />
   }
 

@@ -35,12 +35,12 @@ export function RewardCard({
   return (
     <article
       className={cn(
-        'flex flex-col rounded-xl border bg-card p-4 transition-colors hover-surface',
+        'flex flex-col rounded-sm border bg-card p-4 transition-colors hover-surface',
         canRedeem ? 'border-accent/30' : 'opacity-95',
         className,
       )}
     >
-      <div className="bg-muted text-muted-foreground mb-3 flex size-10 items-center justify-center rounded-lg">
+      <div className="bg-muted text-muted-foreground mb-3 flex size-10 items-center justify-center rounded-sm">
         <Gift className="size-5" />
       </div>
       <h3 className="font-semibold">{name}</h3>

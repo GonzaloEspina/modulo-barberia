@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/features/auth/auth-context'
@@ -38,39 +37,42 @@ export function LoginPage() {
   })
 
   return (
-    <div className="bg-muted/30 flex min-h-svh flex-col items-center justify-center px-4 py-8">
-      <div className="mb-8 flex items-center gap-3">
-        <div className="bg-primary text-primary-foreground flex size-12 items-center justify-center rounded-xl shadow-sm">
-          <Scissors className="size-6" aria-hidden="true" />
+    <div className="bg-background flex min-h-svh flex-col">
+      <header className="bg-sidebar text-sidebar-foreground px-4 py-8 sm:px-8">
+        <div className="mx-auto flex max-w-md items-center gap-3">
+          <div className="bg-sidebar-accent text-sidebar-accent-foreground flex size-11 shrink-0 items-center justify-center rounded-sm">
+            <Scissors className="size-5" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="font-display text-3xl font-semibold tracking-wide uppercase">Barbería</p>
+            <p className="font-listing text-[11px] tracking-[0.16em] text-sidebar-foreground/70 uppercase">
+              Gestión de turnos
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-xl font-semibold tracking-tight">Barbería</p>
-          <p className="text-muted-foreground text-sm">Gestión de turnos</p>
-        </div>
-      </div>
+      </header>
 
-      <Card className="w-full max-w-md shadow-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-xl">Iniciar sesión</CardTitle>
-          <CardDescription>
+      <main className="flex flex-1 items-start justify-center px-4 py-10 sm:items-center">
+        <div className="listing-sheet w-full max-w-md rounded-sm p-6 sm:p-8">
+          <h1 className="font-display text-2xl font-semibold tracking-wide">Iniciar sesión</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
             Accedé con tu cuenta de administrador o barbero.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+
           {!isConfigured && (
-            <p className="text-muted-foreground mb-4 rounded-xl border border-dashed bg-card p-4 text-sm">
+            <p className="text-muted-foreground mt-5 rounded-sm border border-dashed p-4 text-sm">
               Supabase no está configurado. Creá <code className="bg-muted rounded px-1 py-0.5 text-xs">.env.local</code> y ejecutá{' '}
               <code className="bg-muted rounded px-1 py-0.5 text-xs">npx supabase start</code> (requiere Docker).
             </p>
           )}
-          <form className="space-y-4" onSubmit={onSubmit} noValidate>
+
+          <form className="mt-6 space-y-4" onSubmit={onSubmit} noValidate>
             <div className="space-y-2">
               <Label htmlFor="email">Correo electrónico</Label>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
-                className="rounded-lg"
                 placeholder="tu@correo.com"
                 aria-invalid={!!errors.email}
                 {...register('email')}
@@ -88,7 +90,6 @@ export function LoginPage() {
                 id="password"
                 type="password"
                 autoComplete="current-password"
-                className="rounded-lg"
                 aria-invalid={!!errors.password}
                 {...register('password')}
               />
@@ -105,12 +106,12 @@ export function LoginPage() {
               </p>
             )}
 
-            <Button type="submit" variant="accent" className="w-full rounded-lg" disabled={isSubmitting}>
+            <Button type="submit" variant="accent" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? 'Ingresando…' : 'Ingresar'}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </main>
     </div>
   )
 }

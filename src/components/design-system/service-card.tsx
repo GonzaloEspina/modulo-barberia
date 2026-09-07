@@ -30,10 +30,10 @@ export function ServiceCard({
       className={cn(
         'max-w-full text-left transition-colors',
         isLarge
-          ? 'flex min-h-[88px] w-full flex-col gap-2 rounded-xl border p-4'
-          : 'inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm',
+          ? 'flex min-h-[88px] w-full flex-col gap-2 rounded-sm border p-4'
+          : 'inline-flex items-center gap-2 rounded-sm border px-3 py-2 text-sm',
         selected
-          ? 'border-accent bg-accent/10 text-foreground ring-1 ring-accent/30'
+          ? 'border-primary bg-primary text-primary-foreground'
           : 'bg-card hover-surface hover:border-foreground/15',
       )}
     >
@@ -42,7 +42,7 @@ export function ServiceCard({
           className={cn(
             'flex shrink-0 items-center justify-center rounded-full border',
             isLarge ? 'size-5' : 'size-4',
-            selected ? 'border-accent bg-accent text-accent-foreground' : 'border-input bg-background',
+            selected ? 'border-primary-foreground bg-primary-foreground text-primary' : 'border-input bg-background',
           )}
         >
           {selected && <Check className={cn(isLarge ? 'size-3' : 'size-2.5')} strokeWidth={3} />}
@@ -54,6 +54,7 @@ export function ServiceCard({
       <span
         className={cn(
           'text-muted-foreground',
+          selected && 'text-primary-foreground/80',
           isLarge ? 'pl-7 text-sm' : 'shrink-0 text-xs',
         )}
       >

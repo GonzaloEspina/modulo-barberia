@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth/auth-context'
 import { getSupabaseClient } from '@/lib/supabase'
 import type { Profile } from '@/types/database'
@@ -66,6 +66,7 @@ export function useProfile() {
     queryFn: () => fetchProfile(user!.id),
     enabled: isConfigured && !!user?.id,
     staleTime: 60_000,
+    placeholderData: keepPreviousData,
   })
 }
 

@@ -70,21 +70,20 @@ export function ClientForm({ client, isSubmitting, onSubmit, onCancel }: ClientF
   const manualWarning = watch('manual_warning')
 
   useEffect(() => {
-    if (client) {
-      reset({
-        first_name: client.first_name,
-        last_name: client.last_name,
-        phone: client.phone_display ?? client.phone_normalized,
-        email: client.email ?? '',
-        nickname: client.nickname ?? '',
-        birth_date: client.birth_date ?? '',
-        notes: client.notes ?? '',
-        manual_warning: client.manual_warning,
-        manual_warning_reason: client.manual_warning_reason ?? '',
-        booking_override: client.booking_override,
-      })
-    }
-  }, [client, reset])
+    if (!client) return
+    reset({
+      first_name: client.first_name,
+      last_name: client.last_name,
+      phone: client.phone_display ?? client.phone_normalized,
+      email: client.email ?? '',
+      nickname: client.nickname ?? '',
+      birth_date: client.birth_date ?? '',
+      notes: client.notes ?? '',
+      manual_warning: client.manual_warning,
+      manual_warning_reason: client.manual_warning_reason ?? '',
+      booking_override: client.booking_override,
+    })
+  }, [client?.id, reset])
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>

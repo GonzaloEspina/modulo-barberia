@@ -25,7 +25,7 @@ export function ProtectedRoute() {
     )
   }
 
-  if (isLoading) {
+  if (isLoading && !session) {
     return (
       <div className="flex min-h-svh items-center justify-center">
         <p className="text-muted-foreground text-sm">Cargando sesión…</p>
@@ -49,7 +49,7 @@ export function PublicOnlyRoute() {
     return <Outlet />
   }
 
-  if (isLoading) {
+  if (isLoading && !session) {
     return (
       <div className="flex min-h-svh items-center justify-center">
         <p className="text-muted-foreground text-sm">Cargando sesión…</p>

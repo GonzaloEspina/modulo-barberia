@@ -11,16 +11,16 @@ interface MetricCardProps {
 
 export function MetricCard({ label, value, icon: Icon, hint, className }: MetricCardProps) {
   return (
-    <div className={cn('rounded-xl border bg-card p-3 sm:p-4', className)}>
+    <div className={cn('listing-sheet rounded-sm p-3 sm:p-4', className)}>
       <div className="flex items-start justify-between gap-2 sm:gap-3">
-        <div className="min-w-0 space-y-1 sm:space-y-2">
-          <p className="truncate text-lg font-semibold tracking-tight sm:text-2xl">{value}</p>
-          <p className="text-muted-foreground text-xs sm:text-sm">{label}</p>
+        <div className="min-w-0 space-y-1">
+          <p className="font-listing text-muted-foreground text-[11px] font-semibold tracking-[0.12em] uppercase">
+            {label}
+          </p>
+          <p className="font-listing text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">{value}</p>
           {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
         </div>
-        <div className="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-lg sm:size-9">
-          <Icon className="size-3.5 sm:size-4" aria-hidden />
-        </div>
+        <Icon className="text-muted-foreground size-4 shrink-0" aria-hidden />
       </div>
     </div>
   )

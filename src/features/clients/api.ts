@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getSupabaseClient } from '@/lib/supabase'
 import { formatPhoneDisplay, normalizePhoneAr, phoneSearchDigits } from '@/lib/phone'
 import type { Client, ClientFormInput } from '@/types/client'
@@ -121,6 +121,7 @@ export function useClientsPage(options: ClientsPageOptions) {
   return useQuery({
     queryKey: ['clients', 'page', options],
     queryFn: () => fetchClientsPage(options),
+    placeholderData: keepPreviousData,
   })
 }
 

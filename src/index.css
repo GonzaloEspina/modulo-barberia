@@ -4,9 +4,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
+  --radius-sm: calc(var(--radius) - 1px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -45,83 +45,89 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Barlow", ui-sans-serif, sans-serif;
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: #f7f7f5;
-  --foreground: #181817;
+  --radius: 0.1875rem;
+  --background: #eef1f6;
+  --foreground: #141820;
   --card: #ffffff;
-  --card-foreground: #181817;
+  --card-foreground: #141820;
   --popover: #ffffff;
-  --popover-foreground: #181817;
-  --primary: #272724;
-  --primary-foreground: #fafaf9;
-  --secondary: #efefec;
-  --secondary-foreground: #272724;
-  --muted: #f0f0ed;
-  --muted-foreground: #71717a;
-  --accent: #c79a55;
-  --accent-foreground: #181817;
-  --surface-hover: #b0823f;
-  --surface-hover-foreground: #ffffff;
-  --destructive: #c65a5a;
-  --success: #3f8f67;
-  --success-foreground: #fafaf9;
-  --warning: #d89b38;
-  --warning-foreground: #181817;
-  --border: #e8e8e4;
-  --input: #e8e8e4;
-  --ring: #c79a55;
-  --chart-1: #272724;
-  --chart-2: #c79a55;
-  --chart-3: #3f8f67;
-  --chart-4: #71717a;
-  --chart-5: #c65a5a;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #181817;
-  --sidebar-primary: #272724;
-  --sidebar-primary-foreground: #fafaf9;
-  --sidebar-accent: color-mix(in oklab, var(--accent) 18%, var(--card));
-  --sidebar-accent-foreground: #181817;
-  --sidebar-border: #e8e8e4;
-  --sidebar-ring: #c79a55;
+  --popover-foreground: #141820;
+  --primary: #141820;
+  --primary-foreground: #f7f9fc;
+  --secondary: #dce3eb;
+  --secondary-foreground: #141820;
+  --muted: #dce3eb;
+  --muted-foreground: #4d5666;
+  --accent: #c41230;
+  --accent-foreground: #ffffff;
+  --surface-hover: #141820;
+  --surface-hover-foreground: #f7f9fc;
+  --destructive: #c41230;
+  --success: #1b6b45;
+  --success-foreground: #f7f9fc;
+  --warning: #b86a10;
+  --warning-foreground: #141820;
+  --border: #c5ceda;
+  --input: #c5ceda;
+  --ring: #c41230;
+  --chart-1: #141820;
+  --chart-2: #c41230;
+  --chart-3: #1b6b45;
+  --chart-4: #4d5666;
+  --chart-5: #b86a10;
+  --sidebar: #141820;
+  --sidebar-foreground: #e8edf3;
+  --sidebar-primary: #c41230;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #c41230;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2a3140;
+  --sidebar-ring: #c41230;
 }
 
 .dark {
-  --background: #141413;
-  --foreground: #fafaf9;
-  --card: #1c1c1a;
-  --card-foreground: #fafaf9;
-  --popover: #1c1c1a;
-  --popover-foreground: #fafaf9;
-  --primary: #fafaf9;
-  --primary-foreground: #181817;
-  --secondary: #2a2a28;
-  --secondary-foreground: #fafaf9;
-  --muted: #2a2a28;
-  --muted-foreground: #a1a1aa;
-  --accent: #c79a55;
-  --accent-foreground: #181817;
-  --surface-hover: #c79a55;
-  --surface-hover-foreground: #ffffff;
-  --destructive: #c65a5a;
-  --success: #3f8f67;
-  --success-foreground: #fafaf9;
-  --warning: #d89b38;
-  --warning-foreground: #181817;
-  --border: #2f2f2c;
-  --input: #2f2f2c;
-  --ring: #c79a55;
-  --sidebar: #1c1c1a;
-  --sidebar-foreground: #fafaf9;
-  --sidebar-primary: #c79a55;
-  --sidebar-primary-foreground: #181817;
-  --sidebar-accent: color-mix(in oklab, var(--accent) 22%, var(--card));
-  --sidebar-accent-foreground: #fafaf9;
-  --sidebar-border: #2f2f2c;
-  --sidebar-ring: #c79a55;
+  --background: #0e1218;
+  --foreground: #eef1f6;
+  --card: #171c24;
+  --card-foreground: #eef1f6;
+  --popover: #171c24;
+  --popover-foreground: #eef1f6;
+  --primary: #eef1f6;
+  --primary-foreground: #141820;
+  --secondary: #222833;
+  --secondary-foreground: #eef1f6;
+  --muted: #222833;
+  --muted-foreground: #9aa3b2;
+  --accent: #e31b3c;
+  --accent-foreground: #ffffff;
+  --surface-hover: #eef1f6;
+  --surface-hover-foreground: #141820;
+  --destructive: #e31b3c;
+  --success: #3d9a68;
+  --success-foreground: #0e1218;
+  --warning: #e0a03a;
+  --warning-foreground: #0e1218;
+  --border: #2c3442;
+  --input: #2c3442;
+  --ring: #e31b3c;
+  --chart-1: #eef1f6;
+  --chart-2: #e31b3c;
+  --chart-3: #3d9a68;
+  --chart-4: #9aa3b2;
+  --chart-5: #e0a03a;
+  --sidebar: #0a0d12;
+  --sidebar-foreground: #eef1f6;
+  --sidebar-primary: #e31b3c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e31b3c;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2c3442;
+  --sidebar-ring: #e31b3c;
 }
 
 @layer base {
@@ -132,25 +138,47 @@
     overflow-x: clip;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    scrollbar-color: var(--muted-foreground) var(--muted);
   }
   body {
     @apply bg-background font-sans text-foreground antialiased;
     max-width: 100%;
     overflow-x: clip;
+    caret-color: var(--accent);
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-foreground);
   }
   #root {
     min-height: 100svh;
     max-width: 100%;
     overflow-x: clip;
   }
+  h1,
+  h2,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+  }
 }
 
 @layer components {
-  .hover-surface {
-    @apply transition-colors;
+  .font-listing {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
   }
 
-  /* Utilities like bg-card beat @layer components; force hover bg so text stays readable. */
+  .listing-sheet {
+    @apply border border-border bg-card;
+    box-shadow: 0 1px 2px rgb(20 24 32 / 0.06);
+  }
+
+  .hover-surface {
+    @apply transition-colors duration-150;
+  }
+
   .hover-surface:hover {
     background-color: var(--surface-hover) !important;
     color: var(--surface-hover-foreground) !important;
@@ -161,7 +189,7 @@
   }
 
   .interactive-row__cell {
-    @apply transition-colors;
+    @apply transition-colors duration-150;
   }
 
   .group\/interactive-row:hover .interactive-row__cell {

@@ -91,18 +91,18 @@ export function PortalPoints({
   }
 
   return (
-    <Card className="gap-0 py-3 shadow-sm">
+    <Card className="gap-0 py-3">
       <CardContent className="space-y-2 px-4">
         <div className="flex items-baseline justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-semibold">Tus puntos</p>
+            <p className="font-display text-sm font-semibold tracking-wide uppercase">Tus puntos</p>
             {nextExpiresAt && (
               <p className="text-muted-foreground text-xs">
                 Vence {formatAppDate(nextExpiresAt)}
               </p>
             )}
           </div>
-          <p className="text-xl font-semibold tracking-tight tabular-nums">{balance}</p>
+          <p className="font-listing text-3xl font-semibold tabular-nums">{balance}</p>
         </div>
 
         {rewards.length === 0 ? (

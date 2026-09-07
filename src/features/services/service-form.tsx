@@ -57,20 +57,19 @@ export function ServiceForm({ service, isSubmitting, onSubmit, onCancel }: Servi
   const selectedColor = watch('category_color')
 
   useEffect(() => {
-    if (service) {
-      reset({
-        name: service.name,
-        description: service.description ?? '',
-        price: service.price,
-        duration_minutes: service.duration_minutes,
-        points_awarded: service.points_awarded,
-        display_order: service.display_order,
-        category_color: service.category_color ?? '#D97706',
-        is_active: service.is_active,
-        visible_on_portal: service.visible_on_portal !== false,
-      })
-    }
-  }, [service, reset])
+    if (!service) return
+    reset({
+      name: service.name,
+      description: service.description ?? '',
+      price: service.price,
+      duration_minutes: service.duration_minutes,
+      points_awarded: service.points_awarded,
+      display_order: service.display_order,
+      category_color: service.category_color ?? '#D97706',
+      is_active: service.is_active,
+      visible_on_portal: service.visible_on_portal !== false,
+    })
+  }, [service?.id, reset])
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>

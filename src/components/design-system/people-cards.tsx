@@ -96,7 +96,7 @@ export function ClientCard({ client, points, nextAppointment, className, onOpen 
         role="button"
         tabIndex={0}
         className={cn(
-          'hover-surface group rounded-xl border bg-card p-4 cursor-pointer',
+          'hover-surface group listing-sheet rounded-sm p-4 cursor-pointer',
           className,
         )}
         onClick={onOpen}
@@ -113,7 +113,7 @@ export function ClientCard({ client, points, nextAppointment, className, onOpen 
   }
 
   return (
-    <article className={cn('rounded-xl border bg-card p-4', className)}>
+    <article className={cn('listing-sheet rounded-sm p-4', className)}>
       {content}
     </article>
   )
@@ -141,12 +141,12 @@ export function BarberCard({
       type="button"
       onClick={() => onSelect(id)}
       className={cn(
-        'flex w-full items-center gap-3 rounded-xl border bg-card p-4 text-left transition-colors',
-        selected ? 'border-accent bg-accent/5 ring-1 ring-accent/30' : 'hover-surface hover:border-foreground/15',
+        'flex w-full items-center gap-3 rounded-sm border bg-card p-4 text-left transition-colors duration-150',
+        selected ? 'border-primary bg-primary text-primary-foreground' : 'hover-surface hover:border-foreground/15',
       )}
     >
       <div
-        className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+        className="flex size-10 shrink-0 items-center justify-center rounded-sm text-sm font-semibold text-white"
         style={{ backgroundColor: color }}
       >
         {name.slice(0, 1).toUpperCase()}

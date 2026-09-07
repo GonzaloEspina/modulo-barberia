@@ -22,7 +22,7 @@ export function BarberEditPage() {
   const { data: barber, isLoading, isError } = useBarber(id)
   const { updateBarber } = useBarberMutations(profile?.organization_id)
 
-  if (isLoading) {
+  if (isLoading && !barber) {
     return <p className="text-muted-foreground text-sm">Cargando barbero…</p>
   }
 

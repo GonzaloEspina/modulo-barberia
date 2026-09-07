@@ -29,12 +29,12 @@ export function TimeSlot({ label, state, subtitle, onClick, disabled }: TimeSlot
       disabled={disabled || !isInteractive}
       onClick={onClick}
       className={cn(
-        'flex min-h-11 flex-col items-center justify-center rounded-lg border px-2 py-2 text-sm transition-colors',
+        'flex min-h-11 flex-col items-center justify-center rounded-sm border px-2 py-2 text-sm transition-colors duration-150',
         STATE_STYLES[state],
         !isInteractive && 'cursor-not-allowed',
       )}
     >
-      <span className="font-medium">{label}</span>
+      <span className="font-listing font-semibold tabular-nums">{label}</span>
       {subtitle && <span className="text-[10px] opacity-80">{subtitle}</span>}
     </button>
   )

@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toZonedTime } from 'date-fns-tz'
-import { CalendarCheck, Clock } from 'lucide-react'
+import { CalendarCheck } from 'lucide-react'
 import { useState } from 'react'
 import { AppointmentStatusBadge } from '@/components/design-system/status-badges'
 import { Button } from '@/components/ui/button'
@@ -12,15 +12,19 @@ import { formatServicePrice } from '@/types/service'
 import type { AppointmentStatus } from '@/types/appointment'
 
 function formatAppointmentWhen(startsAt: string) {
-  return format(toZonedTime(startsAt, APP_TIMEZONE), "EEEE dd/MM/yyyy · HH:mm", { locale: es })
+  return format(toZonedTime(startsAt, APP_TIMEZONE), "EEEE dd/MM/yyyy", { locale: es })
+}
+
+function formatAppointmentTime(startsAt: string) {
+  return format(toZonedTime(startsAt, APP_TIMEZONE), 'HH:mm')
 }
 
 function PortalAppointmentRow({ appointment }: { appointment: PortalAppointment }) {
   return (
-    <article className="flex items-start gap-3 rounded-xl border bg-background/60 p-3.5">
-      <div className="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg">
-        <Clock className="size-4" aria-hidden />
-      </div>
+    <article className="flex items-start gap-3 py-3">
+      <p className="font-listing w-12 shrink-0 text-lg font-semibold tabular-nums">
+        {formatAppointmentTime(appointment.starts_at)}
+      </p>
       <div className="min-w-0 flex-1 space-y-1">
         <p className="font-medium capitalize">{formatAppointmentWhen(appointment.starts_at)}</p>
         {appointment.service_names && (
@@ -33,7 +37,7 @@ function PortalAppointmentRow({ appointment }: { appointment: PortalAppointment 
       </div>
       <AppointmentStatusBadge
         status={appointment.status as AppointmentStatus}
-        className="shrink-0 px-1.5 py-0 text-[10px]"
+        className="shrink-0"
       />
     </article>
   )
@@ -55,17 +59,15 @@ export function PortalAppointments({
   const [showHistory, setShowHistory] = useState(false)
 
   return (
-    <Card className="gap-4 py-5 shadow-sm">
+    <Card className="gap-4 py-5">
       <CardHeader className="px-5">
-        <CardTitle className="text-base">Mis turnos</CardTitle>
+        <CardTitle className="font-display text-lg tracking-wide uppercase">Mis turnos</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 px-5">
+      <CardContent className="space-y-1 px-5">
         {upcoming.length === 0 ? (
           <div className="flex flex-col items-center px-4 py-8 text-center">
-            <div className="bg-muted text-muted-foreground mb-3 flex size-12 items-center justify-center rounded-xl">
-              <CalendarCheck className="size-5" aria-hidden />
-            </div>
-            <p className="font-medium">No tenés turnos próximos</p>
+            <CalendarCheck className="text-muted-foreground mb-3 size-6" aria-hidden />
+            <p className="font-display text-lg font-semibold tracking-wide uppercase">No tenés turnos próximos</p>
             <p className="text-muted-foreground mt-1 max-w-xs text-sm">
               {canBook
                 ? 'Elegí un servicio más abajo para reservar tu próximo corte.'
@@ -74,11 +76,13 @@ export function PortalAppointments({
           </div>
         ) : (
           <>
-            {upcoming.map((appointment) => (
-              <PortalAppointmentRow key={appointment.id} appointment={appointment} />
-            ))}
+            <div className="divide-y">
+              {upcoming.map((appointment) => (
+                <PortalAppointmentRow key={appointment.id} appointment={appointment} />
+              ))}
+            </div>
             {hasUpcoming && (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground pt-2 text-sm">
                 Ya tenés un turno a futuro. Si necesitás otro, pedilo en el local.
               </p>
             )}
@@ -97,7 +101,7 @@ export function PortalAppointments({
               {showHistory ? 'Ocultar historial' : `Ver historial (${past.length})`}
             </Button>
             {showHistory && (
-              <div className="mt-3 space-y-2">
+              <div className="mt-1 divide-y">
                 {past.map((appointment) => (
                   <PortalAppointmentRow key={appointment.id} appointment={appointment} />
                 ))}

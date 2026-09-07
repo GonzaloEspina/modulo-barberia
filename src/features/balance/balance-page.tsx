@@ -6,8 +6,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { DatePicker } from '@/components/design-system/date-picker'
 import { FilterBar } from '@/components/design-system/filter-bar'
-import { EmptyState, PageHeader, SectionHeader } from '@/components/design-system/layout-primitives'
-import { MetricCard } from '@/components/design-system/metric-card'
+import { BoxOfficeBar, EmptyState, PageHeader, SectionHeader } from '@/components/design-system/layout-primitives'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,7 +18,7 @@ import { APP_TIMEZONE } from '@/lib/constants'
 import { getSupabaseClient } from '@/lib/supabase'
 import { isAdminRole, useProfile } from '@/hooks/use-profile'
 import { formatServicePrice } from '@/types/service'
-import { BarChart3, CircleDollarSign, Clock, Receipt, TrendingUp, Wallet } from 'lucide-react'
+import { BarChart3 } from 'lucide-react'
 
 interface BalanceFilters {
   from: string
@@ -399,19 +398,13 @@ export function BalancePage() {
       </FilterBar>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
-          ))}
-        </div>
+        <Skeleton className="h-28 rounded-sm" />
       ) : (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-          <MetricCard label="Producción del período" value={formatServicePrice(production)} icon={TrendingUp} />
-          <MetricCard label="Cobrado" value={formatServicePrice(cash)} icon={Wallet} />
-          <MetricCard label="Saldo pendiente" value={formatServicePrice(pendingBalance)} icon={Clock} />
-          <MetricCard label="Gastos" value={formatServicePrice(expenses)} icon={Receipt} />
-          <MetricCard label="Resultado de caja" value={formatServicePrice(cashResult)} icon={CircleDollarSign} />
-        </div>
+        <BoxOfficeBar
+          left={{ label: 'Producción', value: formatServicePrice(production) }}
+          right={{ label: 'Caja', value: formatServicePrice(cash) }}
+          note={`Pendiente ${formatServicePrice(pendingBalance)} · Gastos ${formatServicePrice(expenses)} · Resultado ${formatServicePrice(cashResult)}`}
+        />
       )}
 
       {!isLoading && (

@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-07T08:37:00.000Z",
+  "title": "Design System: Barbería",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Ink",
+        "canonical": "#141820",
+        "tonalRamp": ["#1a1e26", "#2a3140", "#3d4554", "#4d5666", "#7a8494", "#a8b0bc", "#c5ceda", "#eef1f6"]
+      },
+      "milk": {
+        "role": "primary",
+        "displayName": "Milk",
+        "canonical": "#f7f9fc",
+        "tonalRamp": ["#141820", "#2a3140", "#4d5666", "#7a8494", "#a8b0bc", "#c5ceda", "#e8edf3", "#f7f9fc"]
+      },
+      "vermillion": {
+        "role": "secondary",
+        "displayName": "Vermillion",
+        "canonical": "#c41230",
+        "tonalRamp": ["#3a0810", "#6b0c1c", "#9a1028", "#c41230", "#e31b3c", "#ef5a6e", "#f5a3ae", "#fde8eb"]
+      },
+      "lobby": {
+        "role": "neutral",
+        "displayName": "Lobby",
+        "canonical": "#eef1f6",
+        "tonalRamp": ["#141820", "#2a3140", "#4d5666", "#7a8494", "#a8b0bc", "#c5ceda", "#dce3eb", "#eef1f6"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#141820", "#2a3140", "#4d5666", "#7a8494", "#c5ceda", "#dce3eb", "#eef1f6", "#ffffff"]
+      },
+      "wash": {
+        "role": "neutral",
+        "displayName": "Wash",
+        "canonical": "#dce3eb",
+        "tonalRamp": ["#141820", "#2a3140", "#4d5666", "#7a8494", "#a8b0bc", "#c5ceda", "#dce3eb", "#eef1f6"]
+      },
+      "steel": {
+        "role": "neutral",
+        "displayName": "Steel",
+        "canonical": "#4d5666",
+        "tonalRamp": ["#1a1e26", "#2a3140", "#3d4554", "#4d5666", "#7a8494", "#a8b0bc", "#c5ceda", "#eef1f6"]
+      },
+      "rail": {
+        "role": "neutral",
+        "displayName": "Rail",
+        "canonical": "#c5ceda",
+        "tonalRamp": ["#141820", "#2a3140", "#4d5666", "#7a8494", "#a8b0bc", "#c5ceda", "#dce3eb", "#eef1f6"]
+      },
+      "forest": {
+        "role": "tertiary",
+        "displayName": "Forest",
+        "canonical": "#1b6b45",
+        "tonalRamp": ["#052016", "#0d3d28", "#145536", "#1b6b45", "#3d9a68", "#6bb88e", "#a8d4bc", "#e6f4ec"]
+      },
+      "amber": {
+        "role": "tertiary",
+        "displayName": "Amber",
+        "canonical": "#b86a10",
+        "tonalRamp": ["#2c1804", "#5c3508", "#8a500c", "#b86a10", "#e0a03a", "#e8bc70", "#f0d6a8", "#faf0dc"]
+      },
+      "sidebar-mist": {
+        "role": "neutral",
+        "displayName": "Sidebar Mist",
+        "canonical": "#e8edf3",
+        "tonalRamp": ["#141820", "#2a3140", "#4d5666", "#7a8494", "#a8b0bc", "#c5ceda", "#e8edf3", "#f7f9fc"]
+      },
+      "sidebar-seam": {
+        "role": "neutral",
+        "displayName": "Sidebar Seam",
+        "canonical": "#2a3140",
+        "tonalRamp": ["#0a0d12", "#141820", "#2a3140", "#3d4554", "#4d5666", "#7a8494", "#c5ceda", "#eef1f6"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Org masthead, login wordmark, portal greeting, box-office amounts. Barlow Condensed, uppercase, semibold."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles such as Cartelera de hoy. Barlow Condensed, uppercase."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Client names, card titles, default button type. Barlow semibold."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running copy, form labels, service lines. Barlow regular."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Column heads, pane labels, status chips, listing times. Condensed uppercase with tabular nums."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sheet",
+        "value": "0 1px 2px rgb(20 24 32 / 0.06)",
+        "purpose": "Listing sheets and default cards, always with a 1px rail."
+      },
+      {
+        "name": "control",
+        "value": "0 1px 2px rgb(0 0 0 / 0.05)",
+        "purpose": "Outline buttons, inputs, and selects — a stroke companion, not lift."
+      },
+      {
+        "name": "dialog",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Modal interruption only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "color-swap",
+        "value": "150ms",
+        "purpose": "Hover invert and button fill changes. Colors only; no lift."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink plate for structural confirms.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Guardar</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 8px 16px; border: 0; border-radius: 2px; background: var(--primary); color: var(--primary-foreground); font-family: var(--font-sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 150ms; } .ds-btn-primary:hover { background: color-mix(in oklab, var(--primary) 90%, black); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent); }"
+    },
+    {
+      "name": "Accent Button",
+      "kind": "button",
+      "refersTo": "button-accent",
+      "description": "Vermillion CTA for Nuevo turno, Ingresar, Canjear.",
+      "html": "<button class=\"ds-btn-accent\" type=\"button\">Nuevo turno</button>",
+      "css": ".ds-btn-accent { display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 8px 16px; border: 0; border-radius: 2px; background: var(--accent); color: var(--accent-foreground); font-family: var(--font-sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 150ms; } .ds-btn-accent:hover { background: color-mix(in oklab, var(--accent) 90%, black); } .ds-btn-accent:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 40%, transparent); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Paper plate with rail; hover inverts to ink.",
+      "html": "<button class=\"ds-btn-outline\" type=\"button\">Salir</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 8px 16px; border: 1px solid var(--border); border-radius: 2px; background: var(--card); color: var(--foreground); font-family: var(--font-sans); font-size: 14px; font-weight: 600; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-btn-outline:hover { background: var(--surface-hover); color: var(--surface-hover-foreground); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost-hover",
+      "description": "No fill at rest; hover inverts like a listing row.",
+      "html": "<button class=\"ds-btn-ghost\" type=\"button\">Ver todos</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 6px 12px; border: 0; border-radius: 2px; background: transparent; color: var(--foreground); font-family: var(--font-sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-btn-ghost:hover { background: var(--surface-hover); color: var(--surface-hover-foreground); } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent); }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Paper field with rail stroke and vermillion focus ring.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field__label\">Correo electrónico</span><input class=\"ds-field__input\" type=\"email\" placeholder=\"tu@correo.com\" /></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 8px; font-family: var(--font-sans); } .ds-field__label { font-size: 14px; font-weight: 500; color: var(--foreground); } .ds-field__input { height: 36px; padding: 4px 12px; border: 1px solid var(--input); border-radius: 2px; background: var(--card); color: var(--foreground); font-family: var(--font-sans); font-size: 14px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); } .ds-field__input::placeholder { color: var(--muted-foreground); } .ds-field__input:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent); }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "badge-now",
+      "description": "Condensed uppercase chip; vermillion means in progress / Now.",
+      "html": "<span class=\"ds-chip ds-chip--now\">En curso</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 2px; font-family: var(--font-display); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; } .ds-chip--now { background: var(--accent); color: var(--accent-foreground); } .ds-chip:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent); }"
+    },
+    {
+      "name": "Listing Sheet",
+      "kind": "card",
+      "refersTo": "listing-sheet",
+      "description": "White paper plate on lobby with rail and hairline sheet shadow.",
+      "html": "<div class=\"ds-sheet\"><h3 class=\"ds-sheet__title\">Resumen del turno</h3><p class=\"ds-sheet__body\">Cliente, servicio y total en una hoja.</p></div>",
+      "css": ".ds-sheet { background: var(--card); color: var(--card-foreground); border: 1px solid var(--border); border-radius: 2px; padding: 16px; box-shadow: 0 1px 2px rgb(20 24 32 / 0.06); font-family: var(--font-sans); } .ds-sheet__title { margin: 0 0 8px; font-family: var(--font-display); font-size: 18px; font-weight: 600; letter-spacing: 0.025em; text-transform: uppercase; } .ds-sheet__body { margin: 0; font-size: 14px; color: var(--muted-foreground); }"
+    },
+    {
+      "name": "Live Listing Row",
+      "kind": "custom",
+      "refersTo": "row-live",
+      "description": "Cartelera row; in-progress inverts the whole plate to ink.",
+      "html": "<article class=\"ds-row ds-row--live\"><span class=\"ds-row__time\">10:30</span><span class=\"ds-row__name\">Gian Anibaldi</span><span class=\"ds-row__meta\">Corte · Sala 1</span><span class=\"ds-chip ds-chip--now\">En curso</span></article>",
+      "css": ".ds-row { display: grid; grid-template-columns: 3.5rem minmax(0,1fr) minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; font-family: var(--font-sans); color: var(--foreground); } .ds-row--live { background: var(--primary); color: var(--primary-foreground); } .ds-row__time { font-family: var(--font-display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; } .ds-row__name { font-size: 14px; font-weight: 600; } .ds-row__meta { font-size: 14px; opacity: 0.8; } .ds-chip { display: inline-flex; padding: 2px 6px; border-radius: 2px; font-family: var(--font-display); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; } .ds-row--live .ds-chip--now { background: #ffffff; color: var(--destructive); } .ds-row:not(.ds-row--live):hover { background: var(--surface-hover); color: var(--surface-hover-foreground); }"
+    },
+    {
+      "name": "Box Office Bar",
+      "kind": "custom",
+      "refersTo": "box-office-production",
+      "description": "Opposing panes: production on ink, cash on vermillion.",
+      "html": "<div class=\"ds-boxoffice\"><div class=\"ds-boxoffice__pane ds-boxoffice__pane--ink\"><p class=\"ds-boxoffice__label\">Producción</p><p class=\"ds-boxoffice__value\">$120.000</p></div><div class=\"ds-boxoffice__pane ds-boxoffice__pane--accent\"><p class=\"ds-boxoffice__label\">Caja</p><p class=\"ds-boxoffice__value\">$80.000</p></div></div>",
+      "css": ".ds-boxoffice { display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border: 1px solid var(--border); border-radius: 2px; box-shadow: 0 1px 2px rgb(20 24 32 / 0.06); } .ds-boxoffice__pane { display: flex; flex-direction: column; justify-content: space-between; gap: 8px; padding: 20px 16px; } .ds-boxoffice__pane--ink { background: var(--primary); color: var(--primary-foreground); } .ds-boxoffice__pane--accent { background: var(--accent); color: var(--accent-foreground); } .ds-boxoffice__label { margin: 0; font-family: var(--font-display); font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.8; } .ds-boxoffice__value { margin: 0; font-family: var(--font-display); font-size: 2rem; font-weight: 600; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Sidebar Nav Active",
+      "kind": "nav",
+      "refersTo": "nav-active",
+      "description": "Ink sidebar; active item is a vermillion plate.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav__item\" href=\"#\">Agenda</a><a class=\"ds-nav__item ds-nav__item--active\" href=\"#\">Resumen</a></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 4px; padding: 8px; background: var(--sidebar); color: var(--sidebar-foreground); border-radius: 2px; font-family: var(--font-sans); } .ds-nav__item { display: flex; align-items: center; height: 32px; padding: 8px; border-radius: 2px; color: inherit; font-size: 14px; text-decoration: none; } .ds-nav__item:hover { background: rgb(255 255 255 / 0.08); } .ds-nav__item--active { background: var(--sidebar-accent); color: var(--sidebar-accent-foreground); font-weight: 600; } .ds-nav__item:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--sidebar-ring); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Cartelera de silla",
+    "overview": "The product reads like a cinema listing under fluorescent lobby light, not like a SaaS dashboard. The operator scans today’s program as hour, name, service, and room on a white sheet; the live session inverts to ink; box office pits production against cash as opposing panes. Vermillion is reserved for Now and for the action that writes the next turn.\n\nThe world is cool, high-key, and slightly industrial: lobby fluorescent behind paper sheets, near-square plates, condensed numerals for time and money. Density is listing density — tight rows, generous section gaps — so the day of the chair is scannable on a phone at the station. Confirmed visual rejections: the previous cream + charcoal + gold + Inter look, generic equal-tile KPI grids, and luxury barbershop tropes.",
+    "keyCharacteristics": [
+      "Fluorescent lobby field with white listing sheets and ink type",
+      "Barlow for names and copy; Barlow Condensed for mastheads, hours, money, and column heads",
+      "Vermillion only for Now, primary action, focus, and selection",
+      "Live row and hover invert to ink on milk",
+      "Near-square plates (2px on sheets and controls; 3px CSS radius token)",
+      "Hairline rail + 1px ink-tinted sheet shadow; no hard offset blocks"
+    ],
+    "rules": [
+      {
+        "name": "The Vermillion Privilege Rule",
+        "body": "Vermillion marks Now, the one action that advances the day, focus, and selection. It is not a wash, not a left stripe, not a decorative icon tint.",
+        "section": "colors"
+      },
+      {
+        "name": "The Invert-to-Ink Rule",
+        "body": "A live session, a hovered listing row, and a highlighted menu item invert the whole surface to ink on milk. Do not signal “active” with a colored bar or a soft badge alone.",
+        "section": "colors"
+      },
+      {
+        "name": "The Condensed Listing Rule",
+        "body": "Hours, money, dates, and column heads use Barlow Condensed with tabular numbers. Names and sentences stay in Barlow. Do not add a third family.",
+        "section": "typography"
+      },
+      {
+        "name": "The Masthead Speaks Rule",
+        "body": "The page title is Condensed, semibold, uppercase. It does not sit under a kicker or eyebrow; the heading carries its own weight.",
+        "section": "typography"
+      },
+      {
+        "name": "The Cartelera Rule",
+        "body": "Today’s program is a divided listing (time | name | service | room), not a grid of equal metric tiles. Box office is one opposing strip under the listing, not four hero numbers.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Sheet Rule",
+        "body": "Resting surfaces are flat paper on lobby. No hard offset block shadows, no glass, no colored halo. Invert or change fill for state; do not raise the plate.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Plate Rule",
+        "body": "If it is a sheet, a row, a button, or a chip, it is a 2–3px plate. Soft 12px cards and pill chrome belong to the discarded Inter/shadcn look.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do set the canvas to lobby and put content on paper sheets with a 1px rail.",
+      "Do set live and hover rows to full ink invert, not a tint or a side stripe.",
+      "Do put the day’s action on the vermillion accent button (Nuevo turno, Ingresar).",
+      "Do set hours, money, and column heads in Barlow Condensed with tabular numbers.",
+      "Do keep mastheads Condensed, semibold, uppercase, with the date or caption in listing type beside or below — not as a kicker above.",
+      "Do theme selection, caret, and focus from vermillion; scrollbars from steel on wash."
+    ],
+    "donts": [
+      "Don't rebuild a page as four equal metric tiles (the discarded Resumen).",
+      "Don't use cream, gold, Inter, or soft 12px shadcn cards — that identity is retired.",
+      "Don't wash a screen in vermillion or use it as a left/right accent bar.",
+      "Don't add a kicker or eyebrow above a heading.",
+      "Don't use hard offset block shadows or glass/blur decoration.",
+      "Don't introduce a third type family or monospace as a “technical” costume.",
+      "Don't treat `.dark` as the product world; the lobby is fluorescent and light."
+    ]
+  }
+}

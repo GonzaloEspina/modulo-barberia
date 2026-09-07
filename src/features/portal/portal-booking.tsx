@@ -40,7 +40,7 @@ function ServiceOption({
   return (
     <label
       className={cn(
-        'flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm transition-colors',
+        'flex cursor-pointer items-center gap-3 rounded-sm border p-3 text-sm transition-colors duration-150',
         checked ? 'border-accent bg-accent/10' : 'hover:border-foreground/20',
       )}
     >
@@ -134,9 +134,9 @@ export function PortalBooking({ sessionToken, redemptions, onBooked }: PortalBoo
   }
 
   return (
-    <Card className="gap-4 py-5 shadow-sm">
+    <Card className="gap-4 py-5">
       <CardHeader className="px-5">
-        <CardTitle className="text-base">Reservar turno</CardTitle>
+        <CardTitle className="font-display text-lg tracking-wide uppercase">Reservar turno</CardTitle>
         <CardDescription>Elegí el servicio, el día y el horario.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5 px-5">

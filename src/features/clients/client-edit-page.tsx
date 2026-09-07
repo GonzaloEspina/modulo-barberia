@@ -76,7 +76,7 @@ export function ClientEditPage() {
   const { data: redemptions } = useRedemptions()
   const { updateClient } = useClientMutations(profile?.organization_id)
 
-  if (isLoading) {
+  if (isLoading && !client) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-24 rounded-xl" />

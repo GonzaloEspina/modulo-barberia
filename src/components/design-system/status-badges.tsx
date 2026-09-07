@@ -13,12 +13,12 @@ import {
 import { cn } from '@/lib/utils'
 
 const STATUS_STYLES: Record<AppointmentStatus, string> = {
-  pending: 'bg-muted text-muted-foreground border-transparent',
-  confirmed: 'bg-muted text-muted-foreground border-transparent',
-  in_progress: 'bg-muted text-muted-foreground border-transparent',
-  completed: 'bg-success/10 text-success border-success/20',
+  pending: 'bg-secondary text-secondary-foreground border-transparent',
+  confirmed: 'bg-primary text-primary-foreground border-transparent',
+  in_progress: 'bg-accent text-accent-foreground border-transparent',
+  completed: 'bg-success text-success-foreground border-transparent',
   cancelled: 'bg-muted text-muted-foreground border-transparent line-through',
-  no_show: 'bg-destructive/10 text-destructive border-destructive/20',
+  no_show: 'bg-accent/15 text-accent border-accent/30',
 }
 
 export function AppointmentStatusBadge({
@@ -66,9 +66,9 @@ const PAYMENT_LABELS: Record<PaymentStatusKind, string> = {
 }
 
 const PAYMENT_STYLES: Record<PaymentStatusKind, string> = {
-  pending: 'bg-warning/10 text-warning border-warning/20',
-  partial: 'bg-accent/15 text-accent-foreground border-accent/20',
-  paid: 'bg-success/10 text-success border-success/20',
+  pending: 'bg-warning text-warning-foreground border-transparent',
+  partial: 'bg-secondary text-secondary-foreground border-transparent',
+  paid: 'bg-success text-success-foreground border-transparent',
   refunded: 'bg-muted text-muted-foreground border-transparent',
 }
 

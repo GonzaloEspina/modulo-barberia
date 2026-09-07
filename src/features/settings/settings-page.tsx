@@ -151,9 +151,10 @@ function PaymentMethodItem({
   )
 
   useEffect(() => {
+    if (editing) return
     setName(method.name)
     setDiscount(method.discount_value > 0 ? String(method.discount_value) : '')
-  }, [method])
+  }, [editing, method.id, method.name, method.discount_value])
 
   const cancel = () => {
     setName(method.name)
@@ -227,7 +228,7 @@ function PaymentMethodItem({
 export function SettingsPage() {
   const { data: profile } = useProfile()
   const orgId = profile?.organization_id
-  const { data: org, isLoading: loadingOrg } = useOrganizationSettings(orgId)
+  const { data: org } = useOrganizationSettings(orgId)
   const { data: pointsConfig } = usePointsConfigAdmin()
   const { data: absenceConfig } = useAbsenceConfig()
   const { data: paymentMethods } = usePaymentMethodsAdmin()
@@ -258,26 +259,24 @@ export function SettingsPage() {
       address: org.address ?? '',
       settings: { ...DEFAULT_SETTINGS, ...org.settings },
     })
-  }, [org])
+  }, [org?.id])
 
   useEffect(() => {
-    if (pointsConfig) {
-      setPointsEnabled(Boolean(pointsConfig.enabled))
-      setCreditMoment(pointsConfig.credit_moment as string)
-      setExpirationMonths(Number(pointsConfig.expiration_value ?? 12))
-    }
-  }, [pointsConfig])
+    if (!pointsConfig) return
+    setPointsEnabled(Boolean(pointsConfig.enabled))
+    setCreditMoment(pointsConfig.credit_moment as string)
+    setExpirationMonths(Number(pointsConfig.expiration_value ?? 12))
+  }, [pointsConfig?.id])
 
   useEffect(() => {
-    if (absenceConfig) {
-      setThresholdCount(Number(absenceConfig.threshold_count ?? 3))
-      setRuleType((absenceConfig.rule_type as AbsenceRuleType) ?? 'within_period')
-      setPeriodValue(Number(absenceConfig.period_value ?? 3))
-      setPeriodUnit((absenceConfig.period_unit as AbsencePeriodUnit) ?? 'months')
-    }
-  }, [absenceConfig])
+    if (!absenceConfig) return
+    setThresholdCount(Number(absenceConfig.threshold_count ?? 3))
+    setRuleType((absenceConfig.rule_type as AbsenceRuleType) ?? 'within_period')
+    setPeriodValue(Number(absenceConfig.period_value ?? 3))
+    setPeriodUnit((absenceConfig.period_unit as AbsencePeriodUnit) ?? 'months')
+  }, [absenceConfig?.id])
 
-  if (loadingOrg || !form) {
+  if (!form) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-16 rounded-xl" />
