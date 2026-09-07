@@ -17,8 +17,8 @@ function formatAppointmentWhen(startsAt: string) {
 
 function PortalAppointmentRow({ appointment }: { appointment: PortalAppointment }) {
   return (
-    <article className="flex items-start gap-3 rounded-xl border bg-background/60 p-3.5">
-      <div className="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg">
+    <article className="flex items-start gap-3 border-b border-border px-3 py-3 last:border-0">
+      <div className="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-sm">
         <Clock className="size-4" aria-hidden />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
@@ -55,14 +55,16 @@ export function PortalAppointments({
   const [showHistory, setShowHistory] = useState(false)
 
   return (
-    <Card className="gap-4 py-5 shadow-sm">
+    <Card className="gap-4 rounded-sm py-5 shadow-none">
       <CardHeader className="px-5">
-        <CardTitle className="text-base">Mis turnos</CardTitle>
+        <CardTitle className="font-display text-base font-semibold tracking-wide uppercase">
+          Mis turnos
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 px-5">
         {upcoming.length === 0 ? (
           <div className="flex flex-col items-center px-4 py-8 text-center">
-            <div className="bg-muted text-muted-foreground mb-3 flex size-12 items-center justify-center rounded-xl">
+            <div className="bg-muted text-muted-foreground mb-3 flex size-12 items-center justify-center rounded-sm">
               <CalendarCheck className="size-5" aria-hidden />
             </div>
             <p className="font-medium">No tenés turnos próximos</p>

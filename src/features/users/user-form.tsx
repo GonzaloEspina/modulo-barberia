@@ -225,7 +225,7 @@ export function UserEditForm({ user, isSubmitting, onSubmit, onCancel }: UserEdi
       barber_id: user.barber_id ?? '',
       is_active: user.is_active,
     })
-  }, [user, reset])
+  }, [user.id, user.full_name, user.role, user.barber_id, user.is_active, reset])
 
   const role = watch('role')
 

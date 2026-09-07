@@ -84,7 +84,7 @@ export function ClientForm({ client, isSubmitting, onSubmit, onCancel }: ClientF
         booking_override: client.booking_override,
       })
     }
-  }, [client, reset])
+  }, [client?.id, reset])
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>

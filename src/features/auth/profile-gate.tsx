@@ -9,7 +9,7 @@ export function ProfileGate() {
   const { user, signOut } = useAuth()
   const { data: profile, isLoading, isError, error } = useProfile()
 
-  if (isLoading) {
+  if (isLoading && !profile) {
     return (
       <div className="flex min-h-svh items-center justify-center">
         <p className="text-muted-foreground text-sm">Cargando perfil…</p>
