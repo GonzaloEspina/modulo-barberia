@@ -78,7 +78,7 @@ export function BarberForm({ barber, isSubmitting, onSubmit, onCancel }: BarberF
         linked_profile_id: barber.user_id ?? '',
       })
     }
-  }, [barber, reset])
+  }, [barber?.id, reset])
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>

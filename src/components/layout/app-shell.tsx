@@ -26,7 +26,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/features/auth/auth-context'
 import { useIsPlatformAdmin } from '@/features/platform/api'
 import { isAdminRole, useProfile } from '@/hooks/use-profile'
@@ -92,13 +91,17 @@ export function AppShell({ children }: AppShellProps) {
     <SidebarProvider>
       <Sidebar variant="inset" collapsible="icon">
         <SidebarHeader className="border-sidebar-border border-b group-data-[collapsible=icon]:hidden">
-          <div className="flex items-center gap-2 px-2 py-1">
-            <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-lg">
+          <div className="flex items-center gap-2.5 px-2 py-2">
+            <div className="bg-sidebar-accent text-sidebar-accent-foreground flex size-8 items-center justify-center rounded-sm">
               <Scissors className="size-4" />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{profile?.organization?.name ?? 'Barbatero'}</p>
-              <p className="text-muted-foreground truncate text-xs">Gestión de barbería</p>
+              <p className="font-display truncate text-base font-semibold tracking-wide uppercase">
+                {profile?.organization?.name ?? 'Barbatero'}
+              </p>
+              <p className="truncate text-[11px] tracking-[0.12em] text-sidebar-foreground/55 uppercase">
+                Gestión de barbería
+              </p>
             </div>
           </div>
         </SidebarHeader>
@@ -156,12 +159,12 @@ export function AppShell({ children }: AppShellProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton className="h-auto py-2">
-                    <div className="bg-muted flex size-8 items-center justify-center rounded-lg text-xs font-semibold">
+                    <div className="flex size-8 items-center justify-center rounded-sm bg-white/10 text-xs font-semibold">
                       {profile?.full_name?.slice(0, 1).toUpperCase() ?? '?'}
                     </div>
                     <div className="min-w-0 text-left group-data-[collapsible=icon]:hidden">
                       <p className="truncate text-sm font-medium">{profile?.full_name}</p>
-                      <p className="text-muted-foreground truncate text-xs">
+                      <p className="truncate text-[11px] tracking-wide text-sidebar-foreground/55 uppercase">
                         {profile ? ROLE_LABELS[profile.role] : ''}
                       </p>
                     </div>
@@ -180,11 +183,12 @@ export function AppShell({ children }: AppShellProps) {
         <SidebarRail />
       </Sidebar>
       <SidebarInset className="min-h-0 min-w-0 overflow-x-clip">
-        <header className="bg-background/80 sticky top-0 z-20 flex h-14 items-center gap-3 border-b px-4 backdrop-blur-sm">
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b bg-card px-4">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="hidden h-5 sm:block" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{profile?.organization?.name}</p>
+            <p className="font-display truncate text-sm font-semibold tracking-wide uppercase">
+              {profile?.organization?.name}
+            </p>
           </div>
           <Button variant="outline" size="sm" className="hidden sm:inline-flex" onClick={() => void signOut()}>
             <LogOut className="size-4" />

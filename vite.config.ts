@@ -10,6 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      devOptions: { enabled: false },
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
@@ -18,8 +19,8 @@ export default defineConfig({
         name: 'Barbatero',
         short_name: 'Barbatero',
         description: 'Gestión de turnos para barberías',
-        theme_color: '#1A1A2E',
-        background_color: '#F8F9FA',
+        theme_color: '#141820',
+        background_color: '#eef1f6',
         display: 'standalone',
         lang: 'es-AR',
         start_url: '/',

@@ -55,18 +55,27 @@ export function PortalPage() {
 
     return (
       <div className="bg-background min-h-screen">
-        <header className="bg-card/90 sticky top-0 z-20 border-b backdrop-blur-sm">
+        <header className="bg-sidebar text-sidebar-foreground">
           <div className="mx-auto flex h-14 max-w-2xl items-center justify-between gap-3 px-4">
             <div className="flex min-w-0 items-center gap-2.5">
-              <div className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-sidebar-accent text-sidebar-accent-foreground flex size-8 shrink-0 items-center justify-center rounded-sm">
                 <Scissors className="size-4" aria-hidden />
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{orgName}</p>
-                <p className="text-muted-foreground text-xs">Portal cliente</p>
+                <p className="font-display truncate text-sm font-semibold tracking-wide uppercase">
+                  {orgName}
+                </p>
+                <p className="font-listing text-[11px] tracking-[0.14em] text-sidebar-foreground/60 uppercase">
+                  Portal cliente
+                </p>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="rounded-lg" onClick={() => void handleLogout()}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-white/10 hover:text-white"
+              onClick={() => void handleLogout()}
+            >
               <LogOut className="size-4" />
               Salir
             </Button>
@@ -74,8 +83,10 @@ export function PortalPage() {
         </header>
 
         <main className="mx-auto max-w-2xl space-y-6 px-4 py-8">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Hola, {greetingName}</h1>
+          <div className="border-b border-border pb-4">
+            <h1 className="font-display text-3xl font-semibold tracking-wide uppercase">
+              Hola, {greetingName}
+            </h1>
             <p className="text-muted-foreground mt-1 text-sm">
               Consultá tus puntos, canjes y turnos.
             </p>
@@ -83,8 +94,8 @@ export function PortalPage() {
 
           {isLoading && (
             <div className="space-y-4">
-              <Skeleton className="h-24 rounded-xl bg-muted" />
-              <Skeleton className="h-64 rounded-xl bg-muted" />
+              <Skeleton className="h-24 rounded-sm" />
+              <Skeleton className="h-64 rounded-sm" />
             </div>
           )}
 
@@ -102,7 +113,9 @@ export function PortalPage() {
                 upcoming={dashboard.upcoming_appointments}
                 past={dashboard.past_appointments}
                 canBook={showBooking}
-                hasUpcoming={dashboard.has_upcoming_appointment ?? dashboard.upcoming_appointments.length > 0}
+                hasUpcoming={
+                  dashboard.has_upcoming_appointment ?? dashboard.upcoming_appointments.length > 0
+                }
               />
 
               {showBooking && session.token && (
@@ -114,19 +127,23 @@ export function PortalPage() {
               )}
 
               {dashboard.memberships.length > 0 && (
-                <Card className="gap-3 py-5 shadow-sm">
+                <Card className="gap-3 rounded-sm py-5 shadow-none">
                   <CardHeader className="px-5">
-                    <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
+                    <CardTitle className="font-display flex items-center gap-2 text-base font-semibold tracking-wide uppercase">
                       <Ticket className="size-4" aria-hidden />
                       Membresías
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3 px-5">
                     {dashboard.memberships.map((m) => (
-                      <div key={m.id}>
+                      <div
+                        key={m.id}
+                        className="flex items-baseline justify-between gap-3 border-b border-border pb-3 last:border-0 last:pb-0"
+                      >
                         <p className="font-medium">{m.plan_name}</p>
-                        <p className="text-muted-foreground text-sm">
-                          {m.appointments_remaining}/{m.appointments_total} turnos · vence {formatAppDate(m.expires_at)}
+                        <p className="text-muted-foreground font-listing text-sm tabular-nums">
+                          {m.appointments_remaining}/{m.appointments_total} ·{' '}
+                          {formatAppDate(m.expires_at)}
                         </p>
                       </div>
                     ))}
@@ -141,28 +158,32 @@ export function PortalPage() {
   }
 
   return (
-    <div className="bg-background flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md space-y-8">
-        <div className="flex flex-col items-center text-center">
-          <div className="bg-primary text-primary-foreground mb-4 flex size-12 items-center justify-center rounded-xl shadow-sm">
-            <Scissors className="size-6" aria-hidden />
+    <div className="bg-background flex min-h-screen flex-col">
+      <header className="bg-sidebar text-sidebar-foreground px-4 py-8">
+        <div className="mx-auto flex max-w-md flex-col items-start gap-3">
+          <div className="bg-sidebar-accent text-sidebar-accent-foreground flex size-11 items-center justify-center rounded-sm">
+            <Scissors className="size-5" aria-hidden />
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Portal cliente</h1>
-          <p className="text-muted-foreground mt-2 max-w-sm text-sm">
-            Ingresá con el teléfono registrado en el local para ver tus turnos, puntos y membresías.
-          </p>
+          <div>
+            <h1 className="font-display text-3xl font-semibold tracking-wide uppercase">
+              Portal cliente
+            </h1>
+            <p className="mt-2 max-w-sm text-sm text-sidebar-foreground/75">
+              Ingresá con el teléfono registrado en el local para ver tus turnos, puntos y
+              membresías.
+            </p>
+          </div>
         </div>
+      </header>
 
-        <Card className="rounded-xl shadow-sm">
-          <CardHeader>
-            <CardTitle>Acceso con teléfono</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+      <main className="flex flex-1 items-start justify-center px-4 py-10">
+        <div className="listing-sheet w-full max-w-md rounded-sm p-6">
+          <h2 className="font-display text-xl font-semibold tracking-wide">Acceso con teléfono</h2>
+          <div className="mt-5 space-y-3">
             <div className="space-y-2">
               <Label htmlFor="portal-phone">Teléfono</Label>
               <Input
                 id="portal-phone"
-                className="rounded-lg"
                 placeholder="11 1234-5678"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -172,17 +193,17 @@ export function PortalPage() {
               />
             </div>
             <Button
-              className="w-full rounded-lg"
+              className="w-full"
               variant="accent"
-              disabled={login.isPending || !phone.trim()}
+              disabled={login.isPending}
               onClick={() => void handleLogin()}
             >
               {login.isPending ? 'Ingresando…' : 'Ingresar'}
             </Button>
             {message && <p className="text-sm text-destructive">{message}</p>}
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+      </main>
     </div>
   )
 }

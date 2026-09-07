@@ -70,7 +70,7 @@ export function ServiceForm({ service, isSubmitting, onSubmit, onCancel }: Servi
         visible_on_portal: service.visible_on_portal !== false,
       })
     }
-  }, [service, reset])
+  }, [service?.id, reset])
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
