@@ -128,8 +128,7 @@ export function AppointmentEditPage() {
   const openWeekdays = useMemo(() => {
     const days = new Set<number>()
     for (const row of generalSchedules ?? []) {
-      if (row.is_closed) continue
-      days.add(row.day_of_week)
+      if (row.is_active) days.add(row.day_of_week)
     }
     return days
   }, [generalSchedules])
