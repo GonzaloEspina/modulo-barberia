@@ -110,7 +110,7 @@ export function AppointmentDetailPage() {
     <div className="space-y-4">
       <PageHeader
         title={clientName}
-        description={`${formatInTimeZone(appt.starts_at, APP_TIMEZONE, 'dd/MM/yyyy HH:mm')} · ${appt.barber?.name}`}
+        description={`${formatInTimeZone(appt.starts_at, APP_TIMEZONE, 'dd/MM/yyyy')} ${formatInTimeZone(appt.starts_at, APP_TIMEZONE, 'HH:mm')} - ${formatInTimeZone(appt.ends_at, APP_TIMEZONE, 'HH:mm')} · ${appt.barber?.name}`}
         actions={
           <Button
             type="button"
