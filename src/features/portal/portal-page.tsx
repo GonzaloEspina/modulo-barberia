@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { LogOut, Scissors, Ticket } from 'lucide-react'
+import { LogOut, Ticket } from 'lucide-react'
 import { useState } from 'react'
+import { BrandMark } from '@/components/brand-mark'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -57,10 +58,8 @@ export function PortalPage() {
       <div className="bg-background min-h-screen">
         <header className="bg-sidebar text-sidebar-foreground">
           <div className="mx-auto flex h-14 max-w-2xl items-center justify-between gap-3 px-4">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <div className="bg-sidebar-accent text-sidebar-accent-foreground flex size-8 shrink-0 items-center justify-center rounded-sm">
-                <Scissors className="size-4" aria-hidden />
-              </div>
+              <div className="flex min-w-0 items-center gap-2.5">
+              <BrandMark className="size-8" />
               <div className="min-w-0">
                 <p className="font-display truncate text-sm font-semibold tracking-wide uppercase">
                   {orgName}
@@ -161,8 +160,8 @@ export function PortalPage() {
     <div className="bg-background flex min-h-screen flex-col">
       <header className="bg-sidebar text-sidebar-foreground px-4 py-8">
         <div className="mx-auto flex max-w-md flex-col items-start gap-3">
-          <div className="bg-sidebar-accent text-sidebar-accent-foreground flex size-11 items-center justify-center rounded-sm">
-            <Scissors className="size-5" aria-hidden />
+          <div className="bg-sidebar-accent flex size-11 items-center justify-center overflow-hidden rounded-sm">
+            <BrandMark className="size-11" />
           </div>
           <div>
             <h1 className="font-display text-3xl font-semibold tracking-wide uppercase">

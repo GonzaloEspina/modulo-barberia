@@ -5,7 +5,7 @@ import sharp from 'sharp'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const publicDir = join(root, 'public')
-const svg = readFileSync(join(publicDir, 'pwa-icon.svg'))
+const source = readFileSync(join(publicDir, 'lomiva-icon.png'))
 
 const sizes = [
   { name: 'pwa-192.png', size: 192 },
@@ -15,6 +15,6 @@ const sizes = [
 ]
 
 for (const { name, size } of sizes) {
-  await sharp(svg).resize(size, size).png().toFile(join(publicDir, name))
+  await sharp(source).resize(size, size).png().toFile(join(publicDir, name))
   console.log(`Generated public/${name}`)
 }

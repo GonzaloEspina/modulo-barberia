@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LogOut, Scissors, type LucideIcon } from 'lucide-react'
+import { LogOut, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { BrandMark } from '@/components/brand-mark'
 import { NAV_GROUPS, NAV_PATHS, SYSTEM_NAV } from '@/config/navigation'
 import {
   Sidebar,
@@ -92,9 +93,7 @@ export function AppShell({ children }: AppShellProps) {
       <Sidebar variant="inset" collapsible="icon">
         <SidebarHeader className="border-sidebar-border border-b group-data-[collapsible=icon]:hidden">
           <div className="flex items-center gap-2.5 px-2 py-2">
-            <div className="bg-sidebar-accent text-sidebar-accent-foreground flex size-8 items-center justify-center rounded-sm">
-              <Scissors className="size-4" />
-            </div>
+            <BrandMark className="size-8" />
             <div className="min-w-0">
               <p className="font-display truncate text-base font-semibold tracking-wide uppercase">
                 {profile?.organization?.name ?? 'Barbatero'}

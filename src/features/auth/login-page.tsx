@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Scissors } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { BrandMark } from '@/components/brand-mark'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -40,8 +40,8 @@ export function LoginPage() {
     <div className="bg-background flex min-h-svh flex-col">
       <header className="bg-sidebar text-sidebar-foreground px-4 py-8 sm:px-8">
         <div className="mx-auto flex max-w-md items-center gap-3">
-          <div className="bg-sidebar-accent text-sidebar-accent-foreground flex size-11 shrink-0 items-center justify-center rounded-sm">
-            <Scissors className="size-5" aria-hidden="true" />
+          <div className="bg-sidebar-accent flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-sm">
+            <BrandMark className="size-11" />
           </div>
           <div>
             <p className="font-display text-3xl font-semibold tracking-wide uppercase">Barbería</p>

@@ -1,6 +1,7 @@
-import { LogOut, Menu, Scissors, X } from 'lucide-react'
+import { LogOut, Menu, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { BrandMark } from '@/components/brand-mark'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/auth-context'
 import { useIsPlatformAdmin } from '@/features/platform/api'
@@ -70,9 +71,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </Button>
             <div className="flex items-center gap-2">
-              <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
-                <Scissors className="size-4" aria-hidden="true" />
-              </div>
+              <BrandMark className="size-8 rounded-md" />
               <div className="leading-tight">
                 <p className="text-sm font-semibold">{orgName}</p>
                 <p className="text-muted-foreground text-xs">
