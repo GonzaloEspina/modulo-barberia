@@ -1,7 +1,7 @@
 import { formatInTimeZone } from 'date-fns-tz'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AppointmentStatusBadge } from '@/components/design-system/status-badges'
 import { PaymentStatus } from '@/components/design-system/payment-status'
 import { PageHeader } from '@/components/design-system/layout-primitives'
@@ -112,17 +112,27 @@ export function AppointmentDetailPage() {
         title={clientName}
         description={`${formatInTimeZone(appt.starts_at, APP_TIMEZONE, 'dd/MM/yyyy')} ${formatInTimeZone(appt.starts_at, APP_TIMEZONE, 'HH:mm')} - ${formatInTimeZone(appt.ends_at, APP_TIMEZONE, 'HH:mm')} · ${appt.barber?.name}`}
         actions={
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              if (window.history.length > 1) navigate(-1)
-              else navigate('/turnos')
-            }}
-          >
-            <ArrowLeft className="size-4" />
-            Volver
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {appt.status !== 'cancelled' && (
+              <Button type="button" variant="outline" asChild>
+                <Link to={`/turnos/${appt.id}/editar`}>
+                  <Pencil className="size-4" />
+                  Editar
+                </Link>
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (window.history.length > 1) navigate(-1)
+                else navigate('/turnos')
+              }}
+            >
+              <ArrowLeft className="size-4" />
+              Volver
+            </Button>
+          </div>
         }
       />
 

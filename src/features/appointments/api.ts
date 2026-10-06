@@ -41,7 +41,7 @@ export function useAppointment(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await getSupabaseClient()
         .from('appointments')
-        .select(`${APPT_COLUMNS}, appointment_services(id, service_name, price_applied, duration_applied, points_applied, sort_order)`)
+        .select(`${APPT_COLUMNS}, appointment_services(id, service_id, service_name, price_applied, duration_applied, points_applied, sort_order)`)
         .eq('id', id!)
         .maybeSingle()
       if (error) throw error
@@ -110,6 +110,28 @@ export function useAppointmentMutations() {
     onSuccess: invalidate,
   })
 
+  const updateAppointment = useMutation({
+    mutationFn: async (input: {
+      id: string
+      barber_id: string
+      starts_at: string
+      service_ids: string[]
+      notes?: string | null
+      ends_at?: string | null
+    }) => {
+      const { error } = await getSupabaseClient().rpc('update_appointment', {
+        p_appointment_id: input.id,
+        p_barber_id: input.barber_id,
+        p_starts_at: input.starts_at,
+        p_service_ids: input.service_ids,
+        p_notes: input.notes ?? null,
+        p_ends_at: input.ends_at ?? null,
+      })
+      if (error) throw error
+    },
+    onSuccess: invalidate,
+  })
+
   const updateStatus = useMutation({
     mutationFn: async ({
       id,
@@ -130,5 +152,11 @@ export function useAppointmentMutations() {
     onSuccess: invalidate,
   })
 
-  return { createAppointment, cancelAppointment, rescheduleAppointment, updateStatus }
+  return {
+    createAppointment,
+    cancelAppointment,
+    rescheduleAppointment,
+    updateAppointment,
+    updateStatus,
+  }
 }

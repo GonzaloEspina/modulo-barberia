@@ -16,6 +16,7 @@ export type AttendanceStatus =
 
 export interface AppointmentService {
   id: string
+  service_id?: string
   service_name: string
   price_applied: number
   duration_applied: number
