@@ -201,7 +201,7 @@
 }
 
 .calendar-compact:not(.calendar-compact--zoomed) .fc-timegrid-slot {
-  min-height: 44px;
+  min-height: 60px;
 }
 
 .calendar-compact--zoomed .fc-timegrid-body,
