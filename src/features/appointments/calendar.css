@@ -82,7 +82,9 @@
 }
 
 .calendar-compact .fc-timegrid-event {
-  margin: 1px 2px;
+  margin: 1px 2px 1px 2px;
+  /* Mantener el bloque dentro de su franja horaria (evita solapes visuales). */
+  overflow: hidden;
 }
 
 .calendar-compact .fc-timegrid-event:hover,
@@ -91,11 +93,12 @@
 }
 
 .calendar-compact .fc-timegrid-event .fc-event-main {
-  overflow: visible;
+  overflow: hidden;
+  height: 100%;
 }
 
 .calendar-compact .fc-timegrid-event .fc-event-main-frame {
-  overflow: visible;
+  overflow: hidden;
   height: 100%;
 }
 
@@ -145,10 +148,10 @@
   border-color: color-mix(in oklab, white 28%, transparent) !important;
   padding: 0.125rem 0.3125rem;
   font-weight: 500;
-  font-size: 0.75rem;
-  line-height: 1.25;
+  font-size: 0.6875rem;
+  line-height: 1.2;
   box-shadow: none;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .calendar-compact .fc-event:hover {
@@ -156,7 +159,7 @@
 }
 
 .calendar-compact .fc-event-time {
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 600;
 }
 
@@ -165,11 +168,11 @@
 }
 
 .calendar-compact--zoomed .fc-event {
-  font-size: calc(0.75rem * min(var(--calendar-zoom, 1), 1.35));
+  font-size: calc(0.6875rem * min(var(--calendar-zoom, 1), 1.35));
 }
 
 .calendar-compact--zoomed .fc-event-time {
-  font-size: calc(0.6875rem * min(var(--calendar-zoom, 1), 1.35));
+  font-size: calc(0.625rem * min(var(--calendar-zoom, 1), 1.35));
 }
 
 .calendar-compact .fc-daygrid-day-number {
@@ -198,7 +201,7 @@
 }
 
 .calendar-compact:not(.calendar-compact--zoomed) .fc-timegrid-slot {
-  min-height: 40px;
+  min-height: 44px;
 }
 
 .calendar-compact--zoomed .fc-timegrid-body,
@@ -229,15 +232,15 @@
   justify-content: flex-start;
   gap: 0.0625rem;
   min-width: 0;
-  min-height: 100%;
-  overflow: visible;
-  padding: 0.0625rem 0;
-  line-height: 1.25;
+  max-height: 100%;
+  overflow: hidden;
+  padding: 0;
+  line-height: 1.2;
 }
 
 .calendar-compact .fc-event-heading {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.25rem;
   min-width: 0;
 }
@@ -245,30 +248,30 @@
 .calendar-compact .fc-event-overbooking {
   flex-shrink: 0;
   font-size: 0.625rem;
-  line-height: 1.25;
+  line-height: 1.2;
   opacity: 0.95;
 }
 
 .calendar-compact .fc-event-inner-custom .fc-event-title {
   min-width: 0;
   flex: 1 1 auto;
-  overflow: visible;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .calendar-compact .fc-event-inner-custom .fc-event-time {
   display: block;
   min-width: 0;
-  overflow: visible;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
   opacity: 0.92;
   padding-left: 0.75rem;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 /* List view */

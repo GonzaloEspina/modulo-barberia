@@ -42,8 +42,7 @@ const selectClass =
 const MIN_ZOOM = 1
 const MAX_ZOOM = 2.5
 const ZOOM_STEP = 0.25
-const DEFAULT_SLOT_MIN_HEIGHT = 40
-const EVENT_MIN_HEIGHT_PX = 40
+const DEFAULT_SLOT_MIN_HEIGHT = 44
 const ZOOM_STORAGE_KEY = 'calendar-zoom'
 const DEFAULT_SLOT_MIN_TIME = '10:00:00'
 const DEFAULT_SLOT_MAX_TIME = '20:00:00'
@@ -626,8 +625,8 @@ export function CalendarPage() {
               allDaySlot={false}
               height="100%"
               expandRows={!zoomed}
-              eventMinHeight={EVENT_MIN_HEIGHT_PX}
-              eventShortHeight={EVENT_MIN_HEIGHT_PX}
+              slotEventOverlap={false}
+              eventOverlap={false}
               events={events}
               editable
               eventStartEditable
