@@ -21,6 +21,7 @@ export function useAppointments(from?: string, to?: string) {
       let query = getSupabaseClient()
         .from('appointments')
         .select(APPT_COLUMNS)
+        .eq('is_active', true)
         .order('starts_at', { ascending: true })
 
       if (from) query = query.gte('starts_at', `${from}T00:00:00`)

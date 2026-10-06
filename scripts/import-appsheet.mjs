@@ -66,13 +66,15 @@ function parseUsDate(value) {
 function parseDateTime(fecha, hora) {
   const date = parseUsDate(fecha)
   if (!date) return null
-  let time = hora ? String(hora).trim() : '09:00:00'
+  // Sin hora válida no inventamos 09:00 — eso generaba turnos fantasma en la agenda.
+  if (!hora || !String(hora).trim()) return null
+  let time = String(hora).trim()
   // AppSheet sometimes exports times as HH/MM/SS instead of HH:MM:SS
   time = time.replace(/^(\d{1,2})\/(\d{1,2})\/(\d{1,2})$/, (_, h, m, s) =>
     `${h.padStart(2, '0')}:${m.padStart(2, '0')}:${s.padStart(2, '0')}`,
   )
   time = time.slice(0, 8)
-  if (!/^\d{2}:\d{2}:\d{2}$/.test(time)) time = '09:00:00'
+  if (!/^\d{2}:\d{2}:\d{2}$/.test(time)) return null
   return `${date}T${time}`
 }
 

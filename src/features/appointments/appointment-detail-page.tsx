@@ -1,4 +1,5 @@
 import { formatInTimeZone } from 'date-fns-tz'
+import { ArrowLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppointmentStatusBadge } from '@/components/design-system/status-badges'
@@ -110,6 +111,19 @@ export function AppointmentDetailPage() {
       <PageHeader
         title={clientName}
         description={`${formatInTimeZone(appt.starts_at, APP_TIMEZONE, 'dd/MM/yyyy HH:mm')} · ${appt.barber?.name}`}
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (window.history.length > 1) navigate(-1)
+              else navigate('/turnos')
+            }}
+          >
+            <ArrowLeft className="size-4" />
+            Volver
+          </Button>
+        }
       />
 
       <div className="grid items-start gap-4 lg:grid-cols-2">
