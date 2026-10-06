@@ -85,6 +85,28 @@
   margin: 1px 2px;
 }
 
+.calendar-compact .fc-timegrid-event:hover,
+.calendar-compact .fc-timegrid-event:focus-within {
+  z-index: 6 !important;
+}
+
+.calendar-compact .fc-timegrid-event .fc-event-main {
+  overflow: visible;
+}
+
+.calendar-compact .fc-timegrid-event .fc-event-main-frame {
+  overflow: visible;
+  height: 100%;
+}
+
+/* No estirar duración arrastrando el borde del turno */
+.calendar-compact .fc-event-resizer,
+.calendar-compact .fc-event-resizer-start,
+.calendar-compact .fc-event-resizer-end {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 .calendar-compact .fc-timegrid-slot-lane {
   cursor: pointer;
 }
@@ -121,11 +143,12 @@
   border-width: 1px;
   border-style: solid;
   border-color: color-mix(in oklab, white 28%, transparent) !important;
-  padding: 0 0.25rem;
+  padding: 0.125rem 0.3125rem;
   font-weight: 500;
-  font-size: 0.6875rem;
-  line-height: 1.2;
+  font-size: 0.75rem;
+  line-height: 1.25;
   box-shadow: none;
+  overflow: visible;
 }
 
 .calendar-compact .fc-event:hover {
@@ -133,20 +156,20 @@
 }
 
 .calendar-compact .fc-event-time {
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   font-weight: 600;
 }
 
 .calendar-compact .fc-event-title {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .calendar-compact--zoomed .fc-event {
-  font-size: calc(0.6875rem * min(var(--calendar-zoom, 1), 1.35));
+  font-size: calc(0.75rem * min(var(--calendar-zoom, 1), 1.35));
 }
 
 .calendar-compact--zoomed .fc-event-time {
-  font-size: calc(0.625rem * min(var(--calendar-zoom, 1), 1.35));
+  font-size: calc(0.6875rem * min(var(--calendar-zoom, 1), 1.35));
 }
 
 .calendar-compact .fc-daygrid-day-number {
@@ -175,7 +198,7 @@
 }
 
 .calendar-compact:not(.calendar-compact--zoomed) .fc-timegrid-slot {
-  min-height: 28px;
+  min-height: 40px;
 }
 
 .calendar-compact--zoomed .fc-timegrid-body,
@@ -204,45 +227,48 @@
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
-  gap: 0;
+  gap: 0.0625rem;
   min-width: 0;
-  overflow: hidden;
+  min-height: 100%;
+  overflow: visible;
   padding: 0.0625rem 0;
-  line-height: 1.15;
+  line-height: 1.25;
 }
 
 .calendar-compact .fc-event-heading {
   display: flex;
-  align-items: center;
-  gap: 0.1875rem;
+  align-items: flex-start;
+  gap: 0.25rem;
   min-width: 0;
 }
 
 .calendar-compact .fc-event-overbooking {
   flex-shrink: 0;
   font-size: 0.625rem;
-  line-height: 1;
+  line-height: 1.25;
   opacity: 0.95;
 }
 
 .calendar-compact .fc-event-inner-custom .fc-event-title {
   min-width: 0;
   flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   font-weight: 600;
+  line-height: 1.25;
 }
 
 .calendar-compact .fc-event-inner-custom .fc-event-time {
   display: block;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
   white-space: nowrap;
   font-weight: 500;
-  opacity: 0.9;
-  padding-left: 0.6875rem;
+  opacity: 0.92;
+  padding-left: 0.75rem;
+  line-height: 1.25;
 }
 
 /* List view */

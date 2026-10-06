@@ -41,7 +41,8 @@ const selectClass =
 const MIN_ZOOM = 1
 const MAX_ZOOM = 2.5
 const ZOOM_STEP = 0.25
-const DEFAULT_SLOT_MIN_HEIGHT = 28
+const DEFAULT_SLOT_MIN_HEIGHT = 40
+const EVENT_MIN_HEIGHT_PX = 40
 const ZOOM_STORAGE_KEY = 'calendar-zoom'
 const DEFAULT_SLOT_MIN_TIME = '10:00:00'
 const DEFAULT_SLOT_MAX_TIME = '20:00:00'
@@ -160,23 +161,37 @@ function toEvents(appointments: Appointment[]): EventInput[] {
   })
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+}
+
 function renderEventContent(arg: EventContentArg) {
   const status = arg.event.extendedProps.status as AppointmentStatus
   const isOverbooking = arg.event.extendedProps.isOverbooking as boolean
   const dotClass = STATUS_DOT_CLASS[status] ?? 'calendar-status-dot--pending'
-  const timeHtml = arg.timeText
-    ? `<span class="fc-event-time">${arg.timeText}</span>`
+  const statusLabel = APPOINTMENT_STATUS_LABELS[status] ?? status
+  const title = arg.event.title
+  const timeText = arg.timeText || ''
+  const tooltip = [title, timeText, statusLabel, isOverbooking ? 'Sobreturno' : '']
+    .filter(Boolean)
+    .join(' · ')
+  const timeHtml = timeText
+    ? `<span class="fc-event-time">${escapeHtml(timeText)}</span>`
     : ''
   const overbookingHtml = isOverbooking
     ? '<span class="fc-event-overbooking" aria-hidden="true">⚠</span>'
     : ''
 
   return {
-    html: `<div class="fc-event-inner-custom">
+    html: `<div class="fc-event-inner-custom" title="${escapeHtml(tooltip)}">
       <div class="fc-event-heading">
         <span class="calendar-status-dot ${dotClass}" aria-hidden="true"></span>
         ${overbookingHtml}
-        <span class="fc-event-title fc-sticky">${arg.event.title}</span>
+        <span class="fc-event-title">${escapeHtml(title)}</span>
       </div>
       ${timeHtml}
     </div>`,
@@ -607,8 +622,13 @@ export function CalendarPage() {
               allDaySlot={false}
               height="100%"
               expandRows={!zoomed}
+              eventMinHeight={EVENT_MIN_HEIGHT_PX}
+              eventShortHeight={EVENT_MIN_HEIGHT_PX}
               events={events}
               editable
+              eventStartEditable
+              eventDurationEditable={false}
+              eventResizableFromStart={false}
               selectable
               selectMirror
               selectAllow={selectAllow}
