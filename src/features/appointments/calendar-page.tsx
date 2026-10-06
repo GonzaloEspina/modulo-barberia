@@ -345,13 +345,11 @@ export function CalendarPage() {
       if (end != null) maxMinutes = Math.max(maxMinutes, end)
     }
 
-    // No recortar turnos que queden fuera del horario configurado.
+    // Ampliar el cierre si hay turnos más tarde; no adelantar el inicio
+    // (el eje debe coincidir con el horario de apertura, p. ej. 09:30).
     for (const appt of filtered) {
-      const startLocal = formatInTimeZone(new Date(appt.starts_at), APP_TIMEZONE, 'HH:mm:ss')
       const endLocal = formatInTimeZone(new Date(appt.ends_at), APP_TIMEZONE, 'HH:mm:ss')
-      const start = timeToMinutes(startLocal)
       const end = timeToMinutes(endLocal)
-      if (start != null) minMinutes = Math.min(minMinutes, start)
       if (end != null) maxMinutes = Math.max(maxMinutes, end)
     }
 
@@ -359,8 +357,7 @@ export function CalendarPage() {
       return { slotMinTime: DEFAULT_SLOT_MIN_TIME, slotMaxTime: DEFAULT_SLOT_MAX_TIME }
     }
 
-    // Redondear al bloque de 30 min hacia abajo / arriba para alinear con slotDuration.
-    const floorMin = Math.floor(minMinutes / 30) * 30
+    // Alinear el cierre al bloque de 30 min; el inicio queda exacto (p. ej. 09:30).
     const ceilMax = Math.ceil(maxMinutes / 30) * 30
     const toHms = (total: number) => {
       const h = Math.floor(total / 60)
@@ -369,8 +366,8 @@ export function CalendarPage() {
     }
 
     return {
-      slotMinTime: toHms(Math.max(0, floorMin)),
-      slotMaxTime: toHms(Math.min(24 * 60, Math.max(ceilMax, floorMin + 60))),
+      slotMinTime: toHms(Math.max(0, minMinutes)),
+      slotMaxTime: toHms(Math.min(24 * 60, Math.max(ceilMax, minMinutes + 60))),
     }
   }, [generalSchedules, filtered])
 
