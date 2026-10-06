@@ -124,10 +124,7 @@ export function AppointmentDetailPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                if (window.history.length > 1) navigate(-1)
-                else navigate('/turnos')
-              }}
+              onClick={() => navigate('/turnos')}
             >
               <ArrowLeft className="size-4" />
               Volver

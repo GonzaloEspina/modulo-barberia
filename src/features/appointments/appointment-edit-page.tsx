@@ -2,7 +2,7 @@ import { formatInTimeZone } from 'date-fns-tz'
 import { parse } from 'date-fns'
 import { ArrowLeft } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/design-system/layout-primitives'
 import { BarberCard } from '@/components/design-system/people-cards'
@@ -207,7 +207,7 @@ export function AppointmentEditPage() {
         ends_at: resolveEndsAt(selectedSlot),
       })
       notifySuccess('Turno actualizado')
-      navigate(`/turnos/${appt.id}`)
+      navigate(`/turnos/${appt.id}`, { replace: true })
     } catch (e) {
       notifyError((e as Error).message)
     }
@@ -229,11 +229,12 @@ export function AppointmentEditPage() {
           title="Editar turno"
           description="Este turno está cancelado"
           actions={
-            <Button variant="outline" asChild>
-              <Link to={`/turnos/${appt.id}`}>
-                <ArrowLeft className="size-4" />
-                Volver
-              </Link>
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/turnos/${appt.id}`, { replace: true })}
+            >
+              <ArrowLeft className="size-4" />
+              Volver
             </Button>
           }
         />
@@ -248,11 +249,12 @@ export function AppointmentEditPage() {
         title="Editar turno"
         description={clientName}
         actions={
-          <Button variant="outline" asChild>
-            <Link to={`/turnos/${appt.id}`}>
-              <ArrowLeft className="size-4" />
-              Volver
-            </Link>
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/turnos/${appt.id}`, { replace: true })}
+          >
+            <ArrowLeft className="size-4" />
+            Volver
           </Button>
         }
       />
