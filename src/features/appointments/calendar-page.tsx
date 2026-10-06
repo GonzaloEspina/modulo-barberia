@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAppointmentMutations, useAppointments } from '@/features/appointments/api'
 import { useBarbers } from '@/features/barbers/api'
+import { useGeneralSchedules } from '@/features/schedules/api'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { isAdminRole, useProfile } from '@/hooks/use-profile'
 import { APP_TIMEZONE } from '@/lib/constants'
@@ -42,6 +43,8 @@ const MAX_ZOOM = 2.5
 const ZOOM_STEP = 0.25
 const DEFAULT_SLOT_MIN_HEIGHT = 28
 const ZOOM_STORAGE_KEY = 'calendar-zoom'
+const DEFAULT_SLOT_MIN_TIME = '10:00:00'
+const DEFAULT_SLOT_MAX_TIME = '20:00:00'
 
 function clampZoom(value: number) {
   const stepped = Math.round(value / ZOOM_STEP) * ZOOM_STEP
@@ -53,6 +56,23 @@ function formatSlotTime(value: string | null) {
   const [hours, minutes] = value.split(':')
   if (!hours || !minutes) return null
   return `${hours}:${minutes}`
+}
+
+/** Normaliza "HH:mm" / "HH:mm:ss" / timestamptz time a "HH:mm:ss" para FullCalendar. */
+function toFullCalendarTime(value: string): string | null {
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/)
+  if (!match) return null
+  const hours = match[1].padStart(2, '0')
+  const minutes = match[2]
+  const seconds = match[3] ?? '00'
+  return `${hours}:${minutes}:${seconds}`
+}
+
+function timeToMinutes(value: string): number | null {
+  const normalized = toFullCalendarTime(value)
+  if (!normalized) return null
+  const [h, m, s] = normalized.split(':').map(Number)
+  return h * 60 + m + s / 60
 }
 
 function findSlotLaneAtY(root: HTMLElement, clientY: number) {
@@ -168,6 +188,7 @@ export function CalendarPage() {
   const isMobile = useIsMobile()
   const { data: profile } = useProfile()
   const { data: barbers } = useBarbers(false)
+  const { data: generalSchedules } = useGeneralSchedules()
   const { rescheduleAppointment } = useAppointmentMutations()
 
   const calendarRef = useRef<FullCalendar>(null)
@@ -312,6 +333,46 @@ export function CalendarPage() {
   }, [appointments, barberFilter, statusFilter, profile])
 
   const events = useMemo(() => toEvents(filtered), [filtered])
+
+  const { slotMinTime, slotMaxTime } = useMemo(() => {
+    let minMinutes = Number.POSITIVE_INFINITY
+    let maxMinutes = Number.NEGATIVE_INFINITY
+
+    for (const row of generalSchedules ?? []) {
+      const start = timeToMinutes(row.start_time)
+      const end = timeToMinutes(row.end_time)
+      if (start != null) minMinutes = Math.min(minMinutes, start)
+      if (end != null) maxMinutes = Math.max(maxMinutes, end)
+    }
+
+    // No recortar turnos que queden fuera del horario configurado.
+    for (const appt of filtered) {
+      const startLocal = formatInTimeZone(new Date(appt.starts_at), APP_TIMEZONE, 'HH:mm:ss')
+      const endLocal = formatInTimeZone(new Date(appt.ends_at), APP_TIMEZONE, 'HH:mm:ss')
+      const start = timeToMinutes(startLocal)
+      const end = timeToMinutes(endLocal)
+      if (start != null) minMinutes = Math.min(minMinutes, start)
+      if (end != null) maxMinutes = Math.max(maxMinutes, end)
+    }
+
+    if (!Number.isFinite(minMinutes) || !Number.isFinite(maxMinutes)) {
+      return { slotMinTime: DEFAULT_SLOT_MIN_TIME, slotMaxTime: DEFAULT_SLOT_MAX_TIME }
+    }
+
+    // Redondear al bloque de 30 min hacia abajo / arriba para alinear con slotDuration.
+    const floorMin = Math.floor(minMinutes / 30) * 30
+    const ceilMax = Math.ceil(maxMinutes / 30) * 30
+    const toHms = (total: number) => {
+      const h = Math.floor(total / 60)
+      const m = Math.round(total % 60)
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`
+    }
+
+    return {
+      slotMinTime: toHms(Math.max(0, floorMin)),
+      slotMaxTime: toHms(Math.min(24 * 60, Math.max(ceilMax, floorMin + 60))),
+    }
+  }, [generalSchedules, filtered])
 
   const legendBarbers = useMemo(() => {
     if (!isAdminRole(profile) && profile?.barber_id) {
@@ -542,8 +603,8 @@ export function CalendarPage() {
                 dayGridMonth: { buttonText: 'Mes' },
                 listDay: { buttonText: 'Lista' },
               }}
-              slotMinTime="10:00:00"
-              slotMaxTime="20:00:00"
+              slotMinTime={slotMinTime}
+              slotMaxTime={slotMaxTime}
               slotDuration="00:30:00"
               slotLabelInterval="01:00:00"
               allDaySlot={false}
