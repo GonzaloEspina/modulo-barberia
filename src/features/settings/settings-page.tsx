@@ -445,7 +445,7 @@ export function SettingsPage() {
                   value={form.settings.default_appointment_status}
                   onChange={(e) => setSetting('default_appointment_status', e.target.value)}
                 >
-                  <option value="pending">Pendiente</option>
+                  <option value="pending">Sin marcar</option>
                 </select>
               </div>
             </div>

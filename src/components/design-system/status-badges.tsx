@@ -28,6 +28,10 @@ export function AppointmentStatusBadge({
   status: AppointmentStatus
   className?: string
 }) {
+  if (status === 'pending' || status === 'confirmed' || status === 'in_progress') {
+    return null
+  }
+
   return (
     <Badge variant="outline" className={cn(STATUS_STYLES[status], className)}>
       {APPOINTMENT_STATUS_LABELS[status]}

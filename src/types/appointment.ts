@@ -50,7 +50,6 @@ export interface Appointment {
 }
 
 export const APPOINTMENT_STATUS_OPTIONS = [
-  'pending',
   'completed',
   'no_show',
   'cancelled',
@@ -58,21 +57,23 @@ export const APPOINTMENT_STATUS_OPTIONS = [
 
 export type VisibleAppointmentStatus = (typeof APPOINTMENT_STATUS_OPTIONS)[number]
 
-export function visibleAppointmentStatus(status: AppointmentStatus): VisibleAppointmentStatus {
+export function visibleAppointmentStatus(
+  status: AppointmentStatus,
+): VisibleAppointmentStatus | '' {
   switch (status) {
     case 'completed':
     case 'no_show':
     case 'cancelled':
       return status
     default:
-      return 'pending'
+      return ''
   }
 }
 
 export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
-  pending: 'Pendiente',
-  confirmed: 'Pendiente',
-  in_progress: 'Pendiente',
+  pending: 'Sin marcar',
+  confirmed: 'Sin marcar',
+  in_progress: 'Sin marcar',
   completed: 'Asistió',
   cancelled: 'Cancelado',
   no_show: 'No asistió',

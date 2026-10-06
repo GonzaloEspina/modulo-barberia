@@ -28,6 +28,7 @@ import { APP_TIMEZONE } from '@/lib/constants'
 import {
   APPOINTMENT_STATUS_LABELS,
   APPOINTMENT_STATUS_OPTIONS,
+  visibleAppointmentStatus,
   type Appointment,
   type AppointmentStatus,
 } from '@/types/appointment'
@@ -172,8 +173,8 @@ function escapeHtml(value: string) {
 function renderEventContent(arg: EventContentArg) {
   const status = arg.event.extendedProps.status as AppointmentStatus
   const isOverbooking = arg.event.extendedProps.isOverbooking as boolean
-  const dotClass = STATUS_DOT_CLASS[status] ?? 'calendar-status-dot--pending'
-  const statusLabel = APPOINTMENT_STATUS_LABELS[status] ?? status
+  const visibleStatus = visibleAppointmentStatus(status)
+  const statusLabel = visibleStatus ? APPOINTMENT_STATUS_LABELS[visibleStatus] : ''
   const title = arg.event.title
   const timeText = arg.timeText || ''
   const tooltip = [title, timeText, statusLabel, isOverbooking ? 'Sobreturno' : '']
@@ -185,11 +186,14 @@ function renderEventContent(arg: EventContentArg) {
   const overbookingHtml = isOverbooking
     ? '<span class="fc-event-overbooking" aria-hidden="true">⚠</span>'
     : ''
+  const statusDotHtml = visibleStatus
+    ? `<span class="calendar-status-dot ${STATUS_DOT_CLASS[visibleStatus]}" aria-hidden="true"></span>`
+    : ''
 
   return {
     html: `<div class="fc-event-inner-custom" title="${escapeHtml(tooltip)}">
       <div class="fc-event-heading">
-        <span class="calendar-status-dot ${dotClass}" aria-hidden="true"></span>
+        ${statusDotHtml}
         ${overbookingHtml}
         <span class="fc-event-title">${escapeHtml(title)}</span>
       </div>

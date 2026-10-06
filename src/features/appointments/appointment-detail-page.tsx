@@ -186,6 +186,7 @@ export function AppointmentDetailPage() {
               value={visibleAppointmentStatus(appt.status)}
               onChange={(e) => {
                 const next = e.target.value as AppointmentStatus
+                if (!next) return
                 if (next === 'cancelled') {
                   void confirmAction('¿Cancelar turno? Se libera el horario.').then((ok) => {
                     if (!ok) return
@@ -196,6 +197,9 @@ export function AppointmentDetailPage() {
                 void updateStatus.mutateAsync({ id: appt.id, status: next })
               }}
             >
+              <option value="" disabled>
+                Sin marcar
+              </option>
               {APPOINTMENT_STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s}>{APPOINTMENT_STATUS_LABELS[s]}</option>
               ))}
