@@ -42,30 +42,15 @@ const selectClass =
 const MIN_ZOOM = 1
 const MAX_ZOOM = 2.5
 const ZOOM_STEP = 0.25
-/** Piso absoluto: nombre + horario visibles dentro de un slot de 30 min. */
-const CONTENT_SLOT_FLOOR_PX = 72
+/** Alto mínimo compacto: nombre + horario con padding vertical simétrico. */
+const CONTENT_SLOT_FLOOR_PX = 48
 const ZOOM_STORAGE_KEY = 'calendar-zoom'
 const DEFAULT_SLOT_MIN_TIME = '10:00:00'
 const DEFAULT_SLOT_MAX_TIME = '20:00:00'
-/** Espacio aproximado de toolbar + cabecera de días dentro de FullCalendar. */
-const CALENDAR_CHROME_PX = 88
 
 function clampZoom(value: number) {
   const stepped = Math.round(value / ZOOM_STEP) * ZOOM_STEP
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Number(stepped.toFixed(2))))
-}
-
-function countHalfHourSlots(minTime: string, maxTime: string) {
-  const min = timeToMinutes(minTime)
-  const max = timeToMinutes(maxTime)
-  if (min == null || max == null || max <= min) return 20
-  return Math.max(1, Math.round((max - min) / 30))
-}
-
-function computeAdaptiveSlotHeight(availablePx: number, slotCount: number) {
-  if (availablePx <= 0 || slotCount <= 0) return CONTENT_SLOT_FLOOR_PX
-  const fitted = Math.floor(availablePx / slotCount)
-  return Math.max(CONTENT_SLOT_FLOOR_PX, fitted)
 }
 
 function formatSlotTime(value: string | null) {
@@ -232,8 +217,8 @@ export function CalendarPage() {
   const hoverTimeRef = useRef<string | null>(null)
   const initialView = isMobile ? 'listDay' : 'timeGridWeek'
   const [zoom, setZoom] = useState(readStoredZoom)
-  const [adaptiveSlotHeight, setAdaptiveSlotHeight] = useState(CONTENT_SLOT_FLOOR_PX)
   const zoomed = zoom > MIN_ZOOM
+  const slotMinHeight = Math.round(CONTENT_SLOT_FLOOR_PX * zoom)
 
   const applyZoom = useCallback((next: number | ((current: number) => number)) => {
     setZoom((current) => {
@@ -249,7 +234,7 @@ export function CalendarPage() {
       /* ignore quota / private mode */
     }
     calendarRef.current?.getApi().updateSize()
-  }, [zoom, adaptiveSlotHeight])
+  }, [zoom])
 
   useEffect(() => {
     const el = calendarShellRef.current
@@ -394,42 +379,6 @@ export function CalendarPage() {
       slotMaxTime: toHms(Math.min(24 * 60, Math.max(ceilMax, minMinutes + 60))),
     }
   }, [generalSchedules, filtered])
-
-  const slotCount = useMemo(
-    () => countHalfHourSlots(slotMinTime, slotMaxTime),
-    [slotMinTime, slotMaxTime],
-  )
-
-  useLayoutEffect(() => {
-    if (isLoading) return
-    const shell = calendarShellRef.current
-    if (!shell) return
-
-    const measure = () => {
-      const scroller = shell.querySelector('.fc-timegrid .fc-scroller') as HTMLElement | null
-      const available =
-        scroller && scroller.clientHeight > 40
-          ? scroller.clientHeight
-          : Math.max(0, shell.clientHeight - CALENDAR_CHROME_PX)
-      const next = computeAdaptiveSlotHeight(available, slotCount)
-      setAdaptiveSlotHeight((prev) => (prev === next ? prev : next))
-    }
-
-    measure()
-    const frame = requestAnimationFrame(measure)
-    const ro = new ResizeObserver(() => {
-      requestAnimationFrame(measure)
-    })
-    ro.observe(shell)
-    window.addEventListener('resize', measure)
-    return () => {
-      cancelAnimationFrame(frame)
-      ro.disconnect()
-      window.removeEventListener('resize', measure)
-    }
-  }, [slotCount, isLoading, slotMinTime, slotMaxTime])
-
-  const slotMinHeight = Math.round(adaptiveSlotHeight * zoom)
 
   const legendBarbers = useMemo(() => {
     if (!isAdminRole(profile) && profile?.barber_id) {
