@@ -240,6 +240,15 @@ export function CalendarPage() {
     calendarRef.current?.getApi().updateSize()
   }, [zoom])
 
+  /** Mobile no longer offers Mes — leave month if the viewport shrinks while on it. */
+  useEffect(() => {
+    if (!isMobile) return
+    const api = calendarRef.current?.getApi()
+    if (api?.view.type === 'dayGridMonth') {
+      api.changeView('timeGridWeek')
+    }
+  }, [isMobile])
+
   useEffect(() => {
     const el = calendarShellRef.current
     if (!el) return
@@ -794,7 +803,7 @@ export function CalendarPage() {
                   left: 'prev,next today',
                   center: 'title',
                   right: isMobile
-                    ? 'listDay,timeGridDay,timeGridWeek,dayGridMonth'
+                    ? 'listDay,timeGridDay,timeGridWeek'
                     : 'timeGridDay,timeGridWeek,dayGridMonth,listDay',
                 }}
                 views={{
@@ -814,8 +823,8 @@ export function CalendarPage() {
                 slotEventOverlap={false}
                 eventOverlap={false}
                 events={events}
-                editable
-                eventStartEditable
+                editable={!isMobile}
+                eventStartEditable={!isMobile}
                 eventDurationEditable={false}
                 eventResizableFromStart={false}
                 selectable

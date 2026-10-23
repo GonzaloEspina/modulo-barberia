@@ -99,6 +99,29 @@
   padding: 0.25rem 0.125rem;
 }
 
+/*
+ * Semana: separadores verticales claros + tintado alterno (tinta/muted, sutil).
+ * Header incluye eje horario (1.º hijo); columnas del body no — por eso
+ * even en header y odd en body alinean el mismo día.
+ */
+.calendar-compact .fc-timeGridWeek-view .fc-col-header-cell,
+.calendar-compact .fc-timeGridWeek-view .fc-timegrid-col {
+  border-inline-end: 1px solid color-mix(in oklab, var(--foreground) 12%, var(--border));
+}
+
+.calendar-compact .fc-timeGridWeek-view .fc-col-header-cell:last-child,
+.calendar-compact .fc-timeGridWeek-view .fc-timegrid-col:last-child {
+  border-inline-end-color: var(--border);
+}
+
+.calendar-compact .fc-timeGridWeek-view .fc-col-header-cell:nth-child(even):not(.fc-day-today) {
+  background: color-mix(in oklab, var(--foreground) 5%, var(--muted));
+}
+
+.calendar-compact .fc-timeGridWeek-view .fc-timegrid-col:nth-child(odd):not(.fc-day-today) {
+  background: color-mix(in oklab, var(--foreground) 2.5%, transparent);
+}
+
 /* Alto de fila vía --calendar-slot-height (adaptativo al viewport). */
 .calendar-compact .fc-timegrid-slot-label-cushion {
   padding: 0 0.25rem;
@@ -371,7 +394,7 @@
 }
 
 @media (max-width: 767px) {
-  /* Row 1: date nav + title · Row 2: view switcher (Lista / Día / Semana / Mes) */
+  /* Row 1: date nav + title · Row 2: view switcher (Lista / Día / Semana) */
   .calendar-compact .fc-header-toolbar {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -493,78 +516,5 @@
   .calendar-compact .fc-timeGridWeek-view .calendar-status-dot {
     width: 0.375rem;
     height: 0.375rem;
-  }
-
-  /* —— Mes: usable cells, compact event chips, +N when crowded —— */
-  .calendar-compact .fc-dayGridMonth-view .fc-col-header-cell-cushion {
-    padding: 0.25rem 0;
-    font-size: 0.625rem;
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .fc-daygrid-day-frame {
-    min-height: 4.25rem;
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .fc-daygrid-day-number {
-    padding: 0.1875rem 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--foreground);
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .fc-day-today .fc-daygrid-day-number {
-    color: var(--accent);
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .fc-daygrid-event {
-    margin: 1px 1px 0;
-    border-radius: 0.125rem;
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .fc-event {
-    padding: 0.0625rem 0.1875rem;
-    font-size: 0.5625rem;
-    line-height: 1.2;
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .fc-event-inner-custom {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.125rem;
-  }
-
-  /* Prefer name chip; hide time to keep cells readable */
-  .calendar-compact .fc-dayGridMonth-view .fc-event-inner-custom .fc-event-time {
-    display: none;
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .fc-event-inner-custom .fc-event-title {
-    font-size: 0.5625rem;
-    font-weight: 600;
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .calendar-status-dot {
-    width: 0.3125rem;
-    height: 0.3125rem;
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .fc-event-overbooking {
-    font-size: 0.5rem;
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .fc-daygrid-more-link {
-    display: block;
-    margin: 1px;
-    padding: 0.0625rem 0.1875rem;
-    border-radius: 0.125rem;
-    font-size: 0.5625rem;
-    font-weight: 600;
-    color: var(--accent);
-    background: color-mix(in oklab, var(--accent) 10%, transparent);
-  }
-
-  .calendar-compact .fc-dayGridMonth-view .fc-daygrid-day-events {
-    margin-top: 0;
-    padding: 0 1px 2px;
   }
 }
