@@ -26,8 +26,8 @@ export default defineConfig({
         'lomiva-icon.png',
       ],
       manifest: {
-        name: 'Lomiva',
-        short_name: 'Lomiva',
+        name: 'Barbería',
+        short_name: 'Barbería',
         description: 'Gestión de turnos para barberías',
         theme_color: '#141820',
         background_color: '#eef1f6',
@@ -36,10 +36,10 @@ export default defineConfig({
         start_url: '/',
         // ?v= cache-busts aggressive OS/PWA icon caches when assets change.
         icons: [
-          { src: '/pwa-192.png?v=20261023', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: '/pwa-512.png?v=20261023', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/pwa-192.png?v=20261023b', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/pwa-512.png?v=20261023b', sizes: '512x512', type: 'image/png', purpose: 'any' },
           {
-            src: '/pwa-512-maskable.png?v=20261023',
+            src: '/pwa-512-maskable.png?v=20261023b',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
