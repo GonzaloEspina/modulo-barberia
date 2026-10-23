@@ -9,7 +9,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
+      injectRegister: false,
       devOptions: { enabled: false },
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,

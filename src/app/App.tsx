@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
+import { PwaUpdatePrompt } from '@/components/pwa-update-prompt'
 import { AuthProvider } from '@/features/auth/auth-context'
 
 import { LoginPage } from '@/features/auth/login-page'
@@ -47,6 +48,8 @@ import { ExpensesPage } from '@/features/expenses/expenses-page'
 import { MembershipsPage } from '@/features/memberships/memberships-page'
 
 import { PlatformPage } from '@/features/platform/platform-page'
+import { PlatformOrgDetailPage } from '@/features/platform/platform-org-detail-page'
+import { OpsEnterPage } from '@/features/platform/ops-enter-page'
 
 import { PlatformIndexRedirect, PlatformRoute } from '@/features/platform/platform-route'
 
@@ -98,6 +101,7 @@ export function App() {
     <QueryClientProvider client={queryClient}>
 
       <AuthProvider>
+        <PwaUpdatePrompt />
 
         <BrowserRouter>
 
@@ -110,6 +114,8 @@ export function App() {
             </Route>
 
             <Route path="/portal" element={<PortalPage />} />
+
+            <Route path="/ops/enter" element={<OpsEnterPage />} />
 
             <Route element={<ProtectedRoute />}>
 
@@ -180,6 +186,7 @@ export function App() {
                   <Route path="/plataforma" element={<PlatformIndexRedirect />} />
 
                   <Route path="/plataforma/organizaciones" element={<PlatformPage />} />
+                  <Route path="/plataforma/organizaciones/:orgId" element={<PlatformOrgDetailPage />} />
 
                 </Route>
 

@@ -43,7 +43,10 @@ export function ProtectedRoute() {
 export function PublicOnlyRoute() {
   const { session, isLoading, isConfigured } = useAuth()
   const location = useLocation()
-  const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/'
+  const fromLoc = (location.state as { from?: { pathname: string; search?: string } } | null)?.from
+  const from = fromLoc
+    ? `${fromLoc.pathname}${fromLoc.search ?? ''}`
+    : '/'
 
   if (!isConfigured) {
     return <Outlet />

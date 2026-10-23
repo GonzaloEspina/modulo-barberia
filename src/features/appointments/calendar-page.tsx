@@ -13,11 +13,13 @@ import listPlugin from '@fullcalendar/list'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { formatInTimeZone } from 'date-fns-tz'
-import { AlertTriangle, Minus, Plus } from 'lucide-react'
+import { AlertTriangle, ListFilter, Minus, Plus, X } from 'lucide-react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { useAppointmentMutations, useAppointments } from '@/features/appointments/api'
 import { useBarbers } from '@/features/barbers/api'
@@ -31,13 +33,14 @@ import {
   visibleAppointmentStatus,
   type Appointment,
   type AppointmentStatus,
+  type VisibleAppointmentStatus,
 } from '@/types/appointment'
 import { getClientFullName } from '@/types/client'
 
 import './calendar.css'
 
-const selectClass =
-  'border-input bg-background h-8 min-w-0 flex-1 rounded-md border px-2 text-xs sm:flex-none sm:shrink'
+const filterOptionClass =
+  'hover:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-sm px-1.5 py-1.5 text-xs'
 
 const MIN_ZOOM = 1
 const MAX_ZOOM = 2.5
@@ -321,18 +324,42 @@ export function CalendarPage() {
     const today = formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd')
     return { from: today, to: today }
   })
-  const [barberFilter, setBarberFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
+  const [barberFilters, setBarberFilters] = useState<string[]>([])
+  const [statusFilters, setStatusFilters] = useState<VisibleAppointmentStatus[]>([])
   const [message, setMessage] = useState('')
 
   const { data: appointments, isLoading, isFetching } = useAppointments(range.from, range.to)
   const showInitialLoader = isLoading && !appointments
 
+  const toggleBarberFilter = useCallback((barberId: string) => {
+    setBarberFilters((current) =>
+      current.includes(barberId)
+        ? current.filter((id) => id !== barberId)
+        : [...current, barberId],
+    )
+  }, [])
+
+  const toggleStatusFilter = useCallback((status: VisibleAppointmentStatus) => {
+    setStatusFilters((current) =>
+      current.includes(status)
+        ? current.filter((value) => value !== status)
+        : [...current, status],
+    )
+  }, [])
+
+  const clearAllFilters = useCallback(() => {
+    setBarberFilters([])
+    setStatusFilters([])
+  }, [])
+
   const filtered = useMemo(() => {
+    const barberSet = barberFilters.length > 0 ? new Set(barberFilters) : null
+    const statusSet = statusFilters.length > 0 ? new Set(statusFilters) : null
+
     return (appointments ?? []).filter((a) => {
-      if (barberFilter && a.barber_id !== barberFilter) return false
-      if (statusFilter) {
-        if (a.status !== statusFilter) return false
+      if (barberSet && !barberSet.has(a.barber_id)) return false
+      if (statusSet) {
+        if (!statusSet.has(a.status as VisibleAppointmentStatus)) return false
       } else if (a.status === 'cancelled') {
         return false
       }
@@ -341,7 +368,7 @@ export function CalendarPage() {
       }
       return true
     })
-  }, [appointments, barberFilter, statusFilter, profile])
+  }, [appointments, barberFilters, statusFilters, profile])
 
   const events = useMemo(() => toEvents(filtered), [filtered])
 
@@ -396,6 +423,8 @@ export function CalendarPage() {
     setRange((prev) => (prev.from === from && prev.to === to ? prev : { from, to }))
   }, [])
 
+  const singleBarberFilter = barberFilters.length === 1 ? barberFilters[0] : ''
+
   const navigateToNewAppointment = useCallback((start: Date) => {
     if (start.getTime() < Date.now()) {
       setMessage('No se pueden crear turnos en el pasado')
@@ -405,9 +434,9 @@ export function CalendarPage() {
       date: formatInTimeZone(start, APP_TIMEZONE, 'yyyy-MM-dd'),
       time: formatInTimeZone(start, APP_TIMEZONE, 'HH:mm'),
     })
-    if (barberFilter) params.set('barber', barberFilter)
+    if (singleBarberFilter) params.set('barber', singleBarberFilter)
     navigate(`/turnos/nuevo?${params.toString()}`)
-  }, [barberFilter, navigate])
+  }, [singleBarberFilter, navigate])
 
   const handleEventClick = (info: EventClickArg) => {
     navigate(`/turnos/${info.event.id}`)
@@ -459,78 +488,236 @@ export function CalendarPage() {
     const params = new URLSearchParams({
       date: formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd'),
     })
-    if (barberFilter) params.set('barber', barberFilter)
+    if (singleBarberFilter) params.set('barber', singleBarberFilter)
     return `/turnos/nuevo?${params.toString()}`
-  }, [barberFilter])
+  }, [singleBarberFilter])
+
+  const activeFilterCount = barberFilters.length + statusFilters.length
+
+  function renderBarberFilterOptions() {
+    if (!isAdminRole(profile)) return null
+    return (
+      <fieldset className="space-y-1">
+        <legend className="text-muted-foreground mb-1.5 text-[0.6875rem] font-medium tracking-wide uppercase">
+          Barberos
+        </legend>
+        {(barbers ?? []).length === 0 ? (
+          <p className="text-muted-foreground text-xs">Sin barberos</p>
+        ) : (
+          (barbers ?? []).map((b) => {
+            const checked = barberFilters.includes(b.id)
+            return (
+              <label key={b.id} className={filterOptionClass}>
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={() => toggleBarberFilter(b.id)}
+                  aria-label={`Filtrar por ${b.name}`}
+                />
+                <span
+                  className="calendar-barber-swatch shrink-0"
+                  style={{ backgroundColor: b.calendar_color }}
+                  aria-hidden
+                />
+                <span className="min-w-0 flex-1 truncate">{b.name}</span>
+              </label>
+            )
+          })
+        )}
+      </fieldset>
+    )
+  }
+
+  function renderStatusFilterOptions() {
+    return (
+      <fieldset className="space-y-1">
+        <legend className="text-muted-foreground mb-1.5 text-[0.6875rem] font-medium tracking-wide uppercase">
+          Estados
+        </legend>
+        {APPOINTMENT_STATUS_OPTIONS.map((value) => {
+          const checked = statusFilters.includes(value)
+          return (
+            <label key={value} className={filterOptionClass}>
+              <Checkbox
+                checked={checked}
+                onCheckedChange={() => toggleStatusFilter(value)}
+                aria-label={`Filtrar por ${APPOINTMENT_STATUS_LABELS[value]}`}
+              />
+              <span
+                className={`calendar-status-dot shrink-0 ${STATUS_DOT_CLASS[value]}`}
+                aria-hidden
+              />
+              <span className="min-w-0 flex-1 truncate">{APPOINTMENT_STATUS_LABELS[value]}</span>
+            </label>
+          )
+        })}
+      </fieldset>
+    )
+  }
+
+  function renderFilterTrigger(
+    label: string,
+    count: number,
+    className?: string,
+  ) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className={cn('h-8 gap-1.5 rounded-sm', className)}
+      >
+        <ListFilter className="size-3.5" />
+        {label}
+        {count > 0 && (
+          <span className="bg-accent text-accent-foreground ml-0.5 inline-flex size-5 items-center justify-center rounded-sm text-[0.6875rem] font-semibold tabular-nums">
+            {count}
+          </span>
+        )}
+      </Button>
+    )
+  }
 
   return (
-    <div className="calendar-page -m-4 flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto p-4 md:-m-6 md:overflow-hidden md:p-6 lg:-m-8 lg:p-8">
-      <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-nowrap sm:items-center">
-        <h1 className="shrink-0 text-lg font-semibold tracking-tight">Calendario</h1>
-        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:ml-auto sm:flex-nowrap">
-          {isAdminRole(profile) && (
-            <select
-              className={selectClass}
-              aria-label="Filtrar por barbero"
-              value={barberFilter}
-              onChange={(e) => setBarberFilter(e.target.value)}
+    <div className="calendar-page -m-4 flex h-full min-h-0 flex-1 flex-col gap-2 overflow-hidden p-4 md:-m-6 md:p-6 lg:-m-8 lg:p-8">
+      <div className="flex shrink-0 flex-col gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:items-center">
+          <h1 className="font-display shrink-0 text-lg font-semibold tracking-wide uppercase">Agenda</h1>
+          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:ml-auto sm:flex-nowrap">
+            {/* Mobile: collapse filters into one control */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-11 min-w-11 gap-1.5 rounded-sm md:hidden"
+                  aria-label="Filtros del calendario"
+                >
+                  <ListFilter className="size-4" />
+                  Filtros
+                  {activeFilterCount > 0 && (
+                    <span className="bg-accent text-accent-foreground ml-0.5 inline-flex size-5 items-center justify-center rounded-sm text-[0.6875rem] font-semibold tabular-nums">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-72 space-y-4 rounded-sm p-3 md:hidden">
+                {renderBarberFilterOptions()}
+                {renderStatusFilterOptions()}
+              </PopoverContent>
+            </Popover>
+
+            {/* Desktop: multi-select popovers */}
+            <div className="hidden min-w-0 flex-wrap items-center gap-2 md:flex md:flex-nowrap">
+              {isAdminRole(profile) && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    {renderFilterTrigger('Barberos', barberFilters.length)}
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-64 rounded-sm p-3">
+                    {renderBarberFilterOptions()}
+                  </PopoverContent>
+                </Popover>
+              )}
+              <Popover>
+                <PopoverTrigger asChild>
+                  {renderFilterTrigger('Estados', statusFilters.length)}
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-56 rounded-sm p-3">
+                  {renderStatusFilterOptions()}
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div
+              className="hidden shrink-0 items-center gap-0.5 md:flex"
+              role="group"
+              aria-label="Zoom del calendario"
             >
-              <option value="">Todos los barberos</option>
-              {barbers?.map((b) => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
-          )}
-          <select
-            className={selectClass}
-            aria-label="Filtrar por estado"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">Todos los estados</option>
-            {APPOINTMENT_STATUS_OPTIONS.map((value) => (
-              <option key={value} value={value}>{APPOINTMENT_STATUS_LABELS[value]}</option>
-            ))}
-          </select>
-          <div
-            className="flex shrink-0 items-center gap-0.5"
-            role="group"
-            aria-label="Zoom del calendario"
-          >
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              className="size-8"
-              disabled={zoom <= MIN_ZOOM}
-              aria-label="Alejar"
-              onClick={() => applyZoom((current) => current - ZOOM_STEP)}
-            >
-              <Minus className="size-4" />
-            </Button>
-            <span className="text-muted-foreground w-11 text-center text-xs tabular-nums">
-              {Math.round(zoom * 100)}%
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              className="size-8"
-              disabled={zoom >= MAX_ZOOM}
-              aria-label="Acercar"
-              onClick={() => applyZoom((current) => current + ZOOM_STEP)}
-            >
-              <Plus className="size-4" />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                className="size-8"
+                disabled={zoom <= MIN_ZOOM}
+                aria-label="Alejar"
+                onClick={() => applyZoom((current) => current - ZOOM_STEP)}
+              >
+                <Minus className="size-4" />
+              </Button>
+              <span className="text-muted-foreground w-11 text-center text-xs tabular-nums">
+                {Math.round(zoom * 100)}%
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                className="size-8"
+                disabled={zoom >= MAX_ZOOM}
+                aria-label="Acercar"
+                onClick={() => applyZoom((current) => current + ZOOM_STEP)}
+              >
+                <Plus className="size-4" />
+              </Button>
+            </div>
+            <Button variant="accent" size="sm" className="hidden h-8 shrink-0 gap-1.5 md:inline-flex" asChild>
+              <Link to={newAppointmentHref}>
+                <Plus className="size-4" />
+                Nuevo turno
+              </Link>
             </Button>
           </div>
-          <Button variant="accent" size="sm" className="h-8 shrink-0 gap-1.5" asChild>
-            <Link to={newAppointmentHref}>
-              <Plus className="size-4" />
-              <span className="hidden sm:inline">Nuevo turno</span>
-              <span className="sm:hidden">Nuevo</span>
-            </Link>
-          </Button>
         </div>
+
+        {activeFilterCount > 0 && (
+          <div
+            className="flex flex-wrap items-center gap-1.5"
+            aria-label="Filtros activos"
+          >
+            {barberFilters.map((barberId) => (
+              <span
+                key={`barber-${barberId}`}
+                className="border-border bg-card text-foreground inline-flex max-w-full items-center gap-1 rounded-sm border px-2 py-1 text-xs"
+              >
+                <span className="truncate">
+                  {barbers?.find((b) => b.id === barberId)?.name ?? 'Barbero'}
+                </span>
+                <button
+                  type="button"
+                  className="text-muted-foreground hover:text-foreground -mr-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-sm"
+                  aria-label="Quitar filtro de barbero"
+                  onClick={() => toggleBarberFilter(barberId)}
+                >
+                  <X className="size-3.5" aria-hidden />
+                </button>
+              </span>
+            ))}
+            {statusFilters.map((status) => (
+              <span
+                key={`status-${status}`}
+                className="border-border bg-card text-foreground inline-flex max-w-full items-center gap-1 rounded-sm border px-2 py-1 text-xs"
+              >
+                <span className="truncate">{APPOINTMENT_STATUS_LABELS[status]}</span>
+                <button
+                  type="button"
+                  className="text-muted-foreground hover:text-foreground -mr-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-sm"
+                  aria-label="Quitar filtro de estado"
+                  onClick={() => toggleStatusFilter(status)}
+                >
+                  <X className="size-3.5" aria-hidden />
+                </button>
+              </span>
+            ))}
+            <button
+              type="button"
+              className="text-muted-foreground hover:text-foreground px-1.5 py-1 text-xs font-medium underline-offset-2 hover:underline"
+              onClick={clearAllFilters}
+            >
+              Quitar todos
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="calendar-legend hidden max-h-16 shrink-0 flex-wrap items-center gap-x-4 gap-y-1 overflow-hidden text-[0.6875rem] text-muted-foreground sm:flex sm:max-h-none">
@@ -573,7 +760,7 @@ export function CalendarPage() {
 
       <div
         ref={calendarShellRef}
-        className="calendar-shell relative min-h-[24rem] flex-1 overflow-hidden rounded-xl border bg-card md:min-h-0"
+        className="calendar-shell relative min-h-0 flex-1 overflow-hidden rounded-sm border bg-card"
       >
         {showInitialLoader ? (
           <p className="text-muted-foreground p-3 text-sm">Cargando turnos…</p>
@@ -607,7 +794,7 @@ export function CalendarPage() {
                   left: 'prev,next today',
                   center: 'title',
                   right: isMobile
-                    ? 'listDay,timeGridDay'
+                    ? 'listDay,timeGridDay,timeGridWeek,dayGridMonth'
                     : 'timeGridDay,timeGridWeek,dayGridMonth,listDay',
                 }}
                 views={{
@@ -616,6 +803,7 @@ export function CalendarPage() {
                   dayGridMonth: { buttonText: 'Mes' },
                   listDay: { buttonText: 'Lista' },
                 }}
+                dayMaxEvents={isMobile ? 3 : false}
                 slotMinTime={slotMinTime}
                 slotMaxTime={slotMaxTime}
                 slotDuration="00:30:00"

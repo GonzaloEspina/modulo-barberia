@@ -676,7 +676,7 @@ export function AppointmentCreatePage() {
         </div>
       </div>
 
-      <div className="bg-background/95 fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
+      <div className="bg-background/95 fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] z-40 border-t backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
         <details className="group border-b">
           <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
             <span>Resumen del turno</span>
@@ -725,14 +725,21 @@ export function AppointmentCreatePage() {
             </dl>
           </div>
         </details>
-        <div className="p-4">
+        <div className="flex gap-2 p-4">
+          <Button
+            variant="outline"
+            className="min-h-11 flex-1 rounded-sm"
+            onClick={() => navigate('/turnos')}
+          >
+            Cancelar
+          </Button>
           <Button
             variant="accent"
-            className="w-full"
+            className="min-h-11 flex-[1.4] rounded-sm"
             disabled={!canConfirm || createAppointment.isPending || applyCoupon.isPending}
             onClick={() => void handleSubmit()}
           >
-            Confirmar turno
+            Confirmar
           </Button>
         </div>
       </div>

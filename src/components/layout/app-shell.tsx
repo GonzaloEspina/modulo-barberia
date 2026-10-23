@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { LogOut, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { BrandMark } from '@/components/brand-mark'
+import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav'
 import { NAV_GROUPS, NAV_PATHS, SYSTEM_NAV } from '@/config/navigation'
 import {
   Sidebar,
@@ -194,7 +195,16 @@ export function AppShell({ children }: AppShellProps) {
             Salir
           </Button>
         </header>
-        <main className={cn('flex min-h-0 min-w-0 flex-1 flex-col p-4 md:p-6 lg:p-8')}>{children}</main>
+        <main
+          className={cn(
+            'flex min-h-0 min-w-0 flex-1 flex-col p-4',
+            'pb-[calc(1rem+3.5rem+env(safe-area-inset-bottom,0px))]',
+            'md:p-6 md:pb-6 lg:p-8 lg:pb-8',
+          )}
+        >
+          {children}
+        </main>
+        <MobileBottomNav />
       </SidebarInset>
     </SidebarProvider>
   )

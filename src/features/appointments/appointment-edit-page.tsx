@@ -244,7 +244,7 @@ export function AppointmentEditPage() {
   }
 
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-4 pb-8 md:pb-4">
       <PageHeader
         title="Editar turno"
         description={clientName}
@@ -374,7 +374,7 @@ export function AppointmentEditPage() {
         />
       </section>
 
-      <div className="bg-background/95 sticky bottom-0 z-10 border-t py-3 backdrop-blur">
+      <div className="bg-background/95 sticky bottom-0 z-10 border-t pt-3 backdrop-blur pb-[calc(0.75rem+3.5rem+env(safe-area-inset-bottom,0px))] md:pb-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm">
             <p className="font-medium">
