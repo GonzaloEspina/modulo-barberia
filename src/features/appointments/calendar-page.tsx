@@ -215,7 +215,8 @@ export function CalendarPage() {
   const slotTimeTooltipRef = useRef<HTMLDivElement>(null)
   const hoveredSlotRef = useRef<HTMLElement | null>(null)
   const hoverTimeRef = useRef<string | null>(null)
-  const initialView = isMobile ? 'listDay' : 'timeGridWeek'
+  /** Solo para el primer mount: no remountar al cambiar breakpoint. */
+  const initialViewRef = useRef(isMobile ? 'listDay' : 'timeGridWeek')
   const [zoom, setZoom] = useState(readStoredZoom)
   const zoomed = zoom > MIN_ZOOM
   const slotMinHeight = Math.round(CONTENT_SLOT_FLOOR_PX * zoom)
@@ -324,7 +325,8 @@ export function CalendarPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [message, setMessage] = useState('')
 
-  const { data: appointments, isLoading } = useAppointments(range.from, range.to)
+  const { data: appointments, isLoading, isFetching } = useAppointments(range.from, range.to)
+  const showInitialLoader = isLoading && !appointments
 
   const filtered = useMemo(() => {
     return (appointments ?? []).filter((a) => {
@@ -391,7 +393,7 @@ export function CalendarPage() {
   const handleDatesSet = useCallback((arg: { startStr: string; endStr: string }) => {
     const from = formatInTimeZone(new Date(arg.startStr), APP_TIMEZONE, 'yyyy-MM-dd')
     const to = formatInTimeZone(new Date(arg.endStr), APP_TIMEZONE, 'yyyy-MM-dd')
-    setRange({ from, to })
+    setRange((prev) => (prev.from === from && prev.to === to ? prev : { from, to }))
   }, [])
 
   const navigateToNewAppointment = useCallback((start: Date) => {
@@ -571,75 +573,81 @@ export function CalendarPage() {
 
       <div
         ref={calendarShellRef}
-        className="calendar-shell min-h-[24rem] flex-1 overflow-hidden rounded-xl border bg-card md:min-h-0"
+        className="calendar-shell relative min-h-[24rem] flex-1 overflow-hidden rounded-xl border bg-card md:min-h-0"
       >
-        {isLoading ? (
+        {showInitialLoader ? (
           <p className="text-muted-foreground p-3 text-sm">Cargando turnos…</p>
         ) : (
-          <div
-            className={cn(
-              'calendar-compact flex h-full min-h-0 flex-col p-1',
-              zoomed && 'calendar-compact--zoomed',
+          <>
+            {isFetching && (
+              <p className="text-muted-foreground pointer-events-none absolute top-2 right-2 z-10 rounded-md bg-card/90 px-2 py-1 text-[0.6875rem] shadow-sm">
+                Actualizando…
+              </p>
             )}
-            style={
-              {
-                '--calendar-zoom': String(zoom),
-                '--calendar-slot-height': `${slotMinHeight}px`,
-              } as CSSProperties
-            }
-            onPointerMove={handleSlotPointerMove}
-            onPointerLeave={clearSlotHover}
-          >
-            <FullCalendar
-              ref={calendarRef}
-              key={initialView}
-              plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-              initialView={initialView}
-              locale={esLocale}
-              headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: isMobile
-                  ? 'listDay,timeGridDay'
-                  : 'timeGridDay,timeGridWeek,dayGridMonth,listDay',
-              }}
-              views={{
-                timeGridDay: { buttonText: 'Día' },
-                timeGridWeek: { buttonText: 'Semana' },
-                dayGridMonth: { buttonText: 'Mes' },
-                listDay: { buttonText: 'Lista' },
-              }}
-              slotMinTime={slotMinTime}
-              slotMaxTime={slotMaxTime}
-              slotDuration="00:30:00"
-              slotLabelInterval="01:00:00"
-              allDaySlot={false}
-              height="100%"
-              expandRows={false}
-              slotEventOverlap={false}
-              eventOverlap={false}
-              events={events}
-              editable
-              eventStartEditable
-              eventDurationEditable={false}
-              eventResizableFromStart={false}
-              selectable
-              selectMirror
-              selectAllow={selectAllow}
-              eventAllow={eventAllow}
-              eventDrop={handleEventDrop}
-              eventClick={handleEventClick}
-              dateClick={handleDateClick}
-              select={handleDateSelect}
-              datesSet={handleDatesSet}
-              eventContent={renderEventContent}
-              eventTimeFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
-              slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
-              dayHeaderFormat={{ weekday: 'short', day: 'numeric' }}
-              nowIndicator
-              noEventsContent="Sin turnos en este período"
-            />
-          </div>
+            <div
+              className={cn(
+                'calendar-compact flex h-full min-h-0 flex-col p-1',
+                zoomed && 'calendar-compact--zoomed',
+              )}
+              style={
+                {
+                  '--calendar-zoom': String(zoom),
+                  '--calendar-slot-height': `${slotMinHeight}px`,
+                } as CSSProperties
+              }
+              onPointerMove={handleSlotPointerMove}
+              onPointerLeave={clearSlotHover}
+            >
+              <FullCalendar
+                ref={calendarRef}
+                plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+                initialView={initialViewRef.current}
+                locale={esLocale}
+                headerToolbar={{
+                  left: 'prev,next today',
+                  center: 'title',
+                  right: isMobile
+                    ? 'listDay,timeGridDay'
+                    : 'timeGridDay,timeGridWeek,dayGridMonth,listDay',
+                }}
+                views={{
+                  timeGridDay: { buttonText: 'Día' },
+                  timeGridWeek: { buttonText: 'Semana' },
+                  dayGridMonth: { buttonText: 'Mes' },
+                  listDay: { buttonText: 'Lista' },
+                }}
+                slotMinTime={slotMinTime}
+                slotMaxTime={slotMaxTime}
+                slotDuration="00:30:00"
+                slotLabelInterval="01:00:00"
+                allDaySlot={false}
+                height="100%"
+                expandRows={false}
+                slotEventOverlap={false}
+                eventOverlap={false}
+                events={events}
+                editable
+                eventStartEditable
+                eventDurationEditable={false}
+                eventResizableFromStart={false}
+                selectable
+                selectMirror
+                selectAllow={selectAllow}
+                eventAllow={eventAllow}
+                eventDrop={handleEventDrop}
+                eventClick={handleEventClick}
+                dateClick={handleDateClick}
+                select={handleDateSelect}
+                datesSet={handleDatesSet}
+                eventContent={renderEventContent}
+                eventTimeFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+                slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+                dayHeaderFormat={{ weekday: 'short', day: 'numeric' }}
+                nowIndicator
+                noEventsContent="Sin turnos en este período"
+              />
+            </div>
+          </>
         )}
       </div>
       {createPortal(

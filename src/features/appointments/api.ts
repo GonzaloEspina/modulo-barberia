@@ -17,6 +17,7 @@ const APPT_COLUMNS = `
 export function useAppointments(from?: string, to?: string) {
   return useQuery({
     queryKey: ['appointments', from, to],
+    placeholderData: (previousData) => previousData,
     queryFn: async () => {
       let query = getSupabaseClient()
         .from('appointments')
