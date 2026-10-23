@@ -13,22 +13,37 @@ export default defineConfig({
       injectRegister: false,
       devOptions: { enabled: false },
       workbox: {
+        // Keep prompt flow: do not skipWaiting/clientsClaim here — reload happens
+        // only after the user confirms via useRegisterSW → updateServiceWorker(true).
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
-      includeAssets: ['pwa-192.png', 'pwa-512.png', 'apple-touch-icon.png', 'favicon-32.png'],
+      includeAssets: [
+        'pwa-192.png',
+        'pwa-512.png',
+        'pwa-512-maskable.png',
+        'apple-touch-icon.png',
+        'favicon-32.png',
+        'lomiva-icon.png',
+      ],
       manifest: {
-        name: 'Barbatero',
-        short_name: 'Barbatero',
+        name: 'Lomiva',
+        short_name: 'Lomiva',
         description: 'Gestión de turnos para barberías',
         theme_color: '#141820',
         background_color: '#eef1f6',
         display: 'standalone',
         lang: 'es-AR',
         start_url: '/',
+        // ?v= cache-busts aggressive OS/PWA icon caches when assets change.
         icons: [
-          { src: '/pwa-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: '/pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-          { src: '/pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: '/pwa-192.png?v=20261023', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/pwa-512.png?v=20261023', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          {
+            src: '/pwa-512-maskable.png?v=20261023',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
         ],
       },
     }),

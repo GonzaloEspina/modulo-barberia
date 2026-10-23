@@ -10,14 +10,17 @@ function resolveActive(pathname: string): '/' | '/turnos' | '/turnos/nuevo' | nu
   return null
 }
 
+const inactive = 'text-white/55'
+const active = 'text-white'
+
 export function MobileBottomNav() {
   const location = useLocation()
   const { setOpenMobile } = useSidebar()
-  const active = resolveActive(location.pathname)
+  const activePath = resolveActive(location.pathname)
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#141820] md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       aria-label="Navegación principal"
     >
@@ -27,11 +30,11 @@ export function MobileBottomNav() {
             to="/"
             className={cn(
               'relative flex h-full flex-col items-center justify-center gap-0.5 text-[0.6875rem] font-medium tracking-wide',
-              active === '/' ? 'text-foreground' : 'text-muted-foreground',
+              activePath === '/' ? active : inactive,
             )}
           >
-            {active === '/' && (
-              <span className="bg-accent absolute inset-x-6 top-0 h-0.5" aria-hidden />
+            {activePath === '/' && (
+              <span className="absolute inset-x-6 top-0 h-0.5 bg-[#c41230]" aria-hidden />
             )}
             <LayoutDashboard className="size-5" aria-hidden />
             Resumen
@@ -42,11 +45,11 @@ export function MobileBottomNav() {
             to="/turnos"
             className={cn(
               'relative flex h-full flex-col items-center justify-center gap-0.5 text-[0.6875rem] font-medium tracking-wide',
-              active === '/turnos' ? 'text-foreground' : 'text-muted-foreground',
+              activePath === '/turnos' ? active : inactive,
             )}
           >
-            {active === '/turnos' && (
-              <span className="bg-accent absolute inset-x-6 top-0 h-0.5" aria-hidden />
+            {activePath === '/turnos' && (
+              <span className="absolute inset-x-6 top-0 h-0.5 bg-[#c41230]" aria-hidden />
             )}
             <CalendarRange className="size-5" aria-hidden />
             Agenda
@@ -57,23 +60,26 @@ export function MobileBottomNav() {
             to="/turnos/nuevo"
             className={cn(
               'relative flex h-full flex-col items-center justify-center gap-0.5 text-[0.6875rem] font-semibold tracking-wide',
-              active === '/turnos/nuevo' ? 'text-foreground' : 'text-muted-foreground',
+              activePath === '/turnos/nuevo' ? active : inactive,
             )}
-            aria-current={active === '/turnos/nuevo' ? 'page' : undefined}
+            aria-current={activePath === '/turnos/nuevo' ? 'page' : undefined}
           >
-            {active === '/turnos/nuevo' && (
-              <span className="bg-accent absolute inset-x-6 top-0 h-0.5" aria-hidden />
+            {activePath === '/turnos/nuevo' && (
+              <span className="absolute inset-x-6 top-0 h-0.5 bg-[#c41230]" aria-hidden />
             )}
-            <span className="bg-accent text-accent-foreground flex size-7 items-center justify-center rounded-sm">
+            <span className="flex size-7 items-center justify-center rounded-sm bg-[#c41230] text-white">
               <Plus className="size-4" aria-hidden />
             </span>
-            <span className="text-foreground">Nuevo</span>
+            <span className={activePath === '/turnos/nuevo' ? active : 'text-white/80'}>Nuevo</span>
           </Link>
         </li>
         <li>
           <button
             type="button"
-            className="text-muted-foreground relative flex h-full w-full flex-col items-center justify-center gap-0.5 text-[0.6875rem] font-medium tracking-wide"
+            className={cn(
+              'relative flex h-full w-full flex-col items-center justify-center gap-0.5 text-[0.6875rem] font-medium tracking-wide',
+              inactive,
+            )}
             onClick={() => setOpenMobile(true)}
             aria-label="Más opciones"
           >
