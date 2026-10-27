@@ -59,7 +59,7 @@ export function DashboardPage() {
   const production = Number(balance?.production ?? 0)
   const cash = Number(balance?.cash ?? 0)
   const pendingBalance = production - cash
-  const orgName = profile.organization?.name ?? 'Barbatero'
+  const orgName = profile.organization?.name ?? 'Tu barbería'
   const dateLabel = formatInTimeZone(new Date(), APP_TIMEZONE, 'dd/MM/yyyy')
 
   return (

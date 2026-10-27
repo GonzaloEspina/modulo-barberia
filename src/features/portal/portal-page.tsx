@@ -51,7 +51,7 @@ export function PortalPage() {
   if (session && !error) {
     const showBooking =
       (dashboard?.can_book ?? false) && !(dashboard?.has_upcoming_appointment ?? false)
-    const orgName = dashboard?.organization.name ?? 'Barbatero'
+    const orgName = dashboard?.organization.name ?? 'Tu barbería'
     const greetingName = portalGreetingName(session.clientName, dashboard?.client.first_name)
 
     return (

@@ -97,7 +97,7 @@ export function AppShell({ children }: AppShellProps) {
             <BrandMark className="size-8" />
             <div className="min-w-0">
               <p className="font-display truncate text-base font-semibold tracking-wide uppercase">
-                {profile?.organization?.name ?? 'Barbatero'}
+                {profile?.organization?.name ?? 'Tu barbería'}
               </p>
               <p className="truncate text-[11px] tracking-[0.12em] text-sidebar-foreground/55 uppercase">
                 Gestión de barbería
