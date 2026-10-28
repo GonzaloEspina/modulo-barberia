@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/auth-context'
 import { useIsPlatformAdmin } from '@/features/platform/api'
 import { isAdminRole, useProfile } from '@/hooks/use-profile'
+import { confirmAction } from '@/lib/notify'
 import { cn } from '@/lib/utils'
 import { ROLE_LABELS } from '@/types/database'
 
@@ -55,6 +56,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   const orgName = profile?.organization?.name ?? 'Barbería'
   const roleLabel = profile ? ROLE_LABELS[profile.role] : '—'
 
+  const handleSignOut = async () => {
+    if (!(await confirmAction('¿Cerrar sesión?'))) return
+    await signOut()
+  }
+
   return (
     <div className="bg-background min-h-svh">
       <header className="bg-card sticky top-0 z-40 border-b">
@@ -83,9 +89,9 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           <div className="hidden items-center gap-2 md:flex">
             <span className="text-muted-foreground text-sm">{profile?.full_name}</span>
-            <Button variant="outline" size="sm" onClick={() => void signOut()}>
+            <Button variant="outline" size="sm" onClick={() => void handleSignOut()}>
               <LogOut className="size-4" aria-hidden="true" />
-              Salir
+              Cerrar sesión
             </Button>
           </div>
         </div>
@@ -117,7 +123,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           </nav>
 
           <div className="mt-4 border-t pt-4 md:hidden">
-            <Button variant="outline" className="w-full" onClick={() => void signOut()}>
+            <Button variant="outline" className="w-full" onClick={() => void handleSignOut()}>
               <LogOut className="size-4" aria-hidden="true" />
               Cerrar sesión
             </Button>

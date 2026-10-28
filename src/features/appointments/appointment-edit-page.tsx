@@ -22,7 +22,7 @@ import { useServices } from '@/features/services/api'
 import { isAdminRole, useProfile } from '@/hooks/use-profile'
 import { appIsoDayOfWeek, clampAppDate, isAppPastDate, isAppPastInstant } from '@/lib/app-datetime'
 import { APP_TIMEZONE } from '@/lib/constants'
-import { notifyError, notifySuccess } from '@/lib/notify'
+import { confirmAction, notifyError, notifySuccess } from '@/lib/notify'
 import { cn } from '@/lib/utils'
 import { getClientFullName } from '@/types/client'
 import { formatServicePrice } from '@/types/service'
@@ -163,7 +163,6 @@ export function AppointmentEditPage() {
         ? current.filter((value) => value !== serviceId)
         : [...current, serviceId],
     )
-    setSelectedSlot('')
   }
 
   const resolveEndsAt = (startsAt: string) => {
@@ -192,9 +191,36 @@ export function AppointmentEditPage() {
       notifyError('Seleccioná un horario')
       return
     }
-    if (isAppPastInstant(selectedSlot) && selectedSlot !== originalStartsAt) {
-      notifyError('No se pueden editar turnos al pasado')
-      return
+
+    const endsAt = resolveEndsAt(selectedSlot)
+    const servicesChanged =
+      selectedServices.slice().sort().join() !== originalServiceIds.slice().sort().join()
+    const scheduleChanged =
+      selectedSlot !== originalStartsAt ||
+      endsAt !== originalEndsAt ||
+      barberId !== appt.barber_id
+    const isPastEdit =
+      isAppPastInstant(selectedSlot) || isAppPastInstant(endsAt)
+
+    if (isPastEdit || servicesChanged || scheduleChanged) {
+      const reasons: string[] = []
+      if (isPastEdit) {
+        reasons.push(
+          'Estás guardando un turno que ya pasó (o termina en el pasado). Los cambios afectan el historial.',
+        )
+      }
+      if (servicesChanged) {
+        reasons.push(
+          'Cambiaste los servicios: puede modificar precio, duración y el total del turno.',
+        )
+      }
+      if (scheduleChanged) {
+        reasons.push('Cambiaste horario y/o barbero. Si hay solape, el turno puede quedar como sobreturno.')
+      }
+      const ok = await confirmAction(
+        `${reasons.join('\n\n')}\n\n¿Confirmás guardar estos cambios?`,
+      )
+      if (!ok) return
     }
 
     try {
@@ -204,7 +230,7 @@ export function AppointmentEditPage() {
         starts_at: selectedSlot,
         service_ids: selectedServices,
         notes,
-        ends_at: resolveEndsAt(selectedSlot),
+        ends_at: endsAt,
       })
       notifySuccess('Turno actualizado')
       navigate(`/turnos/${appt.id}`, { replace: true })

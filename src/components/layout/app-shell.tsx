@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/auth-context'
 import { useIsPlatformAdmin } from '@/features/platform/api'
 import { isAdminRole, useProfile } from '@/hooks/use-profile'
+import { confirmAction } from '@/lib/notify'
 import { ROLE_LABELS } from '@/types/database'
 import { cn } from '@/lib/utils'
 
@@ -88,6 +89,11 @@ export function AppShell({ children }: AppShellProps) {
   const { data: isPlatformAdmin } = useIsPlatformAdmin()
   const location = useLocation()
   const isAdmin = profile && isAdminRole(profile)
+
+  const handleSignOut = async () => {
+    if (!(await confirmAction('¿Cerrar sesión?'))) return
+    await signOut()
+  }
 
   return (
     <SidebarProvider>
@@ -171,7 +177,7 @@ export function AppShell({ children }: AppShellProps) {
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="top" align="start" className="w-56">
-                  <DropdownMenuItem onClick={() => void signOut()}>
+                  <DropdownMenuItem onClick={() => void handleSignOut()}>
                     <LogOut className="size-4" />
                     Cerrar sesión
                   </DropdownMenuItem>
@@ -190,9 +196,14 @@ export function AppShell({ children }: AppShellProps) {
               {profile?.organization?.name}
             </p>
           </div>
-          <Button variant="outline" size="sm" className="hidden sm:inline-flex" onClick={() => void signOut()}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="hidden sm:inline-flex"
+            onClick={() => void handleSignOut()}
+          >
             <LogOut className="size-4" />
-            Salir
+            Cerrar sesión
           </Button>
         </header>
         <main
